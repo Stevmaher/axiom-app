@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1B262C" />
+  <title>Axiom — Pro Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&family=Tajawal:wght@400;500;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-config.js"></script>
+  <script src="./auth-guard.js"></script>
+</head>
+
+<body>
+  <div class="wrap">
+    <section class="panel">
+      <header>
+        <div>
+          <span class="eyebrow" data-i18n="eyebrow">The Bestiary Trial</span>
+          <h1 data-i18n="title">Axiom</h1>
+        </div>
+        <button onclick="axiomLogout()" style="align-self:flex-start; background:transparent; border:1px solid var(--border); color:var(--text); padding:8px 16px; border-radius:10px; cursor:pointer; font-family:inherit;">تسجيل خروج</button>
+      </header>
+      <p data-i18n="description">C++ expectimax solver compiled to WebAssembly. The board uses exponent-style values (1,
+        2, 3...) where merging equal tiles increments the value by one.</p>
+
+      <div class="board-analysis-grid">
+        <div class="board-column">
+          <div class="board-shell" id="boardShell">
+            <div class="board" id="board"></div>
+            <div class="move-layer" id="moveLayer" aria-hidden="true"></div>
+          </div>
+
+          <div class="stats">
+            <div><strong data-i18n="statusTitle">Status:</strong> <span id="status" class="muted"
+                data-i18n="statusLoading">Loading…</span></div>
+            <div><strong data-i18n="emptiesLabel">Empties:</strong> <span id="empties">16</span></div>
+          </div>
+        </div>
+
+        <div class="analysis-column">
+          <h2 data-i18n="analysisTitle">Analysis</h2>
+          <div><strong data-i18n="chosenMoveTitle">Chosen move:</strong> <span id="chosenMove">—</span></div>
+          <div class="direction-card" aria-live="polite">
+            <div class="direction-card-label" data-i18n="playDirectionLabel">Play this direction</div>
+            <div class="direction-card-value">
+              <div class="direction-card-arrow" id="selectedDirectionArrow">—</div>
+              <div class="direction-card-text" id="selectedDirectionText" data-i18n="waiting">Waiting</div>
+            </div>
+          </div>
+
+          <div id="scores"></div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="rescue-card" id="rescueCard">
+        <div class="rescue-title"><span>🆘</span><span data-i18n="rescueTitle">AI Assistant</span></div>
+        <p class="rescue-desc" id="rescueDesc"></p>
+        <div class="rescue-actions">
+          <button id="btnRescueSwap" data-i18n="rescueSwapBtn">Swap suggested tiles</button>
+          <button id="btnRescueDelete" data-i18n="rescueDeleteBtn">Remove suggested tile</button>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <h2 data-i18n="tilePickerTitle">Tile picker</h2>
+      <div class="picker" id="tilePicker"></div>
+
+      <div class="controls">
+        <button id="btnMode" data-i18n="btnModePlay">Switch to Play Mode</button>
+        <button id="btnAnalyze" data-i18n="btnAnalyze">Analyze</button>
+        <button id="btnStep" data-i18n="btnStep">Step best move</button>
+        <button id="btnUndo" data-i18n="btnUndo">Undo last move</button>
+        <button id="btnReset" data-i18n="btnReset">Reset</button>
+        <button id="btnRescue" data-i18n="btnRescue">🆘 AI Assistant</button>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <label class="toggle-row">
+          <input type="checkbox" id="toggleAutoStepAfterSpawn" checked />
+          <span data-i18n="toggleAuto">After placing the next tile, automatically analyze and play the next move</span>
+        </label>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <h2 data-i18n="notesTitle">Notes</h2>
+      <p data-i18n="notes1">Setup mode lets you build any board position by clicking cells. In play mode, Step best move
+        applies the solver's move, then waits for you to place the next tile manually.</p>
+      <p data-i18n="notes2">Under the hood the solver uses bitboards, precomputed transitions, expectimax, a
+        transposition table, move ordering, and a strong heuristic (gradient, smoothness, monotonicity, merge potential,
+        corner anchoring, snake bonus, and dedicated endgame scoring).</p>
+    </section>
+  </div>
+  <script src="./app.js"></script>
+</body>
+
+</html>

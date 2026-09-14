@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Axiom — تسجيل الدخول</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --void: #1B262C;
+      --leather: #0F4C75;
+      --leather-2: #1B262C;
+      --parchment: #E8F1F5;
+      --gold: #3282B8;
+      --border: rgba(50, 130, 184, 0.35);
+      --card: rgba(27, 38, 44, 0.9);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Tajawal', sans-serif;
+      color: var(--parchment);
+      background: linear-gradient(180deg, var(--void) 0%, var(--leather-2) 55%, var(--void) 100%);
+      padding: 20px;
+    }
+
+    .box {
+      width: 100%;
+      max-width: 400px;
+      background: linear-gradient(180deg, rgba(15, 76, 117, 0.94), rgba(27, 38, 44, 0.94));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 26px;
+    }
+
+    p.sub {
+      margin: 0 0 20px;
+      color: rgba(232, 241, 245, 0.65);
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      margin: 14px 0 6px;
+      color: rgba(232, 241, 245, 0.8);
+    }
+
+    input {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--parchment);
+      font-size: 15px;
+      font-family: inherit;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .tabs button {
+      flex: 1;
+      padding: 9px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--parchment);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    .tabs button.active {
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+
+    button.submit {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: var(--gold);
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    button.submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .msg {
+      margin-top: 14px;
+      font-size: 14px;
+      text-align: center;
+      min-height: 20px;
+    }
+
+    .msg.error { color: #ff8a8a; }
+    .msg.ok { color: #8affb0; }
+    .msg.wait { color: #ffd98a; }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <h1>Axiom</h1>
+    <p class="sub">سجّل دخولك أو اعمل حساب جديد للوصول للحل الذكي</p>
+
+    <div class="tabs">
+      <button id="tabLogin" class="active">تسجيل الدخول</button>
+      <button id="tabSignup">إنشاء حساب</button>
+    </div>
+
+    <label for="email">الإيميل</label>
+    <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+
+    <label for="password">كلمة المرور</label>
+    <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+
+    <button class="submit" id="submitBtn">دخول</button>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <script src="./supabase-config.js"></script>
+  <script>
+    let mode = "login"; // or "signup"
+    const tabLogin = document.getElementById("tabLogin");
+    const tabSignup = document.getElementById("tabSignup");
+    const submitBtn = document.getElementById("submitBtn");
+    const msg = document.getElementById("msg");
+
+    function setMode(m) {
+      mode = m;
+      tabLogin.classList.toggle("active", m === "login");
+      tabSignup.classList.toggle("active", m === "signup");
+      submitBtn.textContent = m === "login" ? "دخول" : "إنشاء الحساب";
+      msg.textContent = "";
+      msg.className = "msg";
+    }
+
+    tabLogin.onclick = () => setMode("login");
+    tabSignup.onclick = () => setMode("signup");
+
+    async function checkExistingSession() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) await routeAfterLogin(session);
+    }
+
+    async function routeAfterLogin(session) {
+      const email = session.user.email;
+      if (ADMIN_EMAILS.includes(email)) {
+        window.location.href = "./admin.html";
+        return;
+      }
+      const { data: sub } = await supabaseClient
+        .from("subscriptions")
+        .select("active")
+        .eq("id", session.user.id)
+        .maybeSingle();
+
+      if (sub && sub.active) {
+        window.location.href = "./index.html";
+      } else {
+        msg.className = "msg wait";
+        msg.textContent = "حسابك لسه متفعّلش. استنى تفعيل الأدمن للاشتراك.";
+        await supabaseClient.auth.signOut();
+      }
+    }
+
+    submitBtn.onclick = async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      msg.className = "msg";
+      msg.textContent = "";
+
+      if (!email || !password) {
+        msg.className = "msg error";
+        msg.textContent = "من فضلك اكتب الإيميل وكلمة المرور";
+        return;
+      }
+
+      submitBtn.disabled = true;
+
+      if (mode === "login") {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        submitBtn.disabled = false;
+        if (error) {
+          msg.className = "msg error";
+          msg.textContent = "بيانات الدخول غلط أو الحساب غير موجود";
+          return;
+        }
+        await routeAfterLogin(data.session);
+      } else {
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) {
+          submitBtn.disabled = false;
+          msg.className = "msg error";
+          msg.textContent = "حصل خطأ: " + error.message;
+          return;
+        }
+        // اعمل صف اشتراك غير مفعّل للعميل الجديد
+        if (data.user) {
+          await supabaseClient.from("subscriptions").insert({
+            id: data.user.id,
+            email: email,
+            active: false
+          });
+        }
+        submitBtn.disabled = false;
+        msg.className = "msg wait";
+        msg.textContent = "تم إنشاء الحساب. استنى تفعيل الأدمن للاشتراك عشان تقدر تدخل.";
+      }
+    };
+
+    checkExistingSession();
+  </script>
+</body>
+
+</html>

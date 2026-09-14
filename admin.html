@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Axiom — لوحة الأدمن</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --void: #1B262C;
+      --leather-2: #1B262C;
+      --parchment: #E8F1F5;
+      --gold: #3282B8;
+      --border: rgba(50, 130, 184, 0.35);
+      --good: #3ddc84;
+      --bad: #ff6b6b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Tajawal', sans-serif;
+      color: var(--parchment);
+      background: linear-gradient(180deg, var(--void) 0%, var(--leather-2) 55%, var(--void) 100%);
+      padding: 24px;
+    }
+
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h1 { margin: 0; font-size: 24px; }
+
+    #logoutBtn, #addBtn {
+      padding: 9px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(50, 130, 184, 0.2);
+      color: var(--parchment);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(15, 76, 117, 0.94), rgba(27, 38, 44, 0.94));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 10px 8px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th { color: rgba(232, 241, 245, 0.6); font-weight: 600; }
+
+    .badge {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge.active { background: rgba(61, 220, 132, 0.15); color: var(--good); }
+    .badge.inactive { background: rgba(255, 107, 107, 0.15); color: var(--bad); }
+
+    button.toggle {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      color: #111;
+    }
+
+    button.toggle.on { background: var(--good); }
+    button.toggle.off { background: var(--bad); color: #fff; }
+
+    #gate {
+      max-width: 400px;
+      margin: 80px auto;
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--parchment);
+      font-size: 15px;
+      font-family: inherit;
+      margin-bottom: 10px;
+    }
+
+    #gate button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: var(--gold);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .msg { font-size: 13px; margin-top: 10px; color: var(--bad); }
+    .muted { color: rgba(232,241,245,0.55); font-size: 13px; }
+  </style>
+</head>
+
+<body>
+  <div id="gate">
+    <h1>دخول الأدمن</h1>
+    <input id="gEmail" type="email" placeholder="إيميل الأدمن" />
+    <input id="gPassword" type="password" placeholder="كلمة المرور" />
+    <button id="gBtn">دخول</button>
+    <div class="msg" id="gMsg"></div>
+  </div>
+
+  <div class="wrap" id="dashboard" style="display:none;">
+    <header>
+      <h1>لوحة تحكم Axiom</h1>
+      <button id="logoutBtn">تسجيل خروج</button>
+    </header>
+
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>الإيميل</th>
+            <th>الحالة</th>
+            <th>تاريخ التسجيل</th>
+            <th>إجراء</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <p class="muted" id="empty" style="display:none;">مفيش مستخدمين مسجّلين لسه.</p>
+    </div>
+  </div>
+
+  <script src="./supabase-config.js"></script>
+  <script>
+    const gate = document.getElementById("gate");
+    const dashboard = document.getElementById("dashboard");
+    const gMsg = document.getElementById("gMsg");
+
+    async function boot() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && ADMIN_EMAILS.includes(session.user.email)) {
+        showDashboard();
+      }
+    }
+
+    document.getElementById("gBtn").onclick = async () => {
+      const email = document.getElementById("gEmail").value.trim();
+      const password = document.getElementById("gPassword").value;
+      gMsg.textContent = "";
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        gMsg.textContent = "بيانات دخول غلط";
+        return;
+      }
+      if (!ADMIN_EMAILS.includes(data.user.email)) {
+        gMsg.textContent = "الحساب ده مش أدمن";
+        await supabaseClient.auth.signOut();
+        return;
+      }
+      showDashboard();
+    };
+
+    document.getElementById("logoutBtn").onclick = async () => {
+      await supabaseClient.auth.signOut();
+      window.location.href = "./login.html";
+    };
+
+    async function showDashboard() {
+      gate.style.display = "none";
+      dashboard.style.display = "block";
+      await loadRows();
+    }
+
+    async function loadRows() {
+      const rowsEl = document.getElementById("rows");
+      const emptyEl = document.getElementById("empty");
+      rowsEl.innerHTML = "";
+
+      const { data, error } = await supabaseClient
+        .from("subscriptions")
+        .select("id,email,active,created_at")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        rowsEl.innerHTML = `<tr><td colspan="4">حصل خطأ: ${error.message}</td></tr>`;
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        emptyEl.style.display = "block";
+        return;
+      }
+      emptyEl.style.display = "none";
+
+      for (const row of data) {
+        const tr = document.createElement("tr");
+        const date = new Date(row.created_at).toLocaleDateString("ar-EG");
+        tr.innerHTML = `
+          <td>${row.email}</td>
+          <td><span class="badge ${row.active ? "active" : "inactive"}">${row.active ? "مفعّل" : "غير مفعّل"}</span></td>
+          <td>${date}</td>
+          <td><button class="toggle ${row.active ? "off" : "on"}" data-id="${row.id}" data-active="${row.active}">
+            ${row.active ? "إيقاف" : "تفعيل"}
+          </button></td>
+        `;
+        rowsEl.appendChild(tr);
+      }
+
+      document.querySelectorAll("button.toggle").forEach(btn => {
+        btn.onclick = async () => {
+          const id = btn.dataset.id;
+          const current = btn.dataset.active === "true";
+          btn.disabled = true;
+          await supabaseClient.from("subscriptions").update({ active: !current }).eq("id", id);
+          await loadRows();
+        };
+      });
+    }
+
+    boot();
+  </script>
+</body>
+
+</html>
