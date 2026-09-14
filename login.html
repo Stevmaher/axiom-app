@@ -144,6 +144,14 @@
 
     label:first-of-type { margin-top: 0; }
 
+    .greeting {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: var(--gold);
+      margin: 0 0 6px;
+    }
+
     input {
       width: 100%;
       padding: 11px 2px;
@@ -163,6 +171,31 @@
       border-bottom-color: var(--gold);
     }
 
+    .field-wrap {
+      position: relative;
+    }
+
+    .field-wrap input {
+      padding-left: 30px;
+    }
+
+    .toggle-eye {
+      position: absolute;
+      left: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      font-size: 16px;
+      line-height: 1;
+      opacity: 0.55;
+      transition: opacity 0.2s ease;
+    }
+
+    .toggle-eye:hover { opacity: 0.9; }
+
     button.submit {
       width: 100%;
       margin-top: 26px;
@@ -176,12 +209,32 @@
       font-family: 'Tajawal', sans-serif;
       cursor: pointer;
       transition: filter 0.2s ease, transform 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
     }
 
     button.submit:hover:not(:disabled) { filter: brightness(1.08); }
     button.submit:active:not(:disabled) { transform: scale(0.99); }
 
-    button.submit:disabled { opacity: 0.55; cursor: not-allowed; }
+    button.submit:disabled { opacity: 0.75; cursor: not-allowed; }
+
+    .spinner {
+      display: none;
+      width: 15px;
+      height: 15px;
+      border: 2px solid rgba(27, 20, 12, 0.35);
+      border-top-color: #1B140C;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    button.submit.loading .spinner { display: inline-block; }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
 
     .msg {
       margin-top: 14px;
@@ -303,6 +356,7 @@
 <body>
   <div class="book">
     <section class="leaf-form spine">
+      <p class="greeting" id="greeting"></p>
       <h1 class="brand">Axiom</h1>
       <p class="sub">سجّل دخولك أو افتح حساب جديد عشان توصل لمحرّك الحل الذكي.</p>
 
@@ -315,9 +369,15 @@
       <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
 
       <label for="password">كلمة المرور</label>
-      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+      <div class="field-wrap">
+        <button type="button" class="toggle-eye" id="togglePassword" aria-label="إظهار كلمة المرور">👁</button>
+        <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
 
-      <button class="submit" id="submitBtn">دخول</button>
+      <button class="submit" id="submitBtn">
+        <span class="spinner" id="submitSpinner"></span>
+        <span id="submitLabel">دخول</span>
+      </button>
       <div class="msg" id="msg"></div>
     </section>
 
@@ -349,16 +409,50 @@
     const tabLogin = document.getElementById("tabLogin");
     const tabSignup = document.getElementById("tabSignup");
     const submitBtn = document.getElementById("submitBtn");
+    const submitLabel = document.getElementById("submitLabel");
     const msg = document.getElementById("msg");
+    const passwordInput = document.getElementById("password");
+    const togglePassword = document.getElementById("togglePassword");
+    const greeting = document.getElementById("greeting");
 
     function setMode(m) {
       mode = m;
       tabLogin.classList.toggle("active", m === "login");
       tabSignup.classList.toggle("active", m === "signup");
-      submitBtn.textContent = m === "login" ? "دخول" : "إنشاء الحساب";
+      submitLabel.textContent = m === "login" ? "دخول" : "إنشاء الحساب";
       msg.textContent = "";
       msg.className = "msg";
     }
+
+    function setLoading(isLoading, loadingText) {
+      submitBtn.disabled = isLoading;
+      submitBtn.classList.toggle("loading", isLoading);
+      if (isLoading) {
+        submitBtn.dataset.prevLabel = submitLabel.textContent;
+        submitLabel.textContent = loadingText;
+      } else if (submitBtn.dataset.prevLabel) {
+        submitLabel.textContent = submitBtn.dataset.prevLabel;
+      }
+    }
+
+    function setGreeting() {
+      const hour = new Date().getHours();
+      let text;
+      if (hour < 5) text = "سهرانين لحد دلوقتي؟";
+      else if (hour < 12) text = "صباح الخير";
+      else if (hour < 17) text = "مساء الخير";
+      else if (hour < 21) text = "مساء الفل";
+      else text = "مساء الخير";
+      greeting.textContent = text;
+    }
+    setGreeting();
+
+    togglePassword.onclick = () => {
+      const showing = passwordInput.type === "text";
+      passwordInput.type = showing ? "password" : "text";
+      togglePassword.textContent = showing ? "👁" : "🙈";
+      togglePassword.setAttribute("aria-label", showing ? "إظهار كلمة المرور" : "إخفاء كلمة المرور");
+    };
 
     tabLogin.onclick = () => setMode("login");
     tabSignup.onclick = () => setMode("signup");
@@ -401,21 +495,22 @@
         return;
       }
 
-      submitBtn.disabled = true;
+      setLoading(true, mode === "login" ? "بيتم الدخول..." : "بيتم الإنشاء...");
 
       if (mode === "login") {
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        submitBtn.disabled = false;
         if (error) {
+          setLoading(false);
           msg.className = "msg error";
           msg.textContent = "بيانات الدخول غلط أو الحساب غير موجود";
           return;
         }
         await routeAfterLogin(data.session);
+        setLoading(false);
       } else {
         const { data, error } = await supabaseClient.auth.signUp({ email, password });
         if (error) {
-          submitBtn.disabled = false;
+          setLoading(false);
           msg.className = "msg error";
           msg.textContent = "حصل خطأ: " + error.message;
           return;
@@ -427,7 +522,7 @@
             active: false
           });
         }
-        submitBtn.disabled = false;
+        setLoading(false);
         msg.className = "msg wait";
         msg.textContent = "تم إنشاء الحساب. استنى تفعيل الأدمن للاشتراك عشان تقدر تدخل.";
       }
