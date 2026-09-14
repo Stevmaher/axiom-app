@@ -4,9 +4,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1B262C" />
   <title>Axiom — تسجيل الدخول</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Cormorant+Garamond:wght@500;600&family=Tajawal:wght@400;500;700;800&display=swap"
     rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -15,137 +18,329 @@
       --leather: #0F4C75;
       --leather-2: #1B262C;
       --parchment: #E8F1F5;
+      --parchment-dim: rgba(232, 241, 245, 0.72);
       --gold: #3282B8;
+      --gold-dim: rgba(50, 130, 184, 0.65);
       --border: rgba(50, 130, 184, 0.35);
-      --card: rgba(27, 38, 44, 0.9);
+      --border-soft: rgba(50, 130, 184, 0.18);
+      --ember: #C98A4A;
+      --ember-dim: rgba(201, 138, 74, 0.5);
+      --card: rgba(27, 38, 44, 0.86);
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body { height: 100%; }
 
     body {
       margin: 0;
-      min-height: 100vh;
+      min-height: 100%;
+      font-family: 'Tajawal', 'Cormorant Garamond', serif;
+      color: var(--parchment);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Tajawal', sans-serif;
-      color: var(--parchment);
-      background: linear-gradient(180deg, var(--void) 0%, var(--leather-2) 55%, var(--void) 100%);
-      padding: 20px;
+      padding: clamp(16px, 4vw, 40px);
+      background:
+        radial-gradient(ellipse 70% 50% at 20% 0%, rgba(50, 130, 184, 0.16), transparent 60%),
+        radial-gradient(ellipse 70% 50% at 100% 100%, rgba(201, 138, 74, 0.08), transparent 55%),
+        linear-gradient(180deg, var(--void) 0%, var(--leather-2) 55%, var(--void) 100%);
     }
 
-    .box {
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(rgba(232, 241, 245, 0.10) 1px, transparent 1px);
+      background-size: 26px 26px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .book {
       width: 100%;
-      max-width: 400px;
-      background: linear-gradient(180deg, rgba(15, 76, 117, 0.94), rgba(27, 38, 44, 0.94));
+      max-width: 840px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: linear-gradient(180deg, rgba(15, 76, 117, 0.92), rgba(27, 38, 44, 0.94));
       border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 28px;
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+      border-radius: 20px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+      overflow: hidden;
     }
 
-    h1 {
-      margin: 0 0 4px;
+    .spine {
+      position: relative;
+    }
+
+    .spine::after {
+      content: '';
+      position: absolute;
+      top: 8%;
+      bottom: 8%;
+      right: 0;
+      width: 1px;
+      background: linear-gradient(180deg, transparent, var(--border), transparent);
+    }
+
+    /* ---------- form leaf ---------- */
+    .leaf-form {
+      padding: clamp(28px, 4vw, 40px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .brand {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
       font-size: 26px;
+      letter-spacing: 0.02em;
+      margin: 0 0 2px;
+      color: var(--parchment);
     }
 
-    p.sub {
-      margin: 0 0 20px;
-      color: rgba(232, 241, 245, 0.65);
-      font-size: 14px;
+    .sub {
+      margin: 0 0 24px;
+      color: var(--parchment-dim);
+      font-size: 14.5px;
+      line-height: 1.6;
+      max-width: 34ch;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-soft);
+      margin-bottom: 22px;
+    }
+
+    .tabs button {
+      flex: 1;
+      padding: 10px 4px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--parchment-dim);
+      font-family: 'Tajawal', sans-serif;
+      font-size: 14.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .tabs button.active {
+      color: var(--parchment);
+      border-bottom-color: var(--gold);
+      font-weight: 700;
     }
 
     label {
       display: block;
       font-size: 13px;
-      margin: 14px 0 6px;
-      color: rgba(232, 241, 245, 0.8);
+      color: var(--parchment-dim);
+      margin: 16px 0 6px;
     }
+
+    label:first-of-type { margin-top: 0; }
 
     input {
       width: 100%;
-      padding: 11px 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: rgba(0, 0, 0, 0.25);
-      color: var(--parchment);
-      font-size: 15px;
-      font-family: inherit;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-
-    .tabs button {
-      flex: 1;
-      padding: 9px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
+      padding: 11px 2px;
+      border: none;
+      border-bottom: 1px solid var(--border);
       background: transparent;
       color: var(--parchment);
-      cursor: pointer;
+      font-size: 15.5px;
       font-family: inherit;
-      font-size: 14px;
+      transition: border-color 0.2s ease;
     }
 
-    .tabs button.active {
-      background: var(--gold);
-      border-color: var(--gold);
+    input::placeholder { color: rgba(232, 241, 245, 0.35); }
+
+    input:focus {
+      outline: none;
+      border-bottom-color: var(--gold);
     }
 
     button.submit {
       width: 100%;
-      margin-top: 20px;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      background: var(--gold);
-      color: #fff;
-      font-weight: 700;
+      margin-top: 26px;
+      padding: 13px;
+      border-radius: 12px;
+      border: 1px solid var(--ember-dim);
+      background: linear-gradient(180deg, var(--ember), #A8703A);
+      color: #1B140C;
+      font-weight: 800;
       font-size: 15px;
+      font-family: 'Tajawal', sans-serif;
       cursor: pointer;
-      font-family: inherit;
+      transition: filter 0.2s ease, transform 0.2s ease;
     }
 
-    button.submit:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    button.submit:hover:not(:disabled) { filter: brightness(1.08); }
+    button.submit:active:not(:disabled) { transform: scale(0.99); }
+
+    button.submit:disabled { opacity: 0.55; cursor: not-allowed; }
 
     .msg {
       margin-top: 14px;
-      font-size: 14px;
+      font-size: 13.5px;
       text-align: center;
-      min-height: 20px;
+      min-height: 18px;
+      line-height: 1.5;
     }
 
-    .msg.error { color: #ff8a8a; }
-    .msg.ok { color: #8affb0; }
-    .msg.wait { color: #ffd98a; }
+    .msg.error { color: #ff9a9a; }
+    .msg.ok { color: #8fd9ac; }
+    .msg.wait { color: #e8c07d; }
+
+    /* ---------- hero leaf ---------- */
+    .leaf-hero {
+      padding: clamp(28px, 4vw, 40px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 18px;
+      background: radial-gradient(circle at 50% 20%, rgba(50, 130, 184, 0.14), transparent 65%);
+    }
+
+    .hero-eyebrow {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 15px;
+      color: var(--gold);
+      margin: 0;
+    }
+
+    .hero-title {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 22px;
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    .hero-desc {
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--parchment-dim);
+      margin: 0;
+      max-width: 32ch;
+    }
+
+    /* the merge diagram */
+    .merge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0 4px;
+    }
+
+    .token {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 35% 30%, rgba(232, 241, 245, 0.14), rgba(15, 76, 117, 0.6));
+      border: 1px solid var(--border);
+    }
+
+    .token svg { width: 24px; height: 24px; stroke: var(--parchment); fill: none; stroke-width: 1.4; }
+
+    .token.a { animation: driftA 3.6s ease-in-out infinite; }
+    .token.b { animation: driftB 3.6s ease-in-out infinite; }
+
+    .plus {
+      color: var(--gold-dim);
+      font-size: 15px;
+    }
+
+    .arrow { color: var(--parchment-dim); font-size: 15px; transform: scaleX(-1); }
+
+    .token.result {
+      width: 62px;
+      height: 62px;
+      border-color: var(--ember-dim);
+      box-shadow: 0 0 0 0 rgba(201, 138, 74, 0.5);
+      animation: glow 2.4s ease-in-out infinite;
+    }
+
+    .token.result svg { width: 30px; height: 30px; stroke: var(--ember); }
+
+    @keyframes driftA {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(3px); }
+    }
+
+    @keyframes driftB {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(-3px); }
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(201, 138, 74, 0.35); }
+      50% { box-shadow: 0 0 22px 4px rgba(201, 138, 74, 0.35); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .token.a, .token.b, .token.result { animation: none; }
+    }
+
+    @media (max-width: 720px) {
+      .book { grid-template-columns: 1fr; }
+      .spine::after { display: none; }
+      .leaf-hero { order: -1; padding-bottom: 8px; gap: 14px; }
+      .leaf-form { padding-top: 8px; }
+      .hero-desc { max-width: none; }
+    }
   </style>
 </head>
 
 <body>
-  <div class="box">
-    <h1>Axiom</h1>
-    <p class="sub">سجّل دخولك أو اعمل حساب جديد للوصول للحل الذكي</p>
+  <div class="book">
+    <section class="leaf-form spine">
+      <h1 class="brand">Axiom</h1>
+      <p class="sub">سجّل دخولك أو افتح حساب جديد عشان توصل لمحرّك الحل الذكي.</p>
 
-    <div class="tabs">
-      <button id="tabLogin" class="active">تسجيل الدخول</button>
-      <button id="tabSignup">إنشاء حساب</button>
-    </div>
+      <div class="tabs">
+        <button id="tabLogin" class="active">تسجيل الدخول</button>
+        <button id="tabSignup">إنشاء حساب</button>
+      </div>
 
-    <label for="email">الإيميل</label>
-    <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+      <label for="email">الإيميل</label>
+      <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
 
-    <label for="password">كلمة المرور</label>
-    <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+      <label for="password">كلمة المرور</label>
+      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
 
-    <button class="submit" id="submitBtn">دخول</button>
-    <div class="msg" id="msg"></div>
+      <button class="submit" id="submitBtn">دخول</button>
+      <div class="msg" id="msg"></div>
+    </section>
+
+    <section class="leaf-hero">
+      <p class="hero-eyebrow">The Bestiary Trial</p>
+      <h2 class="hero-title">اتنين من نفس النوع بيتحدوا ويطلعوا وحش أقوى</h2>
+
+      <div class="merge">
+        <div class="token a">
+          <svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.7-4 4 1 5.5L12 15.8 7 18.2l1-5.5-4-4 5.5-.7z"/></svg>
+        </div>
+        <span class="plus">+</span>
+        <div class="token b">
+          <svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.7-4 4 1 5.5L12 15.8 7 18.2l1-5.5-4-4 5.5-.7z"/></svg>
+        </div>
+        <span class="arrow">←</span>
+        <div class="token result">
+          <svg viewBox="0 0 24 24"><path d="M12 2l3 6 6.5.9-4.7 4.6 1.1 6.5L12 16.8 6.1 20l1.1-6.5L2.5 8.9 9 8z"/></svg>
+        </div>
+      </div>
+
+      <p class="hero-desc">كل مستوى وحش جديد، لحد ما توصل للمستوى 11 وتتحرر اللوحة منه. الحل الذكي اللي جوّه بيحسبلك أفضل حركة في كل خطوة.</p>
+    </section>
   </div>
 
   <script src="./supabase-config.js"></script>
@@ -225,7 +420,6 @@
           msg.textContent = "حصل خطأ: " + error.message;
           return;
         }
-        // اعمل صف اشتراك غير مفعّل للعميل الجديد
         if (data.user) {
           await supabaseClient.from("subscriptions").insert({
             id: data.user.id,
