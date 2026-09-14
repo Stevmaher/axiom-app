@@ -830,16 +830,36 @@ async function stepBestMove() {
     setStatus('statusNoMove');
     return;
   }
+
+  // Find the best legal move (fallback if AI's top pick is illegal)
+  let moveIndex = result.bestMove;
+  const bestLegalMove = result.moves.find(m => m.move === moveIndex && m.legal);
+  if (!bestLegalMove) {
+    // AI's top pick is illegal; pick the highest-scoring legal move
+    const legalMoves = result.moves.filter(m => m.legal);
+    if (legalMoves.length === 0) {
+      setStatus('statusNoMove');
+      return;
+    }
+    legalMoves.sort((a, b) => b.score - a.score);
+    moveIndex = legalMoves[0].move;
+  }
+
   pushHistory();
-  const move = MOVE_FNS[result.bestMove](state.board);
+  const move = MOVE_FNS[moveIndex](state.board);
+  if (!move.moved) {
+    // Shouldn't happen since we checked legal, but guard anyway
+    setStatus('statusNoMove');
+    return;
+  }
   state.animating = true;
-  const mergeDestinations = await animateMoveTransition(state.board, result.bestMove);
+  const mergeDestinations = await animateMoveTransition(state.board, moveIndex);
   state.pendingBoard = move.board;
   state.animating = false;
   state.waitingForSpawn = true;
   render();
   triggerMergePops(mergeDestinations);
-  setStatus('statusApplied', { move: MOVE_NAMES[result.bestMove] });
+  setStatus('statusApplied', { move: MOVE_NAMES[moveIndex] });
 }
 
 function onCellClick(index) {
