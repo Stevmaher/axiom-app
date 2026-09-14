@@ -695,7 +695,7 @@ async function ensureSolver() {
   setStatus('statusLoading');
 
   try {
-    state.worker = new Worker('aiSolver_worker-BcLaHdhF');
+    state.worker = new Worker('aiSolver_worker');
     let nextRequestId = 1;
     const pending = new Map();
 
