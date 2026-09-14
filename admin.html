@@ -5,19 +5,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Axiom — لوحة الأدمن</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap"
-    rel="stylesheet">
+  <style type="text/css">@font-face {font-family:'Tajawal';font-style:normal;font-weight:400;src:url(/cf-fonts/s/tajawal/5.2.7/arabic/400/normal.woff2);unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:400;src:url(/cf-fonts/s/tajawal/5.2.7/latin/400/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:500;src:url(/cf-fonts/s/tajawal/5.2.7/latin/500/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:500;src:url(/cf-fonts/s/tajawal/5.2.7/arabic/500/normal.woff2);unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:700;src:url(/cf-fonts/s/tajawal/5.2.7/arabic/700/normal.woff2);unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:700;src:url(/cf-fonts/s/tajawal/5.2.7/latin/700/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:800;src:url(/cf-fonts/s/tajawal/5.2.7/latin/800/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:800;src:url(/cf-fonts/s/tajawal/5.2.7/arabic/800/normal.woff2);unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;font-display:swap;}</style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --void: #1B262C;
-      --leather-2: #1B262C;
+      --deep: #0F4C75;
       --parchment: #E8F1F5;
       --gold: #3282B8;
       --border: rgba(50, 130, 184, 0.35);
       --good: #3ddc84;
       --bad: #ff6b6b;
+      --warn: #ffc94d;
     }
 
     * { box-sizing: border-box; }
@@ -27,25 +26,25 @@
       min-height: 100vh;
       font-family: 'Tajawal', sans-serif;
       color: var(--parchment);
-      background: linear-gradient(180deg, var(--void) 0%, var(--leather-2) 55%, var(--void) 100%);
+      background: linear-gradient(180deg, var(--void) 0%, #16323d 55%, var(--void) 100%);
       padding: 24px;
     }
 
-    .wrap {
-      max-width: 900px;
-      margin: 0 auto;
-    }
+    .wrap { max-width: 1100px; margin: 0 auto; }
 
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
       margin-bottom: 20px;
     }
 
     h1 { margin: 0; font-size: 24px; }
+    h1 span { color: var(--gold); }
 
-    #logoutBtn, #addBtn {
+    .btn {
       padding: 9px 16px;
       border-radius: 10px;
       border: 1px solid var(--border);
@@ -54,8 +53,35 @@
       cursor: pointer;
       font-family: inherit;
       font-size: 14px;
+      transition: background .15s ease;
+    }
+    .btn:hover { background: rgba(50, 130, 184, 0.35); }
+    .btn.primary { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 700; }
+    .btn.primary:hover { background: #3f96d1; }
+    .btn.danger { background: rgba(255,107,107,.15); border-color: rgba(255,107,107,.4); color: var(--bad); }
+
+    /* ===== stats cards ===== */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
     }
 
+    .stat {
+      background: linear-gradient(180deg, rgba(15, 76, 117, 0.55), rgba(27, 38, 44, 0.85));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+
+    .stat .num { font-size: 28px; font-weight: 800; line-height: 1.2; }
+    .stat .lbl { font-size: 13px; color: rgba(232,241,245,.6); margin-top: 2px; }
+    .stat.good .num { color: var(--good); }
+    .stat.bad .num { color: var(--bad); }
+    .stat.warn .num { color: var(--warn); }
+
+    /* ===== panel + toolbar ===== */
     .panel {
       background: linear-gradient(180deg, rgba(15, 76, 117, 0.94), rgba(27, 38, 44, 0.94));
       border: 1px solid var(--border);
@@ -64,49 +90,100 @@
       margin-bottom: 20px;
     }
 
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .toolbar input[type="search"] {
+      flex: 1;
+      min-width: 200px;
+      margin: 0;
+    }
+
+    select {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--parchment);
+      font-family: inherit;
+      font-size: 14px;
+    }
+    select option { background: var(--void); }
+
+    /* ===== table ===== */
+    .table-scroll { overflow-x: auto; }
+
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
+      min-width: 760px;
     }
 
     th, td {
-      padding: 10px 8px;
+      padding: 11px 8px;
       text-align: right;
       border-bottom: 1px solid var(--border);
+      white-space: nowrap;
     }
 
-    th { color: rgba(232, 241, 245, 0.6); font-weight: 600; }
+    th { color: rgba(232, 241, 245, 0.6); font-weight: 600; font-size: 13px; }
+    tbody tr:hover { background: rgba(50, 130, 184, 0.08); }
+    tbody tr:last-child td { border-bottom: none; }
 
     .badge {
       padding: 3px 10px;
       border-radius: 999px;
       font-size: 12px;
       font-weight: 700;
+      display: inline-block;
     }
 
     .badge.active { background: rgba(61, 220, 132, 0.15); color: var(--good); }
     .badge.inactive { background: rgba(255, 107, 107, 0.15); color: var(--bad); }
+    .badge.expired { background: rgba(255, 201, 77, 0.15); color: var(--warn); }
 
-    button.toggle {
-      padding: 6px 14px;
+    .days { font-weight: 700; }
+    .days.ok { color: var(--good); }
+    .days.soon { color: var(--warn); }
+    .days.over { color: var(--bad); }
+    .days.none { color: rgba(232,241,245,.4); font-weight: 400; }
+
+    .actions { display: flex; gap: 6px; justify-content: flex-start; }
+
+    button.mini {
+      padding: 6px 12px;
       border-radius: 8px;
       border: none;
       cursor: pointer;
       font-family: inherit;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 700;
       color: #111;
     }
 
-    button.toggle.on { background: var(--good); }
-    button.toggle.off { background: var(--bad); color: #fff; }
+    button.mini.on { background: var(--good); }
+    button.mini.off { background: var(--bad); color: #fff; }
+    button.mini.ext { background: var(--gold); color: #fff; }
+    button.mini.del { background: rgba(255,107,107,.18); color: var(--bad); border: 1px solid rgba(255,107,107,.4); }
 
+    /* ===== gate ===== */
     #gate {
       max-width: 400px;
       margin: 80px auto;
       text-align: center;
+      background: linear-gradient(180deg, rgba(15, 76, 117, 0.94), rgba(27, 38, 44, 0.94));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 26px;
     }
+
+    #gate h1 { margin-bottom: 18px; }
 
     input {
       width: 100%;
@@ -119,6 +196,7 @@
       font-family: inherit;
       margin-bottom: 10px;
     }
+    input:focus { outline: none; border-color: var(--gold); }
 
     #gate button {
       width: 100%;
@@ -130,14 +208,65 @@
       font-weight: 700;
       cursor: pointer;
       font-family: inherit;
+      font-size: 15px;
     }
 
     .msg { font-size: 13px; margin-top: 10px; color: var(--bad); }
     .muted { color: rgba(232,241,245,0.55); font-size: 13px; }
+
+    /* ===== modal ===== */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+    }
+    .overlay.show { display: flex; }
+
+    .modal {
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(180deg, rgba(15, 76, 117, 0.98), rgba(27, 38, 44, 0.98));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .modal h2 { margin: 0 0 6px; font-size: 18px; }
+    .modal .sub { font-size: 13px; color: rgba(232,241,245,.55); margin-bottom: 16px; }
+
+    .quick {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .quick button {
+      flex: 1;
+      padding: 8px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(50,130,184,.15);
+      color: var(--parchment);
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .quick button:hover { background: rgba(50,130,184,.35); }
+
+    .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
+    .modal-actions .btn { flex: 1; }
+
+    label { display: block; font-size: 13px; color: rgba(232,241,245,.6); margin-bottom: 6px; }
   </style>
 </head>
 
 <body>
+  <!-- ===== بوابة الدخول ===== -->
   <div id="gate">
     <h1>دخول الأدمن</h1>
     <input id="gEmail" type="email" placeholder="إيميل الأدمن" />
@@ -146,25 +275,97 @@
     <div class="msg" id="gMsg"></div>
   </div>
 
+  <!-- ===== لوحة التحكم ===== -->
   <div class="wrap" id="dashboard" style="display:none;">
     <header>
-      <h1>لوحة تحكم Axiom</h1>
-      <button id="logoutBtn">تسجيل خروج</button>
+      <h1>لوحة تحكم <span>Axiom</span></h1>
+      <div style="display:flex; gap:10px;">
+        <button class="btn primary" id="addBtn">+ إضافة مشترك</button>
+        <button class="btn" id="refreshBtn">تحديث</button>
+        <button class="btn" id="logoutBtn">تسجيل خروج</button>
+      </div>
     </header>
 
+    <div class="stats">
+      <div class="stat"><div class="num" id="stTotal">0</div><div class="lbl">إجمالي المشتركين</div></div>
+      <div class="stat good"><div class="num" id="stActive">0</div><div class="lbl">اشتراكات مفعّلة</div></div>
+      <div class="stat warn"><div class="num" id="stSoon">0</div><div class="lbl">بتنتهي خلال 7 أيام</div></div>
+      <div class="stat bad"><div class="num" id="stOff">0</div><div class="lbl">موقوفة / منتهية</div></div>
+    </div>
+
     <div class="panel">
-      <table>
-        <thead>
-          <tr>
-            <th>الإيميل</th>
-            <th>الحالة</th>
-            <th>تاريخ التسجيل</th>
-            <th>إجراء</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="ابحث بالإيميل..." />
+        <select id="filter">
+          <option value="all">الكل</option>
+          <option value="active">مفعّل</option>
+          <option value="expired">منتهي</option>
+          <option value="inactive">موقوف</option>
+        </select>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>الإيميل</th>
+              <th>الحالة</th>
+              <th>الباقة</th>
+              <th>تاريخ التسجيل</th>
+              <th>تاريخ الانتهاء</th>
+              <th>الأيام المتبقية</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
       <p class="muted" id="empty" style="display:none;">مفيش مستخدمين مسجّلين لسه.</p>
+    </div>
+  </div>
+
+  <!-- ===== مودال تمديد الاشتراك ===== -->
+  <div class="overlay" id="extOverlay">
+    <div class="modal">
+      <h2>تمديد الاشتراك</h2>
+      <div class="sub" id="extEmail"></div>
+      <label>عدد الأيام</label>
+      <div class="quick">
+        <button data-d="7">7 أيام</button>
+        <button data-d="30">30 يوم</button>
+        <button data-d="90">90 يوم</button>
+        <button data-d="365">سنة</button>
+      </div>
+      <input id="extDays" type="number" min="1" placeholder="أو اكتب عدد الأيام يدوي" />
+      <div class="modal-actions">
+        <button class="btn primary" id="extConfirm">تمديد</button>
+        <button class="btn" id="extCancel">إلغاء</button>
+      </div>
+      <div class="msg" id="extMsg"></div>
+    </div>
+  </div>
+
+  <!-- ===== مودال إضافة مشترك ===== -->
+  <div class="overlay" id="addOverlay">
+    <div class="modal">
+      <h2>إضافة مشترك جديد</h2>
+      <div class="sub">هيتضاف في جدول الاشتراكات مباشرة.</div>
+      <label>الإيميل</label>
+      <input id="addEmail" type="email" placeholder="user@example.com" />
+      <label>مدة الاشتراك بالأيام</label>
+      <input id="addDays" type="number" min="1" value="30" />
+      <label>الباقة</label>
+      <select id="addPlan" style="width:100%; margin-bottom:10px;">
+        <option value="شهري">شهري</option>
+        <option value="ربع سنوي">ربع سنوي</option>
+        <option value="سنوي">سنوي</option>
+        <option value="تجريبي">تجريبي</option>
+      </select>
+      <div class="modal-actions">
+        <button class="btn primary" id="addConfirm">إضافة</button>
+        <button class="btn" id="addCancel">إلغاء</button>
+      </div>
+      <div class="msg" id="addMsg"></div>
     </div>
   </div>
 
@@ -173,6 +374,12 @@
     const gate = document.getElementById("gate");
     const dashboard = document.getElementById("dashboard");
     const gMsg = document.getElementById("gMsg");
+
+    let allRows = [];
+    let extTargetId = null;
+    let extTargetExpiry = null;
+
+    const DAY = 86400000;
 
     async function boot() {
       const { data: { session } } = await supabaseClient.auth.getSession();
@@ -203,57 +410,223 @@
       window.location.href = "./login.html";
     };
 
+    document.getElementById("refreshBtn").onclick = loadRows;
+    document.getElementById("search").oninput = render;
+    document.getElementById("filter").onchange = render;
+
     async function showDashboard() {
       gate.style.display = "none";
       dashboard.style.display = "block";
       await loadRows();
     }
 
+    /* ===== helpers ===== */
+    function statusOf(row) {
+      if (!row.active) return "inactive";
+      if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) return "expired";
+      return "active";
+    }
+
+    function daysLeft(row) {
+      if (!row.expires_at) return null;
+      return Math.ceil((new Date(row.expires_at).getTime() - Date.now()) / DAY);
+    }
+
+    function fmtDate(d) {
+      return d ? new Date(d).toLocaleDateString("ar-EG") : "—";
+    }
+
+    /* ===== data ===== */
     async function loadRows() {
       const rowsEl = document.getElementById("rows");
-      const emptyEl = document.getElementById("empty");
       rowsEl.innerHTML = "";
 
       const { data, error } = await supabaseClient
         .from("subscriptions")
-        .select("id,email,active,created_at")
+        .select("id,email,active,created_at,expires_at,plan")
         .order("created_at", { ascending: false });
 
       if (error) {
-        rowsEl.innerHTML = `<tr><td colspan="4">حصل خطأ: ${error.message}</td></tr>`;
+        rowsEl.innerHTML = `<tr><td colspan="7">حصل خطأ: ${error.message}</td></tr>`;
         return;
       }
 
-      if (!data || data.length === 0) {
-        emptyEl.style.display = "block";
-        return;
-      }
-      emptyEl.style.display = "none";
+      allRows = data || [];
+      render();
+    }
 
-      for (const row of data) {
+    function render() {
+      const rowsEl = document.getElementById("rows");
+      const emptyEl = document.getElementById("empty");
+      const q = document.getElementById("search").value.trim().toLowerCase();
+      const f = document.getElementById("filter").value;
+
+      /* stats */
+      const total = allRows.length;
+      const active = allRows.filter(r => statusOf(r) === "active").length;
+      const soon = allRows.filter(r => {
+        const d = daysLeft(r);
+        return statusOf(r) === "active" && d !== null && d <= 7;
+      }).length;
+      document.getElementById("stTotal").textContent = total;
+      document.getElementById("stActive").textContent = active;
+      document.getElementById("stSoon").textContent = soon;
+      document.getElementById("stOff").textContent = total - active;
+
+      /* filter + search */
+      const list = allRows.filter(r => {
+        if (q && !r.email.toLowerCase().includes(q)) return false;
+        if (f !== "all" && statusOf(r) !== f) return false;
+        return true;
+      });
+
+      rowsEl.innerHTML = "";
+      emptyEl.style.display = list.length ? "none" : "block";
+      emptyEl.textContent = allRows.length
+        ? "مفيش نتائج مطابقة."
+        : "مفيش مستخدمين مسجّلين لسه.";
+
+      const badges = {
+        active: '<span class="badge active">مفعّل</span>',
+        expired: '<span class="badge expired">منتهي</span>',
+        inactive: '<span class="badge inactive">موقوف</span>',
+      };
+
+      for (const row of list) {
+        const st = statusOf(row);
+        const d = daysLeft(row);
+        let daysHtml;
+        if (d === null) daysHtml = '<span class="days none">غير محدد</span>';
+        else if (d < 0) daysHtml = `<span class="days over">منتهي من ${Math.abs(d)} يوم</span>`;
+        else if (d <= 7) daysHtml = `<span class="days soon">${d} يوم</span>`;
+        else daysHtml = `<span class="days ok">${d} يوم</span>`;
+
         const tr = document.createElement("tr");
-        const date = new Date(row.created_at).toLocaleDateString("ar-EG");
         tr.innerHTML = `
           <td>${row.email}</td>
-          <td><span class="badge ${row.active ? "active" : "inactive"}">${row.active ? "مفعّل" : "غير مفعّل"}</span></td>
-          <td>${date}</td>
-          <td><button class="toggle ${row.active ? "off" : "on"}" data-id="${row.id}" data-active="${row.active}">
-            ${row.active ? "إيقاف" : "تفعيل"}
-          </button></td>
+          <td>${badges[st]}</td>
+          <td>${row.plan || "—"}</td>
+          <td>${fmtDate(row.created_at)}</td>
+          <td>${fmtDate(row.expires_at)}</td>
+          <td>${daysHtml}</td>
+          <td>
+            <div class="actions">
+              <button class="mini ${row.active ? "off" : "on"}" data-act="toggle" data-id="${row.id}" data-active="${row.active}">
+                ${row.active ? "إيقاف" : "تفعيل"}
+              </button>
+              <button class="mini ext" data-act="extend" data-id="${row.id}" data-email="${row.email}" data-exp="${row.expires_at || ""}">تمديد</button>
+              <button class="mini del" data-act="del" data-id="${row.id}" data-email="${row.email}">حذف</button>
+            </div>
+          </td>
         `;
         rowsEl.appendChild(tr);
       }
 
-      document.querySelectorAll("button.toggle").forEach(btn => {
-        btn.onclick = async () => {
-          const id = btn.dataset.id;
-          const current = btn.dataset.active === "true";
-          btn.disabled = true;
-          await supabaseClient.from("subscriptions").update({ active: !current }).eq("id", id);
-          await loadRows();
-        };
+      rowsEl.querySelectorAll("button[data-act]").forEach(btn => {
+        btn.onclick = () => handleAction(btn);
       });
     }
+
+    async function handleAction(btn) {
+      const id = btn.dataset.id;
+      const act = btn.dataset.act;
+
+      if (act === "toggle") {
+        const current = btn.dataset.active === "true";
+        btn.disabled = true;
+        await supabaseClient.from("subscriptions").update({ active: !current }).eq("id", id);
+        await loadRows();
+      }
+
+      if (act === "extend") {
+        extTargetId = id;
+        extTargetExpiry = btn.dataset.exp || null;
+        document.getElementById("extEmail").textContent = btn.dataset.email;
+        document.getElementById("extDays").value = "";
+        document.getElementById("extMsg").textContent = "";
+        document.getElementById("extOverlay").classList.add("show");
+      }
+
+      if (act === "del") {
+        if (!confirm(`متأكد إنك عايز تحذف ${btn.dataset.email}؟`)) return;
+        await supabaseClient.from("subscriptions").delete().eq("id", id);
+        await loadRows();
+      }
+    }
+
+    /* ===== extend modal ===== */
+    document.querySelectorAll("#extOverlay .quick button").forEach(b => {
+      b.onclick = () => { document.getElementById("extDays").value = b.dataset.d; };
+    });
+
+    document.getElementById("extCancel").onclick = () =>
+      document.getElementById("extOverlay").classList.remove("show");
+
+    document.getElementById("extConfirm").onclick = async () => {
+      const days = parseInt(document.getElementById("extDays").value, 10);
+      if (!days || days < 1) {
+        document.getElementById("extMsg").textContent = "اكتب عدد أيام صحيح";
+        return;
+      }
+      // لو الاشتراك لسه ساري بنمدّد من تاريخ الانتهاء، لو منتهي بنمدّد من النهارده
+      const base = extTargetExpiry && new Date(extTargetExpiry).getTime() > Date.now()
+        ? new Date(extTargetExpiry).getTime()
+        : Date.now();
+      const newExpiry = new Date(base + days * DAY).toISOString();
+
+      const { error } = await supabaseClient
+        .from("subscriptions")
+        .update({ expires_at: newExpiry, active: true })
+        .eq("id", extTargetId);
+
+      if (error) {
+        document.getElementById("extMsg").textContent = "حصل خطأ: " + error.message;
+        return;
+      }
+      document.getElementById("extOverlay").classList.remove("show");
+      await loadRows();
+    };
+
+    /* ===== add modal ===== */
+    document.getElementById("addBtn").onclick = () => {
+      document.getElementById("addEmail").value = "";
+      document.getElementById("addDays").value = "30";
+      document.getElementById("addMsg").textContent = "";
+      document.getElementById("addOverlay").classList.add("show");
+    };
+
+    document.getElementById("addCancel").onclick = () =>
+      document.getElementById("addOverlay").classList.remove("show");
+
+    document.getElementById("addConfirm").onclick = async () => {
+      const email = document.getElementById("addEmail").value.trim();
+      const days = parseInt(document.getElementById("addDays").value, 10);
+      const plan = document.getElementById("addPlan").value;
+      const msg = document.getElementById("addMsg");
+      msg.textContent = "";
+
+      if (!email || !email.includes("@")) { msg.textContent = "اكتب إيميل صحيح"; return; }
+      if (!days || days < 1) { msg.textContent = "اكتب عدد أيام صحيح"; return; }
+
+      const expires_at = new Date(Date.now() + days * DAY).toISOString();
+      const { error } = await supabaseClient
+        .from("subscriptions")
+        .insert({ email, active: true, plan, expires_at });
+
+      if (error) {
+        msg.textContent = "حصل خطأ: " + error.message;
+        return;
+      }
+      document.getElementById("addOverlay").classList.remove("show");
+      await loadRows();
+    };
+
+    /* قفل المودال بالضغط برة */
+    document.querySelectorAll(".overlay").forEach(ov => {
+      ov.addEventListener("click", e => {
+        if (e.target === ov) ov.classList.remove("show");
+      });
+    });
 
     boot();
   </script>
