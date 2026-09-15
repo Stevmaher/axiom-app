@@ -110,6 +110,8 @@ const TRANSLATIONS = {
     rescueSwapBtn: 'تأكيد: بدّل {a} ↔ {b}',
     rescueDeleteBtn: 'تأكيد: احذف {a}',
     rescueApplied: 'تم. اضغط تحليل أو خطوة مجدداً.',
+    statusSolverError: 'تعذّر تحميل محرك الحل. أعد تحميل الصفحة وجرّب تاني.',
+    logout: 'تسجيل خروج',
   }
 };
 
@@ -373,6 +375,7 @@ function makeTilePicker(targetEl) {
       btn.textContent = String(value);
     }
     if (value === state.selectedTile) btn.classList.add('active');
+    btn.setAttribute('aria-pressed', value === state.selectedTile ? 'true' : 'false');
     btn.addEventListener('click', () => {
       state.selectedTile = value;
       syncTilePickers();
@@ -733,7 +736,7 @@ async function ensureSolver() {
     setStatus('statusReady');
   } catch (err) {
     console.warn('AI Solver unavailable.', err);
-    setStatus('Solver Error: AI Unavailable');
+    setStatus('statusSolverError');
   }
 }
 

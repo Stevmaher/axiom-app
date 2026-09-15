@@ -1,10 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#1B262C" />
+  <meta name="description" content="Axiom — محرك حل ذكي للوحة الوحوش الأسطورية" />
   <title>Axiom — Pro Edition</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,21 +26,21 @@
           <span class="eyebrow" data-i18n="eyebrow">The Bestiary Trial</span>
           <h1 data-i18n="title">Axiom</h1>
         </div>
-        <button onclick="axiomLogout()" style="align-self:flex-start; background:transparent; border:1px solid var(--border); color:var(--text); padding:8px 16px; border-radius:10px; cursor:pointer; font-family:inherit;">تسجيل خروج</button>
+        <button class="btn-logout" onclick="axiomLogout()" data-i18n="logout">تسجيل خروج</button>
       </header>
-      <p data-i18n="description">C++ expectimax solver compiled to WebAssembly. The board uses exponent-style values (1,
+      <p data-i18n="description">A solver that runs inside a Web Worker. The board uses exponent-style values (1,
         2, 3...) where merging equal tiles increments the value by one.</p>
 
       <div class="board-analysis-grid">
         <div class="board-column">
           <div class="board-shell" id="boardShell">
-            <div class="board" id="board"></div>
+            <div class="board" id="board" role="group" aria-label="Board"></div>
             <div class="move-layer" id="moveLayer" aria-hidden="true"></div>
           </div>
 
           <div class="stats">
-            <div><strong data-i18n="statusTitle">Status:</strong> <span id="status" class="muted"
-                data-i18n="statusLoading">Loading…</span></div>
+            <div><strong data-i18n="statusTitle">Status:</strong> <span id="status" class="muted" role="status"
+                aria-live="polite" data-i18n="statusLoading">Loading…</span></div>
             <div><strong data-i18n="emptiesLabel">Empties:</strong> <span id="empties">16</span></div>
           </div>
         </div>
@@ -73,7 +74,7 @@
       <div class="section-divider"></div>
 
       <h2 data-i18n="tilePickerTitle">Tile picker</h2>
-      <div class="picker" id="tilePicker"></div>
+      <div class="picker" id="tilePicker" role="group" aria-label="Tile picker"></div>
 
       <div class="controls">
         <button id="btnMode" data-i18n="btnModePlay">Switch to Play Mode</button>
