@@ -5,6 +5,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Axiom — لوحة الأدمن</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
   <style type="text/css">@font-face {font-family:'Tajawal';font-style:normal;font-weight:400;src:url(/cf-fonts/s/tajawal/5.2.7/arabic/400/normal.woff2);unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:400;src:url(/cf-fonts/s/tajawal/5.2.7/latin/400/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:500;src:url(/cf-fonts/s/tajawal/5.2.7/latin/500/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:500;src:url(/cf-fonts/s/tajawal/5.2.7/arabic/500/normal.woff2);unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:700;src:url(/cf-fonts/s/tajawal/5.2.7/arabic/700/normal.woff2);unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:700;src:url(/cf-fonts/s/tajawal/5.2.7/latin/700/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:800;src:url(/cf-fonts/s/tajawal/5.2.7/latin/800/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:800;src:url(/cf-fonts/s/tajawal/5.2.7/arabic/800/normal.woff2);unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;font-display:swap;}</style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -41,7 +44,7 @@
       margin-bottom: 20px;
     }
 
-    h1 { margin: 0; font-size: 24px; }
+    h1 { margin: 0; font-family: 'Cinzel', 'Tajawal', sans-serif; font-weight: 700; font-size: 22px; }
     h1 span { color: var(--gold); }
 
     .btn {
@@ -183,7 +186,7 @@
       padding: 32px 26px;
     }
 
-    #gate h1 { margin-bottom: 18px; }
+    #gate h1 { font-size: 22px; margin-bottom: 18px; }
 
     input {
       width: 100%;
@@ -382,6 +385,13 @@
     const DAY = 86400000;
 
     async function boot() {
+      // تنبيه أمان: الشرط ده (ADMIN_EMAILS.includes) بيتنفذ في المتصفح بس،
+      // يعني أي حد فاتح Console يقدر يتخطاه أو يشوف قايمة إيميلات الأدمن.
+      // الحماية الحقيقية لازم تكون على مستوى قاعدة البيانات (Row Level
+      // Security في Supabase) على جدول subscriptions، بحيث فقط إيميلات
+      // الأدمن تقدر تعمل update/delete/insert. من غير كده، أي مستخدم عادي
+      // يقدر يفتح الـ Console ويفعّل اشتراكه بنفسه مجاناً حتى لو الواجهة
+      // دي مقفولة قدامه.
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (session && ADMIN_EMAILS.includes(session.user.email)) {
         showDashboard();
@@ -411,7 +421,12 @@
     };
 
     document.getElementById("refreshBtn").onclick = loadRows;
-    document.getElementById("search").oninput = render;
+
+    let searchDebounce;
+    document.getElementById("search").oninput = () => {
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(render, 200);
+    };
     document.getElementById("filter").onchange = render;
 
     async function showDashboard() {
@@ -436,10 +451,18 @@
       return d ? new Date(d).toLocaleDateString("ar-EG") : "—";
     }
 
+    // الإيميل والباقة بيتخزنوا كنص حر في القاعدة، فلازم نعمل escape ليهم قبل
+    // ما ندخلهم بـ innerHTML عشان نمنع أي HTML/script يتحقن من خلالهم (XSS).
+    function escapeHtml(str) {
+      return String(str ?? "").replace(/[&<>"']/g, ch => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[ch]));
+    }
+
     /* ===== data ===== */
     async function loadRows() {
       const rowsEl = document.getElementById("rows");
-      rowsEl.innerHTML = "";
+      rowsEl.innerHTML = `<tr><td colspan="7" class="muted">بيتحمّل...</td></tr>`;
 
       const { data, error } = await supabaseClient
         .from("subscriptions")
@@ -447,7 +470,7 @@
         .order("created_at", { ascending: false });
 
       if (error) {
-        rowsEl.innerHTML = `<tr><td colspan="7">حصل خطأ: ${error.message}</td></tr>`;
+        rowsEl.innerHTML = `<tr><td colspan="7">حصل خطأ: ${escapeHtml(error.message)}</td></tr>`;
         return;
       }
 
@@ -503,9 +526,9 @@
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${row.email}</td>
+          <td>${escapeHtml(row.email)}</td>
           <td>${badges[st]}</td>
-          <td>${row.plan || "—"}</td>
+          <td>${escapeHtml(row.plan) || "—"}</td>
           <td>${fmtDate(row.created_at)}</td>
           <td>${fmtDate(row.expires_at)}</td>
           <td>${daysHtml}</td>
@@ -514,8 +537,8 @@
               <button class="mini ${row.active ? "off" : "on"}" data-act="toggle" data-id="${row.id}" data-active="${row.active}">
                 ${row.active ? "إيقاف" : "تفعيل"}
               </button>
-              <button class="mini ext" data-act="extend" data-id="${row.id}" data-email="${row.email}" data-exp="${row.expires_at || ""}">تمديد</button>
-              <button class="mini del" data-act="del" data-id="${row.id}" data-email="${row.email}">حذف</button>
+              <button class="mini ext" data-act="extend" data-id="${row.id}" data-email="${escapeHtml(row.email)}" data-exp="${row.expires_at || ""}">تمديد</button>
+              <button class="mini del" data-act="del" data-id="${row.id}" data-email="${escapeHtml(row.email)}">حذف</button>
             </div>
           </td>
         `;
