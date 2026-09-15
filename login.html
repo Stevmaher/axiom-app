@@ -3,8 +3,9 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#1B262C" />
+  <meta name="description" content="Axiom — تسجيل الدخول لمحرّك الحل الذكي" />
   <title>Axiom — تسجيل الدخول</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,7 +26,10 @@
       --border-soft: rgba(50, 130, 184, 0.18);
       --ember: #C98A4A;
       --ember-dim: rgba(201, 138, 74, 0.5);
-      --card: rgba(27, 38, 44, 0.86);
+      --error: #ff9a9a;
+      --ok: #8fd9ac;
+      --wait: #e8c07d;
+      --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -35,7 +39,7 @@
     body {
       margin: 0;
       min-height: 100%;
-      font-family: 'Tajawal', 'Cormorant Garamond', serif;
+      font-family: 'Tajawal', system-ui, sans-serif;
       color: var(--parchment);
       display: flex;
       align-items: center;
@@ -50,17 +54,24 @@
     body::before {
       content: '';
       position: fixed;
-      inset: 0;
+      inset: -40px;
       background-image: radial-gradient(rgba(232, 241, 245, 0.10) 1px, transparent 1px);
       background-size: 26px 26px;
       opacity: 0.3;
       pointer-events: none;
       z-index: -1;
+      animation: drift 40s linear infinite;
     }
 
+    @keyframes drift {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(26px, 26px); }
+    }
+
+    /* ===================== card ===================== */
     .book {
       width: 100%;
-      max-width: 840px;
+      max-width: 860px;
       display: grid;
       grid-template-columns: 1fr 1fr;
       background: linear-gradient(180deg, rgba(15, 76, 117, 0.92), rgba(27, 38, 44, 0.94));
@@ -68,28 +79,65 @@
       border-radius: 20px;
       box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
       overflow: hidden;
+      animation: cardIn 0.7s var(--ease) both;
     }
 
-    .spine {
-      position: relative;
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(18px) scale(0.985); }
+      to   { opacity: 1; transform: none; }
     }
+
+    .book.shake { animation: shake 0.42s ease; }
+
+    @keyframes shake {
+      10%, 90% { transform: translateX(-2px); }
+      20%, 80% { transform: translateX(4px); }
+      30%, 50%, 70% { transform: translateX(-6px); }
+      40%, 60% { transform: translateX(6px); }
+    }
+
+    .spine { position: relative; }
 
     .spine::after {
       content: '';
       position: absolute;
       top: 8%;
       bottom: 8%;
-      right: 0;
+      inset-inline-end: 0;
       width: 1px;
       background: linear-gradient(180deg, transparent, var(--border), transparent);
     }
 
-    /* ---------- form leaf ---------- */
+    /* ===================== form ===================== */
     .leaf-form {
       padding: clamp(28px, 4vw, 40px);
       display: flex;
       flex-direction: column;
       justify-content: center;
+    }
+
+    /* staggered entrance for everything inside the form */
+    .leaf-form > *, .fields > * {
+      animation: riseIn 0.6s var(--ease) both;
+    }
+    .leaf-form > *:nth-child(1) { animation-delay: 0.10s; }
+    .leaf-form > *:nth-child(2) { animation-delay: 0.16s; }
+    .leaf-form > *:nth-child(3) { animation-delay: 0.22s; }
+    .leaf-form > *:nth-child(4) { animation-delay: 0.28s; }
+    .leaf-form > *:nth-child(5) { animation-delay: 0.34s; }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .greeting {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: var(--gold);
+      margin: 0 0 4px;
+      min-height: 18px;
     }
 
     .brand {
@@ -98,7 +146,6 @@
       font-size: 26px;
       letter-spacing: 0.02em;
       margin: 0 0 2px;
-      color: var(--parchment);
     }
 
     .sub {
@@ -109,10 +156,12 @@
       max-width: 34ch;
     }
 
+    /* ---- tabs with a sliding indicator ---- */
     .tabs {
+      position: relative;
       display: flex;
       border-bottom: 1px solid var(--border-soft);
-      margin-bottom: 22px;
+      margin-bottom: 8px;
     }
 
     .tabs button {
@@ -120,20 +169,30 @@
       padding: 10px 4px;
       background: transparent;
       border: none;
-      border-bottom: 2px solid transparent;
       color: var(--parchment-dim);
-      font-family: 'Tajawal', sans-serif;
+      font-family: inherit;
       font-size: 14.5px;
       font-weight: 500;
       cursor: pointer;
-      transition: color 0.2s ease, border-color 0.2s ease;
+      transition: color 0.25s var(--ease);
     }
 
-    .tabs button.active {
-      color: var(--parchment);
-      border-bottom-color: var(--gold);
-      font-weight: 700;
+    .tabs button[aria-selected="true"] { color: var(--parchment); font-weight: 700; }
+
+    .tab-indicator {
+      position: absolute;
+      bottom: -1px;
+      height: 2px;
+      width: 50%;
+      background: var(--gold);
+      border-radius: 2px;
+      transition: transform 0.35s var(--ease);
     }
+    /* RTL: login tab is on the right */
+    .tab-indicator[data-mode="login"]  { transform: translateX(0); }
+    .tab-indicator[data-mode="signup"] { transform: translateX(-100%); }
+
+    .fields { display: flex; flex-direction: column; }
 
     label {
       display: block;
@@ -142,15 +201,7 @@
       margin: 16px 0 6px;
     }
 
-    label:first-of-type { margin-top: 0; }
-
-    .greeting {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-size: 14px;
-      color: var(--gold);
-      margin: 0 0 6px;
-    }
+    .field-wrap { position: relative; }
 
     input {
       width: 100%;
@@ -161,44 +212,99 @@
       color: var(--parchment);
       font-size: 15.5px;
       font-family: inherit;
-      transition: border-color 0.2s ease;
+      transition: border-color 0.25s var(--ease);
     }
 
     input::placeholder { color: rgba(232, 241, 245, 0.35); }
+    input:focus { outline: none; }
+    input:focus-visible { outline: none; }
 
-    input:focus {
-      outline: none;
-      border-bottom-color: var(--gold);
+    /* animated underline that grows from the center on focus */
+    .field-wrap::after {
+      content: '';
+      position: absolute;
+      inset-inline: 0;
+      bottom: 0;
+      height: 2px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform 0.3s var(--ease), background-color 0.2s ease;
     }
+    .field-wrap:focus-within::after { transform: scaleX(1); }
+    .field-wrap.invalid::after { transform: scaleX(1); background: var(--error); }
 
-    .field-wrap {
-      position: relative;
-    }
-
-    .field-wrap input {
-      padding-left: 30px;
-    }
+    .field-wrap.has-eye input { padding-inline-start: 34px; }
 
     .toggle-eye {
       position: absolute;
-      left: 2px;
+      inset-inline-start: 0;
       top: 50%;
       transform: translateY(-50%);
       background: transparent;
       border: none;
       cursor: pointer;
-      padding: 4px;
-      font-size: 16px;
-      line-height: 1;
-      opacity: 0.55;
+      padding: 6px;
+      line-height: 0;
+      color: var(--parchment);
+      opacity: 0.5;
+      border-radius: 8px;
       transition: opacity 0.2s ease;
     }
+    .toggle-eye:hover { opacity: 0.95; }
+    .toggle-eye svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+    .toggle-eye .slash { stroke-dasharray: 26; stroke-dashoffset: 26; transition: stroke-dashoffset 0.25s var(--ease); }
+    .toggle-eye[aria-pressed="true"] .slash { stroke-dashoffset: 0; }
 
-    .toggle-eye:hover { opacity: 0.9; }
+    /* ---- password strength (signup only) ---- */
+    .strength {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transition: grid-template-rows 0.35s var(--ease), opacity 0.25s ease, margin 0.35s var(--ease);
+      margin-top: 0;
+    }
+    .strength.show { grid-template-rows: 1fr; opacity: 1; margin-top: 10px; }
+    .strength > div { overflow: hidden; }
 
+    .bars { display: flex; gap: 5px; }
+    .bars i {
+      flex: 1;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(232, 241, 245, 0.14);
+      transition: background-color 0.3s var(--ease);
+    }
+    .strength-text { font-size: 12px; margin-top: 6px; color: var(--parchment-dim); }
+
+    /* ---- extra signup row ---- */
+    .row-extra {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+    .link {
+      background: none;
+      border: none;
+      padding: 0;
+      color: var(--gold);
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 0.2s ease;
+    }
+    .link:hover { color: var(--parchment); }
+
+    /* ---- submit ---- */
     button.submit {
+      position: relative;
       width: 100%;
-      margin-top: 26px;
+      margin-top: 22px;
       padding: 13px;
       border-radius: 12px;
       border: 1px solid var(--ember-dim);
@@ -206,49 +312,71 @@
       color: #1B140C;
       font-weight: 800;
       font-size: 15px;
-      font-family: 'Tajawal', sans-serif;
+      font-family: inherit;
       cursor: pointer;
-      transition: filter 0.2s ease, transform 0.2s ease;
+      overflow: hidden;
+      transition: filter 0.2s ease, transform 0.12s ease, box-shadow 0.25s ease;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 9px;
     }
+    button.submit:hover:not(:disabled) {
+      filter: brightness(1.08);
+      box-shadow: 0 8px 22px rgba(201, 138, 74, 0.22);
+    }
+    button.submit:active:not(:disabled) { transform: scale(0.985); }
+    button.submit:disabled { opacity: 0.7; cursor: not-allowed; }
 
-    button.submit:hover:not(:disabled) { filter: brightness(1.08); }
-    button.submit:active:not(:disabled) { transform: scale(0.99); }
-
-    button.submit:disabled { opacity: 0.75; cursor: not-allowed; }
+    /* sheen sweep while loading */
+    button.submit.loading::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+      animation: sheen 1.15s linear infinite;
+    }
+    @keyframes sheen {
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(100%); }
+    }
 
     .spinner {
       display: none;
       width: 15px;
       height: 15px;
-      border: 2px solid rgba(27, 20, 12, 0.35);
+      border: 2px solid rgba(27, 20, 12, 0.3);
       border-top-color: #1B140C;
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
     }
-
     button.submit.loading .spinner { display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    :where(button, input, a):focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+      border-radius: 6px;
     }
 
+    /* ---- message ---- */
     .msg {
       margin-top: 14px;
       font-size: 13.5px;
       text-align: center;
-      min-height: 18px;
-      line-height: 1.5;
+      min-height: 20px;
+      line-height: 1.55;
     }
+    .msg:not(:empty) { animation: msgIn 0.35s var(--ease) both; }
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: none; }
+    }
+    .msg.error { color: var(--error); }
+    .msg.ok    { color: var(--ok); }
+    .msg.wait  { color: var(--wait); }
 
-    .msg.error { color: #ff9a9a; }
-    .msg.ok { color: #8fd9ac; }
-    .msg.wait { color: #e8c07d; }
-
-    /* ---------- hero leaf ---------- */
+    /* ===================== hero ===================== */
     .leaf-hero {
       padding: clamp(28px, 4vw, 40px);
       display: flex;
@@ -256,6 +384,7 @@
       justify-content: center;
       gap: 18px;
       background: radial-gradient(circle at 50% 20%, rgba(50, 130, 184, 0.14), transparent 65%);
+      animation: riseIn 0.7s var(--ease) 0.2s both;
     }
 
     .hero-eyebrow {
@@ -267,10 +396,10 @@
     }
 
     .hero-title {
-      font-family: 'Cinzel', serif;
+      font-family: 'Cinzel', 'Tajawal', serif;
       font-weight: 700;
       font-size: 22px;
-      line-height: 1.4;
+      line-height: 1.5;
       margin: 0;
     }
 
@@ -282,110 +411,149 @@
       max-width: 32ch;
     }
 
-    /* the merge diagram */
+    /* ---- merge diagram: a real 4s merge loop ---- */
     .merge {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
       margin: 10px 0 4px;
+      min-height: 66px;
     }
 
     .token {
       width: 52px;
       height: 52px;
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: grid;
+      place-items: center;
       background: radial-gradient(circle at 35% 30%, rgba(232, 241, 245, 0.14), rgba(15, 76, 117, 0.6));
       border: 1px solid var(--border);
     }
 
     .token svg { width: 24px; height: 24px; stroke: var(--parchment); fill: none; stroke-width: 1.4; }
 
-    .token.a { animation: driftA 3.6s ease-in-out infinite; }
-    .token.b { animation: driftB 3.6s ease-in-out infinite; }
+    .token.a { animation: mergeA 4s var(--ease) infinite; }
+    .token.b { animation: mergeB 4s var(--ease) infinite; }
+    .plus, .arrow { animation: fadeMid 4s var(--ease) infinite; }
 
-    .plus {
-      color: var(--gold-dim);
-      font-size: 15px;
-    }
-
+    .plus  { color: var(--gold-dim); font-size: 15px; }
     .arrow { color: var(--parchment-dim); font-size: 15px; transform: scaleX(-1); }
 
     .token.result {
       width: 62px;
       height: 62px;
       border-color: var(--ember-dim);
-      box-shadow: 0 0 0 0 rgba(201, 138, 74, 0.5);
-      animation: glow 2.4s ease-in-out infinite;
+      animation: pop 4s var(--ease) infinite;
     }
-
     .token.result svg { width: 30px; height: 30px; stroke: var(--ember); }
 
-    @keyframes driftA {
-      0%, 100% { transform: translateX(0); }
-      50% { transform: translateX(3px); }
+    /* the two tokens slide together, fade, then the result pops */
+    @keyframes mergeA {
+      0%, 20%   { transform: translateX(0) scale(1); opacity: 1; }
+      45%       { transform: translateX(-26px) scale(0.9); opacity: 1; }
+      55%, 85%  { transform: translateX(-26px) scale(0.6); opacity: 0; }
+      100%      { transform: translateX(0) scale(1); opacity: 1; }
+    }
+    @keyframes mergeB {
+      0%, 20%   { transform: translateX(0) scale(1); opacity: 1; }
+      45%       { transform: translateX(26px) scale(0.9); opacity: 1; }
+      55%, 85%  { transform: translateX(26px) scale(0.6); opacity: 0; }
+      100%      { transform: translateX(0) scale(1); opacity: 1; }
+    }
+    @keyframes fadeMid {
+      0%, 25%  { opacity: 1; }
+      45%, 85% { opacity: 0; }
+      100%     { opacity: 1; }
+    }
+    @keyframes pop {
+      0%, 45%  { transform: scale(1); box-shadow: 0 0 0 0 rgba(201, 138, 74, 0); }
+      58%      { transform: scale(1.18); box-shadow: 0 0 26px 6px rgba(201, 138, 74, 0.4); }
+      72%      { transform: scale(1); box-shadow: 0 0 14px 2px rgba(201, 138, 74, 0.2); }
+      100%     { transform: scale(1); box-shadow: 0 0 0 0 rgba(201, 138, 74, 0); }
     }
 
-    @keyframes driftB {
-      0%, 100% { transform: translateX(0); }
-      50% { transform: translateX(-3px); }
-    }
-
-    @keyframes glow {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(201, 138, 74, 0.35); }
-      50% { box-shadow: 0 0 22px 4px rgba(201, 138, 74, 0.35); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .token.a, .token.b, .token.result { animation: none; }
-    }
-
-    @media (max-width: 720px) {
+    /* ===================== responsive ===================== */
+    @media (max-width: 760px) {
       .book { grid-template-columns: 1fr; }
       .spine::after { display: none; }
       .leaf-hero { order: -1; padding-bottom: 8px; gap: 14px; }
       .leaf-form { padding-top: 8px; }
       .hero-desc { max-width: none; }
+      .hero-title { font-size: 19px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="book">
+  <main class="book" id="book">
     <section class="leaf-form spine">
       <p class="greeting" id="greeting"></p>
       <h1 class="brand">Axiom</h1>
       <p class="sub">سجّل دخولك أو افتح حساب جديد عشان توصل لمحرّك الحل الذكي.</p>
 
-      <div class="tabs">
-        <button id="tabLogin" class="active">تسجيل الدخول</button>
-        <button id="tabSignup">إنشاء حساب</button>
+      <div class="tabs" role="tablist" aria-label="نوع العملية">
+        <button id="tabLogin" role="tab" aria-selected="true" aria-controls="authForm" type="button">تسجيل الدخول</button>
+        <button id="tabSignup" role="tab" aria-selected="false" aria-controls="authForm" type="button">إنشاء حساب</button>
+        <span class="tab-indicator" id="tabIndicator" data-mode="login" aria-hidden="true"></span>
       </div>
 
-      <label for="email">الإيميل</label>
-      <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+      <form class="fields" id="authForm" novalidate>
+        <label for="email">الإيميل</label>
+        <div class="field-wrap" id="emailWrap">
+          <input id="email" name="email" type="email" placeholder="you@example.com"
+                 autocomplete="email" inputmode="email" required />
+        </div>
 
-      <label for="password">كلمة المرور</label>
-      <div class="field-wrap">
-        <button type="button" class="toggle-eye" id="togglePassword" aria-label="إظهار كلمة المرور">👁</button>
-        <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
-      </div>
+        <label for="password">كلمة المرور</label>
+        <div class="field-wrap has-eye" id="passwordWrap">
+          <button type="button" class="toggle-eye" id="togglePassword"
+                  aria-pressed="false" aria-label="إظهار كلمة المرور" aria-controls="password">
+            <svg viewBox="0 0 24 24">
+              <path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" />
+              <circle cx="12" cy="12" r="3" />
+              <path class="slash" d="M4 20L20 4" />
+            </svg>
+          </button>
+          <input id="password" name="password" type="password" placeholder="••••••••"
+                 autocomplete="current-password" required minlength="6" />
+        </div>
 
-      <button class="submit" id="submitBtn">
-        <span class="spinner" id="submitSpinner"></span>
-        <span id="submitLabel">دخول</span>
-      </button>
-      <div class="msg" id="msg"></div>
+        <div class="strength" id="strength" aria-hidden="true">
+          <div>
+            <div class="bars">
+              <i></i><i></i><i></i><i></i>
+            </div>
+            <div class="strength-text" id="strengthText">اكتب 8 حروف على الأقل، وخلّي فيها أرقام ورموز.</div>
+          </div>
+        </div>
+
+        <div class="row-extra" id="rowExtra">
+          <button type="button" class="link" id="forgotBtn">نسيت كلمة المرور؟</button>
+        </div>
+
+        <button class="submit" id="submitBtn" type="submit">
+          <span class="spinner" id="submitSpinner" aria-hidden="true"></span>
+          <span id="submitLabel">دخول</span>
+        </button>
+      </form>
+
+      <div class="msg" id="msg" role="status" aria-live="polite"></div>
     </section>
 
     <section class="leaf-hero">
       <p class="hero-eyebrow">The Bestiary Trial</p>
       <h2 class="hero-title">اتنين من نفس النوع بيتحدوا ويطلعوا وحش أقوى</h2>
 
-      <div class="merge">
+      <div class="merge" aria-hidden="true">
         <div class="token a">
           <svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.7-4 4 1 5.5L12 15.8 7 18.2l1-5.5-4-4 5.5-.7z"/></svg>
         </div>
@@ -401,134 +569,321 @@
 
       <p class="hero-desc">كل مستوى وحش جديد، لحد ما توصل للمستوى 11 وتتحرر اللوحة منه. الحل الذكي اللي جوّه بيحسبلك أفضل حركة في كل خطوة.</p>
     </section>
-  </div>
+  </main>
 
   <script src="./supabase-config.js"></script>
   <script>
-    let mode = "login"; // or "signup"
-    const tabLogin = document.getElementById("tabLogin");
-    const tabSignup = document.getElementById("tabSignup");
-    const submitBtn = document.getElementById("submitBtn");
-    const submitLabel = document.getElementById("submitLabel");
-    const msg = document.getElementById("msg");
-    const passwordInput = document.getElementById("password");
-    const togglePassword = document.getElementById("togglePassword");
-    const greeting = document.getElementById("greeting");
+    "use strict";
+
+    const $ = (id) => document.getElementById(id);
+
+    const els = {
+      book: $("book"), form: $("authForm"),
+      tabLogin: $("tabLogin"), tabSignup: $("tabSignup"), indicator: $("tabIndicator"),
+      submitBtn: $("submitBtn"), submitLabel: $("submitLabel"),
+      msg: $("msg"), email: $("email"), password: $("password"),
+      emailWrap: $("emailWrap"), passwordWrap: $("passwordWrap"),
+      togglePassword: $("togglePassword"), greeting: $("greeting"),
+      strength: $("strength"), strengthText: $("strengthText"),
+      bars: document.querySelectorAll(".bars i"),
+      forgotBtn: $("forgotBtn"),
+    };
+
+    let mode = "login";
+    let busy = false;
+
+    /* ===================== ui helpers ===================== */
+
+    function showMsg(text, kind = "") {
+      els.msg.textContent = "";
+      // force the entrance animation to replay even for an identical message
+      void els.msg.offsetWidth;
+      els.msg.className = "msg" + (kind ? " " + kind : "");
+      els.msg.textContent = text;
+    }
+
+    function shake() {
+      els.book.classList.remove("shake");
+      void els.book.offsetWidth;
+      els.book.classList.add("shake");
+    }
+
+    function markInvalid(wrap) {
+      wrap.classList.add("invalid");
+      wrap.querySelector("input").addEventListener(
+        "input", () => wrap.classList.remove("invalid"), { once: true }
+      );
+    }
+
+    function fail(text, wrap) {
+      showMsg(text, "error");
+      shake();
+      if (wrap) { markInvalid(wrap); wrap.querySelector("input").focus(); }
+    }
 
     function setMode(m) {
+      if (busy) return;
       mode = m;
-      tabLogin.classList.toggle("active", m === "login");
-      tabSignup.classList.toggle("active", m === "signup");
-      submitLabel.textContent = m === "login" ? "دخول" : "إنشاء الحساب";
-      msg.textContent = "";
-      msg.className = "msg";
+      const isLogin = m === "login";
+      els.tabLogin.setAttribute("aria-selected", String(isLogin));
+      els.tabSignup.setAttribute("aria-selected", String(!isLogin));
+      els.indicator.dataset.mode = m;
+      els.submitLabel.textContent = isLogin ? "دخول" : "إنشاء الحساب";
+      // correct autocomplete hint matters: it stops password managers from
+      // saving the wrong credential and lets them offer a generated password
+      els.password.setAttribute("autocomplete", isLogin ? "current-password" : "new-password");
+      els.strength.classList.toggle("show", !isLogin);
+      els.strength.setAttribute("aria-hidden", String(isLogin));
+      els.forgotBtn.style.display = isLogin ? "" : "none";
+      if (!isLogin) updateStrength();
+      showMsg("");
+      els.emailWrap.classList.remove("invalid");
+      els.passwordWrap.classList.remove("invalid");
     }
 
     function setLoading(isLoading, loadingText) {
-      submitBtn.disabled = isLoading;
-      submitBtn.classList.toggle("loading", isLoading);
+      busy = isLoading;
+      els.submitBtn.disabled = isLoading;
+      els.submitBtn.classList.toggle("loading", isLoading);
+      els.submitBtn.setAttribute("aria-busy", String(isLoading));
       if (isLoading) {
-        submitBtn.dataset.prevLabel = submitLabel.textContent;
-        submitLabel.textContent = loadingText;
-      } else if (submitBtn.dataset.prevLabel) {
-        submitLabel.textContent = submitBtn.dataset.prevLabel;
+        els.submitBtn.dataset.prevLabel = els.submitLabel.textContent;
+        els.submitLabel.textContent = loadingText;
+      } else if (els.submitBtn.dataset.prevLabel) {
+        els.submitLabel.textContent = els.submitBtn.dataset.prevLabel;
       }
     }
 
-    function setGreeting() {
-      const hour = new Date().getHours();
-      let text;
-      if (hour < 5) text = "سهرانين لحد دلوقتي؟";
-      else if (hour < 12) text = "صباح الخير";
-      else if (hour < 17) text = "مساء الخير";
-      else if (hour < 21) text = "مساء الفل";
-      else text = "مساء الخير";
-      greeting.textContent = text;
+    /* ===================== greeting ===================== */
+
+    (function setGreeting() {
+      const h = new Date().getHours();
+      els.greeting.textContent =
+        h < 5  ? "سهرانين لحد دلوقتي؟" :
+        h < 12 ? "صباح الخير" :
+        h < 17 ? "مساء الخير" :
+        h < 21 ? "مساء الفل" : "مساء الخير";
+    })();
+
+    /* ===================== password ===================== */
+
+    els.togglePassword.addEventListener("click", () => {
+      const nowVisible = els.password.type === "password";
+      els.password.type = nowVisible ? "text" : "password";
+      els.togglePassword.setAttribute("aria-pressed", String(nowVisible));
+      els.togglePassword.setAttribute("aria-label", nowVisible ? "إخفاء كلمة المرور" : "إظهار كلمة المرور");
+      els.password.focus();
+    });
+
+    const STRENGTH = [
+      { text: "ضعيفة جداً", color: "#ff6b6b" },
+      { text: "ضعيفة",      color: "#ff9a5a" },
+      { text: "متوسطة",     color: "#e8c07d" },
+      { text: "قوية",       color: "#8fd9ac" },
+    ];
+
+    function scorePassword(v) {
+      if (!v) return -1;
+      let s = 0;
+      if (v.length >= 8) s++;
+      if (v.length >= 12) s++;
+      if (/[a-z]/.test(v) && /[A-Z]/.test(v)) s++;
+      if (/\d/.test(v)) s++;
+      if (/[^A-Za-z0-9]/.test(v)) s++;
+      return Math.min(3, Math.max(0, s - 1));
     }
-    setGreeting();
 
-    togglePassword.onclick = () => {
-      const showing = passwordInput.type === "text";
-      passwordInput.type = showing ? "password" : "text";
-      togglePassword.textContent = showing ? "👁" : "🙈";
-      togglePassword.setAttribute("aria-label", showing ? "إظهار كلمة المرور" : "إخفاء كلمة المرور");
-    };
+    function updateStrength() {
+      const v = els.password.value;
+      const score = scorePassword(v);
+      els.bars.forEach((bar, i) => {
+        bar.style.background = (score >= 0 && i <= score)
+          ? STRENGTH[score].color
+          : "rgba(232, 241, 245, 0.14)";
+      });
+      els.strengthText.textContent = score < 0
+        ? "اكتب 8 حروف على الأقل، وخلّي فيها أرقام ورموز."
+        : "قوة كلمة المرور: " + STRENGTH[score].text;
+    }
 
-    tabLogin.onclick = () => setMode("login");
-    tabSignup.onclick = () => setMode("signup");
+    els.password.addEventListener("input", () => { if (mode === "signup") updateStrength(); });
 
-    async function checkExistingSession() {
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (session) await routeAfterLogin(session);
+    /* ===================== tabs ===================== */
+
+    els.tabLogin.addEventListener("click", () => setMode("login"));
+    els.tabSignup.addEventListener("click", () => setMode("signup"));
+
+    // arrow-key navigation between tabs, as expected from a real tablist
+    [els.tabLogin, els.tabSignup].forEach((tab) => {
+      tab.addEventListener("keydown", (e) => {
+        if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+        e.preventDefault();
+        const next = mode === "login" ? els.tabSignup : els.tabLogin;
+        setMode(mode === "login" ? "signup" : "login");
+        next.focus();
+      });
+    });
+
+    /* ===================== validation ===================== */
+
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    function validate(email, password) {
+      if (!email) return { ok: false, text: "اكتب الإيميل الأول", wrap: els.emailWrap };
+      if (!EMAIL_RE.test(email)) return { ok: false, text: "الإيميل ده مش شكله صح", wrap: els.emailWrap };
+      if (!password) return { ok: false, text: "اكتب كلمة المرور", wrap: els.passwordWrap };
+      if (mode === "signup" && password.length < 8) {
+        return { ok: false, text: "كلمة المرور لازم تكون 8 حروف على الأقل", wrap: els.passwordWrap };
+      }
+      return { ok: true };
+    }
+
+    /* ===================== auth ===================== */
+
+    // مهم: التحقق ده كله في المتصفح. الحماية الحقيقية لازم تكون Row Level
+    // Security على جدول subscriptions في Supabase، بحيث المستخدم يقدر يقرأ
+    // صفّه هو بس، ومايقدرش يعمل update على active أو expires_at نهائياً.
+    function isSubscriptionValid(sub) {
+      if (!sub || !sub.active) return false;
+      if (sub.expires_at && new Date(sub.expires_at).getTime() < Date.now()) return false;
+      return true;
     }
 
     async function routeAfterLogin(session) {
       const email = session.user.email;
-      if (ADMIN_EMAILS.includes(email)) {
+
+      if (typeof ADMIN_EMAILS !== "undefined" && ADMIN_EMAILS.includes(email)) {
+        showMsg("أهلاً بيك يا أدمن، بنحوّلك...", "ok");
         window.location.href = "./admin.html";
         return;
       }
-      const { data: sub } = await supabaseClient
+
+      const { data: sub, error } = await supabaseClient
         .from("subscriptions")
-        .select("active")
+        .select("active, expires_at")
         .eq("id", session.user.id)
         .maybeSingle();
 
-      if (sub && sub.active) {
-        window.location.href = "./index.html";
-      } else {
-        msg.className = "msg wait";
-        msg.textContent = "حسابك لسه متفعّلش. استنى تفعيل الأدمن للاشتراك.";
+      if (error) {
+        showMsg("مش قادرين نتأكد من الاشتراك دلوقتي. جرّب تاني بعد شوية.", "error");
         await supabaseClient.auth.signOut();
-      }
-    }
-
-    submitBtn.onclick = async () => {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      msg.className = "msg";
-      msg.textContent = "";
-
-      if (!email || !password) {
-        msg.className = "msg error";
-        msg.textContent = "من فضلك اكتب الإيميل وكلمة المرور";
         return;
       }
 
+      if (isSubscriptionValid(sub)) {
+        showMsg("تمام، بنفتحلك المحرّك...", "ok");
+        window.location.href = "./index.html";
+        return;
+      }
+
+      // النوع ده من الرسايل بيفرق: المستخدم يعرف هو منتهي ولا لسه متفعّلش
+      const expired = sub && sub.active && sub.expires_at;
+      showMsg(
+        expired
+          ? "اشتراكك انتهى. كلّم الأدمن عشان يجدّدهولك."
+          : "حسابك لسه متفعّلش. استنى تفعيل الأدمن للاشتراك.",
+        "wait"
+      );
+      await supabaseClient.auth.signOut();
+    }
+
+    function friendlyAuthError(error, forMode) {
+      const m = (error && error.message ? error.message : "").toLowerCase();
+      if (m.includes("invalid login")) return "الإيميل أو كلمة المرور غلط";
+      if (m.includes("email not confirmed")) return "لازم تأكّد الإيميل بتاعك الأول من الرسالة اللي وصلتك";
+      if (m.includes("already registered") || m.includes("already been registered")) {
+        return "الإيميل ده متسجّل قبل كده. جرّب تسجّل دخول.";
+      }
+      if (m.includes("rate limit") || m.includes("too many")) return "محاولات كتير. استنى دقيقة وجرّب تاني.";
+      if (m.includes("password")) return "كلمة المرور مش مطابقة للشروط";
+      if (m.includes("fetch") || m.includes("network")) return "مفيش اتصال بالنت. اتأكد من الشبكة وجرّب تاني.";
+      return forMode === "login" ? "مش قادرين نسجّل دخولك دلوقتي. جرّب تاني." : "حصل خطأ أثناء إنشاء الحساب. جرّب تاني.";
+    }
+
+    els.form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (busy) return;
+
+      const email = els.email.value.trim();
+      const password = els.password.value;
+      showMsg("");
+
+      const check = validate(email, password);
+      if (!check.ok) { fail(check.text, check.wrap); return; }
+
       setLoading(true, mode === "login" ? "بيتم الدخول..." : "بيتم الإنشاء...");
 
-      if (mode === "login") {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) {
-          setLoading(false);
-          msg.className = "msg error";
-          msg.textContent = "بيانات الدخول غلط أو الحساب غير موجود";
-          return;
-        }
-        await routeAfterLogin(data.session);
-        setLoading(false);
-      } else {
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
-        if (error) {
-          setLoading(false);
-          msg.className = "msg error";
-          msg.textContent = "حصل خطأ: " + error.message;
-          return;
-        }
-        if (data.user) {
-          await supabaseClient.from("subscriptions").insert({
-            id: data.user.id,
-            email: email,
-            active: false
-          });
-        }
-        setLoading(false);
-        msg.className = "msg wait";
-        msg.textContent = "تم إنشاء الحساب. استنى تفعيل الأدمن للاشتراك عشان تقدر تدخل.";
-      }
-    };
+      try {
+        if (mode === "login") {
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+          if (error) { fail(friendlyAuthError(error, "login")); return; }
+          await routeAfterLogin(data.session);
+        } else {
+          const { data, error } = await supabaseClient.auth.signUp({ email, password });
+          if (error) { fail(friendlyAuthError(error, "signup")); return; }
 
-    checkExistingSession();
+          // بنسيب insert الصف للـ trigger في القاعدة لو موجود؛ لو مش موجود
+          // بنحاول نعمله هنا، وأي خطأ (زي إن الصف موجود أصلاً) بنتجاهله
+          if (data.user) {
+            const { error: insErr } = await supabaseClient
+              .from("subscriptions")
+              .insert({ id: data.user.id, email, active: false });
+            if (insErr && !String(insErr.message).toLowerCase().includes("duplicate")) {
+              console.warn("subscriptions insert:", insErr.message);
+            }
+          }
+
+          els.form.reset();
+          updateStrength();
+          showMsg("تم إنشاء الحساب. استنى تفعيل الأدمن للاشتراك عشان تقدر تدخل.", "wait");
+        }
+      } catch (err) {
+        console.error(err);
+        fail("حصل خطأ غير متوقع. اتأكد من الاتصال بالنت وجرّب تاني.");
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    /* ===================== forgot password ===================== */
+
+    els.forgotBtn.addEventListener("click", async () => {
+      const email = els.email.value.trim();
+      if (!EMAIL_RE.test(email)) {
+        fail("اكتب إيميلك في الخانة الأول، وبعدين اضغط نسيت كلمة المرور", els.emailWrap);
+        return;
+      }
+      els.forgotBtn.disabled = true;
+      try {
+        await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: new URL("./login.html", window.location.href).href,
+        });
+        // بنرد نفس الرسالة سواء الإيميل موجود أو لأ، عشان محدش يستخدم
+        // الزرار ده عشان يعرف مين مسجّل عندنا
+        showMsg("لو الإيميل ده مسجّل عندنا، هتوصلك رسالة لإعادة التعيين.", "ok");
+      } catch (err) {
+        console.error(err);
+        showMsg("مش قادرين نبعت الرسالة دلوقتي. جرّب تاني بعد شوية.", "error");
+      } finally {
+        els.forgotBtn.disabled = false;
+      }
+    });
+
+    /* ===================== existing session ===================== */
+
+    (async function checkExistingSession() {
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+          setLoading(true, "بنراجع جلستك...");
+          await routeAfterLogin(session);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error(err);
+        setLoading(false);
+      }
+    })();
   </script>
 </body>
 

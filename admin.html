@@ -3,38 +3,51 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1B262C" />
+  <meta name="robots" content="noindex, nofollow" />
   <title>Axiom — لوحة الأدمن</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
-  <style type="text/css">@font-face {font-family:'Tajawal';font-style:normal;font-weight:400;src:url(/cf-fonts/s/tajawal/5.2.7/arabic/400/normal.woff2);unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:400;src:url(/cf-fonts/s/tajawal/5.2.7/latin/400/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:500;src:url(/cf-fonts/s/tajawal/5.2.7/latin/500/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:500;src:url(/cf-fonts/s/tajawal/5.2.7/arabic/500/normal.woff2);unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:700;src:url(/cf-fonts/s/tajawal/5.2.7/arabic/700/normal.woff2);unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:700;src:url(/cf-fonts/s/tajawal/5.2.7/latin/700/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:800;src:url(/cf-fonts/s/tajawal/5.2.7/latin/800/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Tajawal';font-style:normal;font-weight:800;src:url(/cf-fonts/s/tajawal/5.2.7/arabic/800/normal.woff2);unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;font-display:swap;}</style>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Tajawal:wght@400;500;700;800&display=swap"
+        rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --void: #1B262C;
       --deep: #0F4C75;
       --parchment: #E8F1F5;
+      --dim: rgba(232, 241, 245, 0.6);
+      --dimmer: rgba(232, 241, 245, 0.4);
       --gold: #3282B8;
       --border: rgba(50, 130, 184, 0.35);
+      --border-soft: rgba(50, 130, 184, 0.18);
       --good: #3ddc84;
       --bad: #ff6b6b;
       --warn: #ffc94d;
+      --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: 'Tajawal', sans-serif;
+      font-family: 'Tajawal', system-ui, sans-serif;
       color: var(--parchment);
       background: linear-gradient(180deg, var(--void) 0%, #16323d 55%, var(--void) 100%);
-      padding: 24px;
+      background-attachment: fixed;
+      padding: clamp(14px, 3vw, 26px);
     }
 
     .wrap { max-width: 1100px; margin: 0 auto; }
 
+    :where(button, input, select, a):focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    /* ===================== header ===================== */
     header {
       display: flex;
       justify-content: space-between;
@@ -42,10 +55,15 @@
       flex-wrap: wrap;
       gap: 12px;
       margin-bottom: 20px;
+      animation: rise 0.5s var(--ease) both;
     }
 
     h1 { margin: 0; font-family: 'Cinzel', 'Tajawal', sans-serif; font-weight: 700; font-size: 22px; }
     h1 span { color: var(--gold); }
+
+    .who { font-size: 12.5px; color: var(--dimmer); margin-top: 3px; }
+
+    .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
     .btn {
       padding: 9px 16px;
@@ -56,41 +74,76 @@
       cursor: pointer;
       font-family: inherit;
       font-size: 14px;
-      transition: background .15s ease;
+      transition: background 0.18s ease, transform 0.12s ease, opacity 0.2s ease;
     }
-    .btn:hover { background: rgba(50, 130, 184, 0.35); }
+    .btn:hover:not(:disabled) { background: rgba(50, 130, 184, 0.35); }
+    .btn:active:not(:disabled) { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
     .btn.primary { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 700; }
-    .btn.primary:hover { background: #3f96d1; }
-    .btn.danger { background: rgba(255,107,107,.15); border-color: rgba(255,107,107,.4); color: var(--bad); }
+    .btn.primary:hover:not(:disabled) { background: #3f96d1; }
+    .btn.danger { background: rgba(255, 107, 107, 0.15); border-color: rgba(255, 107, 107, 0.4); color: var(--bad); }
+    .btn.danger:hover:not(:disabled) { background: rgba(255, 107, 107, 0.28); }
 
-    /* ===== stats cards ===== */
+    #refreshBtn.spinning svg { animation: spin 0.8s linear infinite; }
+    .btn svg { width: 14px; height: 14px; vertical-align: -2px; margin-inline-start: 5px; fill: none; stroke: currentColor; stroke-width: 2; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===================== stats ===================== */
     .stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
       gap: 14px;
       margin-bottom: 20px;
     }
 
     .stat {
+      position: relative;
       background: linear-gradient(180deg, rgba(15, 76, 117, 0.55), rgba(27, 38, 44, 0.85));
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 16px 18px;
+      overflow: hidden;
+      transition: transform 0.2s var(--ease), border-color 0.2s ease;
+      animation: rise 0.55s var(--ease) both;
     }
+    .stat:nth-child(1) { animation-delay: 0.05s; }
+    .stat:nth-child(2) { animation-delay: 0.10s; }
+    .stat:nth-child(3) { animation-delay: 0.15s; }
+    .stat:nth-child(4) { animation-delay: 0.20s; }
+    .stat:hover { transform: translateY(-2px); border-color: var(--gold); }
 
-    .stat .num { font-size: 28px; font-weight: 800; line-height: 1.2; }
-    .stat .lbl { font-size: 13px; color: rgba(232,241,245,.6); margin-top: 2px; }
+    .stat::after {
+      content: '';
+      position: absolute;
+      inset-inline-start: 0;
+      top: 0; bottom: 0;
+      width: 3px;
+      background: var(--gold);
+      opacity: 0.5;
+    }
+    .stat.good::after { background: var(--good); }
+    .stat.warn::after { background: var(--warn); }
+    .stat.bad::after  { background: var(--bad); }
+
+    .stat .num { font-size: 28px; font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums; }
+    .stat .lbl { font-size: 13px; color: var(--dim); margin-top: 2px; }
     .stat.good .num { color: var(--good); }
-    .stat.bad .num { color: var(--bad); }
+    .stat.bad  .num { color: var(--bad); }
     .stat.warn .num { color: var(--warn); }
 
-    /* ===== panel + toolbar ===== */
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ===================== panel ===================== */
     .panel {
       background: linear-gradient(180deg, rgba(15, 76, 117, 0.94), rgba(27, 38, 44, 0.94));
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 20px;
       margin-bottom: 20px;
+      animation: rise 0.55s var(--ease) 0.22s both;
     }
 
     .toolbar {
@@ -101,13 +154,19 @@
       margin-bottom: 16px;
     }
 
-    .toolbar input[type="search"] {
-      flex: 1;
-      min-width: 200px;
-      margin: 0;
+    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap svg {
+      position: absolute;
+      inset-inline-start: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 15px; height: 15px;
+      stroke: var(--dimmer); fill: none; stroke-width: 2;
+      pointer-events: none;
     }
+    .search-wrap input { padding-inline-start: 36px; margin: 0; }
 
-    select {
+    input, select {
       padding: 10px 12px;
       border-radius: 10px;
       border: 1px solid var(--border);
@@ -115,29 +174,65 @@
       color: var(--parchment);
       font-family: inherit;
       font-size: 14px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
+    input { width: 100%; margin-bottom: 10px; }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(50, 130, 184, 0.18);
+    }
+    input::placeholder { color: var(--dimmer); }
     select option { background: var(--void); }
 
-    /* ===== table ===== */
-    .table-scroll { overflow-x: auto; }
+    .count { font-size: 13px; color: var(--dimmer); white-space: nowrap; }
+
+    /* ===================== table ===================== */
+    .table-scroll { overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
 
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
-      min-width: 760px;
+      min-width: 780px;
     }
 
     th, td {
       padding: 11px 8px;
       text-align: right;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--border-soft);
       white-space: nowrap;
     }
 
-    th { color: rgba(232, 241, 245, 0.6); font-weight: 600; font-size: 13px; }
+    th {
+      color: var(--dim);
+      font-weight: 600;
+      font-size: 13px;
+      position: sticky;
+      top: 0;
+      background: #12384e;
+      z-index: 1;
+    }
+    th.sortable { cursor: pointer; user-select: none; transition: color 0.15s ease; }
+    th.sortable:hover { color: var(--parchment); }
+    th .caret { opacity: 0; font-size: 10px; transition: opacity 0.2s ease, transform 0.2s ease; display: inline-block; }
+    th[aria-sort] .caret { opacity: 1; }
+    th[aria-sort="ascending"] .caret { transform: rotate(180deg); }
+
+    tbody tr { transition: background 0.15s ease; animation: rowIn 0.35s var(--ease) both; }
     tbody tr:hover { background: rgba(50, 130, 184, 0.08); }
     tbody tr:last-child td { border-bottom: none; }
+    tbody tr.removing { animation: rowOut 0.3s var(--ease) forwards; }
+
+    @keyframes rowIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: none; }
+    }
+    @keyframes rowOut {
+      to { opacity: 0; transform: translateX(-20px); }
+    }
+
+    td.email { white-space: normal; word-break: break-all; min-width: 180px; }
 
     .badge {
       padding: 3px 10px;
@@ -146,16 +241,15 @@
       font-weight: 700;
       display: inline-block;
     }
-
-    .badge.active { background: rgba(61, 220, 132, 0.15); color: var(--good); }
+    .badge.active   { background: rgba(61, 220, 132, 0.15); color: var(--good); }
     .badge.inactive { background: rgba(255, 107, 107, 0.15); color: var(--bad); }
-    .badge.expired { background: rgba(255, 201, 77, 0.15); color: var(--warn); }
+    .badge.expired  { background: rgba(255, 201, 77, 0.15); color: var(--warn); }
 
-    .days { font-weight: 700; }
-    .days.ok { color: var(--good); }
+    .days { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .days.ok   { color: var(--good); }
     .days.soon { color: var(--warn); }
     .days.over { color: var(--bad); }
-    .days.none { color: rgba(232,241,245,.4); font-weight: 400; }
+    .days.none { color: var(--dimmer); font-weight: 400; }
 
     .actions { display: flex; gap: 6px; justify-content: flex-start; }
 
@@ -168,40 +262,54 @@
       font-size: 12.5px;
       font-weight: 700;
       color: #111;
+      transition: filter 0.15s ease, transform 0.12s ease, opacity 0.2s ease;
     }
-
-    button.mini.on { background: var(--good); }
+    button.mini:hover:not(:disabled) { filter: brightness(1.12); }
+    button.mini:active:not(:disabled) { transform: scale(0.95); }
+    button.mini:disabled { opacity: 0.5; cursor: wait; }
+    button.mini.on  { background: var(--good); }
     button.mini.off { background: var(--bad); color: #fff; }
     button.mini.ext { background: var(--gold); color: #fff; }
-    button.mini.del { background: rgba(255,107,107,.18); color: var(--bad); border: 1px solid rgba(255,107,107,.4); }
+    button.mini.del { background: rgba(255, 107, 107, 0.18); color: var(--bad); border: 1px solid rgba(255, 107, 107, 0.4); }
 
-    /* ===== gate ===== */
+    /* skeleton loading */
+    .sk {
+      display: block;
+      height: 12px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, rgba(232,241,245,.07) 25%, rgba(232,241,245,.16) 50%, rgba(232,241,245,.07) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.3s linear infinite;
+    }
+    @keyframes shimmer {
+      from { background-position: 200% 0; }
+      to   { background-position: -200% 0; }
+    }
+
+    .empty-state { text-align: center; padding: 34px 10px; color: var(--dimmer); font-size: 14px; }
+
+    /* ===================== gate ===================== */
     #gate {
       max-width: 400px;
-      margin: 80px auto;
+      margin: clamp(40px, 12vh, 90px) auto;
       text-align: center;
       background: linear-gradient(180deg, rgba(15, 76, 117, 0.94), rgba(27, 38, 44, 0.94));
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 32px 26px;
+      animation: rise 0.5s var(--ease) both;
+    }
+    #gate.shake { animation: shake 0.42s ease; }
+    @keyframes shake {
+      10%, 90% { transform: translateX(-2px); }
+      20%, 80% { transform: translateX(4px); }
+      30%, 50%, 70% { transform: translateX(-6px); }
+      40%, 60% { transform: translateX(6px); }
     }
 
-    #gate h1 { font-size: 22px; margin-bottom: 18px; }
-
-    input {
-      width: 100%;
-      padding: 11px 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: rgba(0, 0, 0, 0.25);
-      color: var(--parchment);
-      font-size: 15px;
-      font-family: inherit;
-      margin-bottom: 10px;
-    }
-    input:focus { outline: none; border-color: var(--gold); }
-
-    #gate button {
+    #gate h1 { font-size: 22px; margin-bottom: 6px; }
+    #gate .hint { font-size: 13px; color: var(--dim); margin: 0 0 18px; }
+    #gate button[type="submit"] {
       width: 100%;
       padding: 12px;
       border-radius: 10px;
@@ -212,23 +320,29 @@
       cursor: pointer;
       font-family: inherit;
       font-size: 15px;
+      transition: background 0.18s ease, opacity 0.2s ease;
     }
+    #gate button[type="submit"]:disabled { opacity: 0.6; cursor: wait; }
 
-    .msg { font-size: 13px; margin-top: 10px; color: var(--bad); }
-    .muted { color: rgba(232,241,245,0.55); font-size: 13px; }
+    .msg { font-size: 13px; margin-top: 10px; color: var(--bad); min-height: 18px; }
+    .muted { color: rgba(232, 241, 245, 0.55); font-size: 13px; }
 
-    /* ===== modal ===== */
+    /* ===================== modal ===================== */
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.6);
-      display: none;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(3px);
+      display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
       z-index: 50;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s;
     }
-    .overlay.show { display: flex; }
+    .overlay.show { opacity: 1; visibility: visible; }
 
     .modal {
       width: 100%;
@@ -237,55 +351,164 @@
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+      transform: translateY(14px) scale(0.97);
+      opacity: 0;
+      transition: transform 0.28s var(--ease), opacity 0.22s ease;
+      max-height: 90vh;
+      overflow-y: auto;
     }
+    .overlay.show .modal { transform: none; opacity: 1; }
 
     .modal h2 { margin: 0 0 6px; font-size: 18px; }
-    .modal .sub { font-size: 13px; color: rgba(232,241,245,.55); margin-bottom: 16px; }
+    .modal .sub { font-size: 13px; color: var(--dim); margin-bottom: 16px; word-break: break-all; }
 
-    .quick {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
+    .quick { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
     .quick button {
       flex: 1;
+      min-width: 64px;
       padding: 8px 0;
       border-radius: 8px;
       border: 1px solid var(--border);
-      background: rgba(50,130,184,.15);
+      background: rgba(50, 130, 184, 0.15);
       color: var(--parchment);
       font-family: inherit;
       font-size: 13px;
       cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
     }
-    .quick button:hover { background: rgba(50,130,184,.35); }
+    .quick button:hover { background: rgba(50, 130, 184, 0.35); }
+    .quick button.sel { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 700; }
+
+    .preview { font-size: 12.5px; color: var(--dim); margin: -2px 0 12px; min-height: 17px; }
+    .preview b { color: var(--good); font-weight: 700; }
 
     .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
     .modal-actions .btn { flex: 1; }
 
-    label { display: block; font-size: 13px; color: rgba(232,241,245,.6); margin-bottom: 6px; }
+    label { display: block; font-size: 13px; color: var(--dim); margin-bottom: 6px; }
+
+    /* ===================== toasts ===================== */
+    #toasts {
+      position: fixed;
+      bottom: 20px;
+      inset-inline-start: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: rgba(18, 40, 52, 0.97);
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
+      font-size: 13.5px;
+      max-width: 340px;
+      animation: toastIn 0.35s var(--ease) both;
+    }
+    .toast.out { animation: toastOut 0.3s var(--ease) forwards; }
+    .toast::before {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--gold);
+    }
+    .toast.ok::before  { background: var(--good); }
+    .toast.err::before { background: var(--bad); }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-24px); }
+      to   { opacity: 1; transform: none; }
+    }
+    @keyframes toastOut {
+      to { opacity: 0; transform: translateX(-24px); }
+    }
+
+    /* ===================== mobile: table becomes cards ===================== */
+    @media (max-width: 720px) {
+      table, thead, tbody, tr, td { display: block; width: 100%; }
+      thead { display: none; }
+      table { min-width: 0; }
+
+      tbody tr {
+        border: 1px solid var(--border-soft);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        background: rgba(0, 0, 0, 0.16);
+      }
+      tbody tr:last-child { margin-bottom: 0; }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 0;
+        border: none;
+        white-space: normal;
+      }
+      td::before {
+        content: attr(data-label);
+        color: var(--dim);
+        font-size: 12.5px;
+        flex-shrink: 0;
+      }
+      td.email { font-weight: 700; }
+      td.actions-cell { padding-top: 10px; }
+      td.actions-cell::before { display: none; }
+      .actions { width: 100%; }
+      .actions button { flex: 1; }
+      #toasts { inset-inline: 14px; bottom: 14px; }
+      .toast { max-width: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <!-- ===== بوابة الدخول ===== -->
+  <!-- ===================== بوابة الدخول ===================== -->
   <div id="gate">
     <h1>دخول الأدمن</h1>
-    <input id="gEmail" type="email" placeholder="إيميل الأدمن" />
-    <input id="gPassword" type="password" placeholder="كلمة المرور" />
-    <button id="gBtn">دخول</button>
-    <div class="msg" id="gMsg"></div>
+    <p class="hint">الصفحة دي مخصّصة لإدارة الاشتراكات.</p>
+    <form id="gateForm" novalidate>
+      <input id="gEmail" type="email" placeholder="إيميل الأدمن" autocomplete="email" required />
+      <input id="gPassword" type="password" placeholder="كلمة المرور" autocomplete="current-password" required />
+      <button type="submit" id="gBtn">دخول</button>
+    </form>
+    <div class="msg" id="gMsg" role="alert" aria-live="assertive"></div>
   </div>
 
-  <!-- ===== لوحة التحكم ===== -->
-  <div class="wrap" id="dashboard" style="display:none;">
+  <!-- ===================== لوحة التحكم ===================== -->
+  <div class="wrap" id="dashboard" hidden>
     <header>
-      <h1>لوحة تحكم <span>Axiom</span></h1>
-      <div style="display:flex; gap:10px;">
+      <div>
+        <h1>لوحة تحكم <span>Axiom</span></h1>
+        <div class="who" id="whoami"></div>
+      </div>
+      <div class="header-actions">
         <button class="btn primary" id="addBtn">+ إضافة مشترك</button>
-        <button class="btn" id="refreshBtn">تحديث</button>
-        <button class="btn" id="logoutBtn">تسجيل خروج</button>
+        <button class="btn" id="exportBtn">تصدير CSV</button>
+        <button class="btn" id="refreshBtn">
+          تحديث
+          <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v6h-6"/></svg>
+        </button>
+        <button class="btn danger" id="logoutBtn">خروج</button>
       </div>
     </header>
 
@@ -298,144 +521,152 @@
 
     <div class="panel">
       <div class="toolbar">
-        <input id="search" type="search" placeholder="ابحث بالإيميل..." />
-        <select id="filter">
-          <option value="all">الكل</option>
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="search" type="search" placeholder="ابحث بالإيميل..." aria-label="بحث بالإيميل" />
+        </div>
+        <select id="filter" aria-label="فلترة بالحالة">
+          <option value="all">كل الحالات</option>
           <option value="active">مفعّل</option>
           <option value="expired">منتهي</option>
           <option value="inactive">موقوف</option>
         </select>
+        <span class="count" id="count"></span>
       </div>
 
       <div class="table-scroll">
         <table>
           <thead>
             <tr>
-              <th>الإيميل</th>
+              <th class="sortable" data-sort="email">الإيميل <span class="caret">▼</span></th>
               <th>الحالة</th>
               <th>الباقة</th>
-              <th>تاريخ التسجيل</th>
-              <th>تاريخ الانتهاء</th>
-              <th>الأيام المتبقية</th>
+              <th class="sortable" data-sort="created_at">تاريخ التسجيل <span class="caret">▼</span></th>
+              <th class="sortable" data-sort="expires_at">تاريخ الانتهاء <span class="caret">▼</span></th>
+              <th class="sortable" data-sort="days">الأيام المتبقية <span class="caret">▼</span></th>
               <th>إجراءات</th>
             </tr>
           </thead>
           <tbody id="rows"></tbody>
         </table>
       </div>
-      <p class="muted" id="empty" style="display:none;">مفيش مستخدمين مسجّلين لسه.</p>
+      <div class="empty-state" id="empty" hidden></div>
     </div>
   </div>
 
-  <!-- ===== مودال تمديد الاشتراك ===== -->
-  <div class="overlay" id="extOverlay">
+  <!-- ===================== مودال التمديد ===================== -->
+  <div class="overlay" id="extOverlay" role="dialog" aria-modal="true" aria-labelledby="extTitle">
     <div class="modal">
-      <h2>تمديد الاشتراك</h2>
+      <h2 id="extTitle">تمديد الاشتراك</h2>
       <div class="sub" id="extEmail"></div>
-      <label>عدد الأيام</label>
-      <div class="quick">
-        <button data-d="7">7 أيام</button>
-        <button data-d="30">30 يوم</button>
-        <button data-d="90">90 يوم</button>
-        <button data-d="365">سنة</button>
+      <label for="extDays">عدد الأيام</label>
+      <div class="quick" id="extQuick">
+        <button type="button" data-d="7">7 أيام</button>
+        <button type="button" data-d="30">30 يوم</button>
+        <button type="button" data-d="90">90 يوم</button>
+        <button type="button" data-d="365">سنة</button>
       </div>
-      <input id="extDays" type="number" min="1" placeholder="أو اكتب عدد الأيام يدوي" />
+      <input id="extDays" type="number" min="1" max="3650" placeholder="أو اكتب عدد الأيام يدوي" />
+      <div class="preview" id="extPreview"></div>
       <div class="modal-actions">
         <button class="btn primary" id="extConfirm">تمديد</button>
         <button class="btn" id="extCancel">إلغاء</button>
       </div>
-      <div class="msg" id="extMsg"></div>
+      <div class="msg" id="extMsg" role="alert"></div>
     </div>
   </div>
 
-  <!-- ===== مودال إضافة مشترك ===== -->
-  <div class="overlay" id="addOverlay">
+  <!-- ===================== مودال الإضافة ===================== -->
+  <div class="overlay" id="addOverlay" role="dialog" aria-modal="true" aria-labelledby="addTitle">
     <div class="modal">
-      <h2>إضافة مشترك جديد</h2>
+      <h2 id="addTitle">إضافة مشترك جديد</h2>
       <div class="sub">هيتضاف في جدول الاشتراكات مباشرة.</div>
-      <label>الإيميل</label>
-      <input id="addEmail" type="email" placeholder="user@example.com" />
-      <label>مدة الاشتراك بالأيام</label>
-      <input id="addDays" type="number" min="1" value="30" />
-      <label>الباقة</label>
+      <label for="addEmail">الإيميل</label>
+      <input id="addEmail" type="email" placeholder="user@example.com" autocomplete="off" />
+      <label for="addDays">مدة الاشتراك بالأيام</label>
+      <input id="addDays" type="number" min="1" max="3650" value="30" />
+      <label for="addPlan">الباقة</label>
       <select id="addPlan" style="width:100%; margin-bottom:10px;">
         <option value="شهري">شهري</option>
         <option value="ربع سنوي">ربع سنوي</option>
         <option value="سنوي">سنوي</option>
         <option value="تجريبي">تجريبي</option>
       </select>
+      <div class="preview" id="addPreview"></div>
       <div class="modal-actions">
         <button class="btn primary" id="addConfirm">إضافة</button>
         <button class="btn" id="addCancel">إلغاء</button>
       </div>
-      <div class="msg" id="addMsg"></div>
+      <div class="msg" id="addMsg" role="alert"></div>
     </div>
   </div>
 
+  <!-- ===================== مودال التأكيد ===================== -->
+  <div class="overlay" id="confirmOverlay" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal" style="max-width:380px;">
+      <h2 id="confirmTitle">تأكيد</h2>
+      <div class="sub" id="confirmText"></div>
+      <div class="modal-actions">
+        <button class="btn danger" id="confirmYes">تأكيد</button>
+        <button class="btn" id="confirmNo">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toasts" aria-live="polite"></div>
+
   <script src="./supabase-config.js"></script>
   <script>
-    const gate = document.getElementById("gate");
-    const dashboard = document.getElementById("dashboard");
-    const gMsg = document.getElementById("gMsg");
+    "use strict";
 
-    let allRows = [];
-    let extTargetId = null;
-    let extTargetExpiry = null;
+    /* ────────────────────────────────────────────────────────────────
+       تنبيه أمان مهم (لسه قايم من النسخة القديمة):
+       شرط ADMIN_EMAILS.includes بينفّذ في المتصفح بس. أي حد يفتح الـ
+       Console يقدر يتخطاه ويشوف قايمة إيميلات الأدمن. الحماية الحقيقية
+       لازم تكون Row Level Security على جدول subscriptions في Supabase:
+         • المستخدم العادي: SELECT على صفّه هو بس، ومفيش UPDATE خالص.
+         • الأدمن: INSERT/UPDATE/DELETE عن طريق policy بتتحقق من
+           auth.jwt() ->> 'email' أو من custom claim، مش من قايمة
+           في ملف JS.
+       من غير كده أي مستخدم يقدر يفعّل اشتراكه بنفسه مجاناً.
+       ──────────────────────────────────────────────────────────────── */
 
+    const $ = (id) => document.getElementById(id);
     const DAY = 86400000;
 
-    async function boot() {
-      // تنبيه أمان: الشرط ده (ADMIN_EMAILS.includes) بيتنفذ في المتصفح بس،
-      // يعني أي حد فاتح Console يقدر يتخطاه أو يشوف قايمة إيميلات الأدمن.
-      // الحماية الحقيقية لازم تكون على مستوى قاعدة البيانات (Row Level
-      // Security في Supabase) على جدول subscriptions، بحيث فقط إيميلات
-      // الأدمن تقدر تعمل update/delete/insert. من غير كده، أي مستخدم عادي
-      // يقدر يفتح الـ Console ويفعّل اشتراكه بنفسه مجاناً حتى لو الواجهة
-      // دي مقفولة قدامه.
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (session && ADMIN_EMAILS.includes(session.user.email)) {
-        showDashboard();
-      }
+    const gate = $("gate");
+    const dashboard = $("dashboard");
+    const gMsg = $("gMsg");
+    const rowsEl = $("rows");
+    const emptyEl = $("empty");
+
+    let allRows = [];
+    let sortKey = "created_at";
+    let sortDir = "desc";
+    let extTargetId = null;
+    let extTargetExpiry = null;
+    let lastFocused = null;
+
+    /* ===================== utilities ===================== */
+
+    function escapeHtml(str) {
+      return String(str ?? "").replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[ch]));
     }
 
-    document.getElementById("gBtn").onclick = async () => {
-      const email = document.getElementById("gEmail").value.trim();
-      const password = document.getElementById("gPassword").value;
-      gMsg.textContent = "";
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) {
-        gMsg.textContent = "بيانات دخول غلط";
-        return;
-      }
-      if (!ADMIN_EMAILS.includes(data.user.email)) {
-        gMsg.textContent = "الحساب ده مش أدمن";
-        await supabaseClient.auth.signOut();
-        return;
-      }
-      showDashboard();
-    };
-
-    document.getElementById("logoutBtn").onclick = async () => {
-      await supabaseClient.auth.signOut();
-      window.location.href = "./login.html";
-    };
-
-    document.getElementById("refreshBtn").onclick = loadRows;
-
-    let searchDebounce;
-    document.getElementById("search").oninput = () => {
-      clearTimeout(searchDebounce);
-      searchDebounce = setTimeout(render, 200);
-    };
-    document.getElementById("filter").onchange = render;
-
-    async function showDashboard() {
-      gate.style.display = "none";
-      dashboard.style.display = "block";
-      await loadRows();
+    function toast(text, kind = "") {
+      const box = $("toasts");
+      const el = document.createElement("div");
+      el.className = "toast" + (kind ? " " + kind : "");
+      el.textContent = text;
+      box.appendChild(el);
+      setTimeout(() => {
+        el.classList.add("out");
+        el.addEventListener("animationend", () => el.remove(), { once: true });
+      }, 3200);
     }
 
-    /* ===== helpers ===== */
     function statusOf(row) {
       if (!row.active) return "inactive";
       if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) return "expired";
@@ -448,107 +679,292 @@
     }
 
     function fmtDate(d) {
-      return d ? new Date(d).toLocaleDateString("ar-EG") : "—";
+      if (!d) return "—";
+      const date = new Date(d);
+      return isNaN(date) ? "—" : date.toLocaleDateString("ar-EG", { year: "numeric", month: "short", day: "numeric" });
     }
 
-    // الإيميل والباقة بيتخزنوا كنص حر في القاعدة، فلازم نعمل escape ليهم قبل
-    // ما ندخلهم بـ innerHTML عشان نمنع أي HTML/script يتحقن من خلالهم (XSS).
-    function escapeHtml(str) {
-      return String(str ?? "").replace(/[&<>"']/g, ch => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-      }[ch]));
+    // عدّاد بيتحرك للرقم الجديد بدل ما ينطّ فجأة
+    function animateNumber(el, target) {
+      const from = parseInt(el.textContent, 10) || 0;
+      if (from === target) return;
+      const start = performance.now();
+      const dur = 500;
+      function tick(now) {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = Math.round(from + (target - from) * eased);
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
     }
 
-    /* ===== data ===== */
-    async function loadRows() {
-      const rowsEl = document.getElementById("rows");
-      rowsEl.innerHTML = `<tr><td colspan="7" class="muted">بيتحمّل...</td></tr>`;
+    /* ===================== modals ===================== */
 
-      const { data, error } = await supabaseClient
-        .from("subscriptions")
-        .select("id,email,active,created_at,expires_at,plan")
-        .order("created_at", { ascending: false });
+    function openModal(id) {
+      lastFocused = document.activeElement;
+      const ov = $(id);
+      ov.classList.add("show");
+      const first = ov.querySelector("input, select, button");
+      if (first) setTimeout(() => first.focus(), 60);
+    }
 
-      if (error) {
-        rowsEl.innerHTML = `<tr><td colspan="7">حصل خطأ: ${escapeHtml(error.message)}</td></tr>`;
+    function closeModal(id) {
+      $(id).classList.remove("show");
+      if (lastFocused) lastFocused.focus();
+    }
+
+    document.querySelectorAll(".overlay").forEach((ov) => {
+      ov.addEventListener("click", (e) => { if (e.target === ov) closeModal(ov.id); });
+    });
+
+    // ESC بيقفل المودال المفتوح، و Tab بيفضل جوّاه
+    document.addEventListener("keydown", (e) => {
+      const open = document.querySelector(".overlay.show");
+      if (!open) return;
+      if (e.key === "Escape") { closeModal(open.id); return; }
+      if (e.key !== "Tab") return;
+      const f = [...open.querySelectorAll("input, select, button")].filter((el) => !el.disabled);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+
+    let confirmResolve = null;
+    function askConfirm(text) {
+      $("confirmText").textContent = text;
+      openModal("confirmOverlay");
+      return new Promise((resolve) => { confirmResolve = resolve; });
+    }
+    $("confirmYes").onclick = () => { closeModal("confirmOverlay"); confirmResolve?.(true); confirmResolve = null; };
+    $("confirmNo").onclick  = () => { closeModal("confirmOverlay"); confirmResolve?.(false); confirmResolve = null; };
+
+    /* ===================== gate ===================== */
+
+    async function boot() {
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session && ADMIN_EMAILS.includes(session.user.email)) {
+          showDashboard(session.user.email);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    $("gateForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = $("gBtn");
+      const email = $("gEmail").value.trim();
+      const password = $("gPassword").value;
+      gMsg.textContent = "";
+
+      if (!email || !password) {
+        gMsg.textContent = "اكتب الإيميل وكلمة المرور";
+        gate.classList.remove("shake"); void gate.offsetWidth; gate.classList.add("shake");
         return;
       }
 
-      allRows = data || [];
-      render();
+      btn.disabled = true;
+      btn.textContent = "بيتم الدخول...";
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) {
+          gMsg.textContent = "بيانات الدخول غلط";
+          gate.classList.remove("shake"); void gate.offsetWidth; gate.classList.add("shake");
+          return;
+        }
+        if (!ADMIN_EMAILS.includes(data.user.email)) {
+          gMsg.textContent = "الحساب ده مش أدمن";
+          await supabaseClient.auth.signOut();
+          return;
+        }
+        showDashboard(data.user.email);
+      } catch (err) {
+        console.error(err);
+        gMsg.textContent = "مفيش اتصال. جرّب تاني.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "دخول";
+      }
+    });
+
+    async function showDashboard(email) {
+      gate.hidden = true;
+      gate.style.display = "none";
+      dashboard.hidden = false;
+      $("whoami").textContent = email || "";
+      await loadRows();
     }
 
-    function render() {
-      const rowsEl = document.getElementById("rows");
-      const emptyEl = document.getElementById("empty");
-      const q = document.getElementById("search").value.trim().toLowerCase();
-      const f = document.getElementById("filter").value;
+    $("logoutBtn").onclick = async () => {
+      await supabaseClient.auth.signOut();
+      window.location.href = "./login.html";
+    };
 
-      /* stats */
+    /* ===================== data ===================== */
+
+    function skeleton(n = 4) {
+      let html = "";
+      for (let i = 0; i < n; i++) {
+        html += "<tr>" + '<td><span class="sk" style="width:62%"></span></td>'
+              + '<td><span class="sk" style="width:46px"></span></td>'.repeat(2)
+              + '<td><span class="sk" style="width:74px"></span></td>'.repeat(3)
+              + '<td><span class="sk" style="width:120px"></span></td>' + "</tr>";
+      }
+      return html;
+    }
+
+    async function loadRows() {
+      const btn = $("refreshBtn");
+      btn.classList.add("spinning");
+      btn.disabled = true;
+      rowsEl.innerHTML = skeleton();
+      emptyEl.hidden = true;
+
+      try {
+        const { data, error } = await supabaseClient
+          .from("subscriptions")
+          .select("id,email,active,created_at,expires_at,plan")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          rowsEl.innerHTML = `<tr><td colspan="7" class="muted">حصل خطأ: ${escapeHtml(error.message)}</td></tr>`;
+          toast("مش قادرين نحمّل البيانات", "err");
+          return;
+        }
+        allRows = data || [];
+        render();
+      } catch (err) {
+        console.error(err);
+        rowsEl.innerHTML = `<tr><td colspan="7" class="muted">مفيش اتصال بالسيرفر.</td></tr>`;
+        toast("مفيش اتصال بالسيرفر", "err");
+      } finally {
+        btn.classList.remove("spinning");
+        btn.disabled = false;
+      }
+    }
+
+    /* ===================== search / filter / sort ===================== */
+
+    let searchDebounce;
+    $("search").oninput = () => {
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(render, 200);
+    };
+    $("filter").onchange = render;
+
+    document.querySelectorAll("th.sortable").forEach((th) => {
+      th.onclick = () => {
+        const key = th.dataset.sort;
+        sortDir = sortKey === key && sortDir === "desc" ? "asc" : "desc";
+        sortKey = key;
+        document.querySelectorAll("th.sortable").forEach((o) => o.removeAttribute("aria-sort"));
+        th.setAttribute("aria-sort", sortDir === "asc" ? "ascending" : "descending");
+        render();
+      };
+    });
+
+    function sortRows(list) {
+      const dir = sortDir === "asc" ? 1 : -1;
+      return [...list].sort((a, b) => {
+        let va, vb;
+        if (sortKey === "email") return a.email.localeCompare(b.email, "en") * dir;
+        if (sortKey === "days") {
+          // الصفوف من غير تاريخ انتهاء بتتحط في الآخر دايماً
+          va = daysLeft(a); vb = daysLeft(b);
+          if (va === null) return 1;
+          if (vb === null) return -1;
+        } else {
+          va = a[sortKey] ? new Date(a[sortKey]).getTime() : 0;
+          vb = b[sortKey] ? new Date(b[sortKey]).getTime() : 0;
+        }
+        return (va - vb) * dir;
+      });
+    }
+
+    /* ===================== render ===================== */
+
+    const BADGES = {
+      active:   '<span class="badge active">مفعّل</span>',
+      expired:  '<span class="badge expired">منتهي</span>',
+      inactive: '<span class="badge inactive">موقوف</span>',
+    };
+
+    function render() {
+      const q = $("search").value.trim().toLowerCase();
+      const f = $("filter").value;
+
       const total = allRows.length;
-      const active = allRows.filter(r => statusOf(r) === "active").length;
-      const soon = allRows.filter(r => {
+      const active = allRows.filter((r) => statusOf(r) === "active").length;
+      const soon = allRows.filter((r) => {
         const d = daysLeft(r);
         return statusOf(r) === "active" && d !== null && d <= 7;
       }).length;
-      document.getElementById("stTotal").textContent = total;
-      document.getElementById("stActive").textContent = active;
-      document.getElementById("stSoon").textContent = soon;
-      document.getElementById("stOff").textContent = total - active;
 
-      /* filter + search */
-      const list = allRows.filter(r => {
-        if (q && !r.email.toLowerCase().includes(q)) return false;
+      animateNumber($("stTotal"), total);
+      animateNumber($("stActive"), active);
+      animateNumber($("stSoon"), soon);
+      animateNumber($("stOff"), total - active);
+
+      const list = sortRows(allRows.filter((r) => {
+        if (q && !String(r.email || "").toLowerCase().includes(q)) return false;
         if (f !== "all" && statusOf(r) !== f) return false;
         return true;
-      });
+      }));
+
+      $("count").textContent = total ? `${list.length} من ${total}` : "";
 
       rowsEl.innerHTML = "";
-      emptyEl.style.display = list.length ? "none" : "block";
-      emptyEl.textContent = allRows.length
-        ? "مفيش نتائج مطابقة."
-        : "مفيش مستخدمين مسجّلين لسه.";
+      if (!list.length) {
+        emptyEl.hidden = false;
+        emptyEl.textContent = total ? "مفيش نتائج مطابقة للبحث." : "مفيش مستخدمين مسجّلين لسه.";
+        return;
+      }
+      emptyEl.hidden = true;
 
-      const badges = {
-        active: '<span class="badge active">مفعّل</span>',
-        expired: '<span class="badge expired">منتهي</span>',
-        inactive: '<span class="badge inactive">موقوف</span>',
-      };
-
-      for (const row of list) {
+      const frag = document.createDocumentFragment();
+      list.forEach((row, i) => {
         const st = statusOf(row);
         const d = daysLeft(row);
         let daysHtml;
         if (d === null) daysHtml = '<span class="days none">غير محدد</span>';
-        else if (d < 0) daysHtml = `<span class="days over">منتهي من ${Math.abs(d)} يوم</span>`;
+        else if (d < 0)  daysHtml = `<span class="days over">منتهي من ${Math.abs(d)} يوم</span>`;
         else if (d <= 7) daysHtml = `<span class="days soon">${d} يوم</span>`;
-        else daysHtml = `<span class="days ok">${d} يوم</span>`;
+        else             daysHtml = `<span class="days ok">${d} يوم</span>`;
 
         const tr = document.createElement("tr");
+        tr.style.animationDelay = Math.min(i * 22, 300) + "ms";
         tr.innerHTML = `
-          <td>${escapeHtml(row.email)}</td>
-          <td>${badges[st]}</td>
-          <td>${escapeHtml(row.plan) || "—"}</td>
-          <td>${fmtDate(row.created_at)}</td>
-          <td>${fmtDate(row.expires_at)}</td>
-          <td>${daysHtml}</td>
-          <td>
+          <td class="email" data-label="الإيميل">${escapeHtml(row.email)}</td>
+          <td data-label="الحالة">${BADGES[st]}</td>
+          <td data-label="الباقة">${escapeHtml(row.plan) || "—"}</td>
+          <td data-label="التسجيل">${fmtDate(row.created_at)}</td>
+          <td data-label="الانتهاء">${fmtDate(row.expires_at)}</td>
+          <td data-label="المتبقي">${daysHtml}</td>
+          <td class="actions-cell" data-label="إجراءات">
             <div class="actions">
               <button class="mini ${row.active ? "off" : "on"}" data-act="toggle" data-id="${row.id}" data-active="${row.active}">
                 ${row.active ? "إيقاف" : "تفعيل"}
               </button>
-              <button class="mini ext" data-act="extend" data-id="${row.id}" data-email="${escapeHtml(row.email)}" data-exp="${row.expires_at || ""}">تمديد</button>
+              <button class="mini ext" data-act="extend" data-id="${row.id}"
+                      data-email="${escapeHtml(row.email)}" data-exp="${row.expires_at || ""}">تمديد</button>
               <button class="mini del" data-act="del" data-id="${row.id}" data-email="${escapeHtml(row.email)}">حذف</button>
             </div>
-          </td>
-        `;
-        rowsEl.appendChild(tr);
-      }
-
-      rowsEl.querySelectorAll("button[data-act]").forEach(btn => {
-        btn.onclick = () => handleAction(btn);
+          </td>`;
+        frag.appendChild(tr);
       });
+      rowsEl.appendChild(frag);
     }
+
+    // event delegation: أسرع من ربط onclick لكل زرار في كل render
+    rowsEl.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-act]");
+      if (btn) handleAction(btn);
+    });
+
+    /* ===================== actions ===================== */
 
     async function handleAction(btn) {
       const id = btn.dataset.id;
@@ -557,99 +973,162 @@
       if (act === "toggle") {
         const current = btn.dataset.active === "true";
         btn.disabled = true;
-        await supabaseClient.from("subscriptions").update({ active: !current }).eq("id", id);
+        btn.textContent = "...";
+        const { error } = await supabaseClient.from("subscriptions")
+          .update({ active: !current }).eq("id", id);
+        if (error) { toast("مش قادرين نغيّر الحالة: " + error.message, "err"); btn.disabled = false; return; }
+        toast(current ? "تم إيقاف الاشتراك" : "تم تفعيل الاشتراك", "ok");
         await loadRows();
       }
 
       if (act === "extend") {
         extTargetId = id;
         extTargetExpiry = btn.dataset.exp || null;
-        document.getElementById("extEmail").textContent = btn.dataset.email;
-        document.getElementById("extDays").value = "";
-        document.getElementById("extMsg").textContent = "";
-        document.getElementById("extOverlay").classList.add("show");
+        $("extEmail").textContent = btn.dataset.email;
+        $("extDays").value = "";
+        $("extMsg").textContent = "";
+        $("extPreview").textContent = "";
+        document.querySelectorAll("#extQuick button").forEach((b) => b.classList.remove("sel"));
+        openModal("extOverlay");
       }
 
       if (act === "del") {
-        if (!confirm(`متأكد إنك عايز تحذف ${btn.dataset.email}؟`)) return;
-        await supabaseClient.from("subscriptions").delete().eq("id", id);
-        await loadRows();
+        const ok = await askConfirm(`متأكد إنك عايز تحذف ${btn.dataset.email}؟ الخطوة دي مش بترجع.`);
+        if (!ok) return;
+        const tr = btn.closest("tr");
+        const { error } = await supabaseClient.from("subscriptions").delete().eq("id", id);
+        if (error) { toast("مش قادرين نحذف: " + error.message, "err"); return; }
+        tr.classList.add("removing");
+        tr.addEventListener("animationend", loadRows, { once: true });
+        toast("تم حذف المشترك", "ok");
       }
     }
 
-    /* ===== extend modal ===== */
-    document.querySelectorAll("#extOverlay .quick button").forEach(b => {
-      b.onclick = () => { document.getElementById("extDays").value = b.dataset.d; };
+    /* ===================== extend modal ===================== */
+
+    function extBase() {
+      return extTargetExpiry && new Date(extTargetExpiry).getTime() > Date.now()
+        ? new Date(extTargetExpiry).getTime()
+        : Date.now();
+    }
+
+    function updateExtPreview() {
+      const days = parseInt($("extDays").value, 10);
+      if (!days || days < 1) { $("extPreview").textContent = ""; return; }
+      const newDate = new Date(extBase() + days * DAY);
+      $("extPreview").innerHTML = "هينتهي في <b>" + fmtDate(newDate) + "</b>";
+    }
+
+    $("extDays").addEventListener("input", () => {
+      document.querySelectorAll("#extQuick button").forEach((b) =>
+        b.classList.toggle("sel", b.dataset.d === $("extDays").value));
+      updateExtPreview();
     });
 
-    document.getElementById("extCancel").onclick = () =>
-      document.getElementById("extOverlay").classList.remove("show");
+    document.querySelectorAll("#extQuick button").forEach((b) => {
+      b.onclick = () => {
+        $("extDays").value = b.dataset.d;
+        document.querySelectorAll("#extQuick button").forEach((o) => o.classList.remove("sel"));
+        b.classList.add("sel");
+        updateExtPreview();
+      };
+    });
 
-    document.getElementById("extConfirm").onclick = async () => {
-      const days = parseInt(document.getElementById("extDays").value, 10);
-      if (!days || days < 1) {
-        document.getElementById("extMsg").textContent = "اكتب عدد أيام صحيح";
+    $("extCancel").onclick = () => closeModal("extOverlay");
+
+    $("extConfirm").onclick = async () => {
+      const btn = $("extConfirm");
+      const days = parseInt($("extDays").value, 10);
+      if (!days || days < 1 || days > 3650) {
+        $("extMsg").textContent = "اكتب عدد أيام بين 1 و 3650";
         return;
       }
       // لو الاشتراك لسه ساري بنمدّد من تاريخ الانتهاء، لو منتهي بنمدّد من النهارده
-      const base = extTargetExpiry && new Date(extTargetExpiry).getTime() > Date.now()
-        ? new Date(extTargetExpiry).getTime()
-        : Date.now();
-      const newExpiry = new Date(base + days * DAY).toISOString();
+      const newExpiry = new Date(extBase() + days * DAY).toISOString();
 
-      const { error } = await supabaseClient
-        .from("subscriptions")
-        .update({ expires_at: newExpiry, active: true })
-        .eq("id", extTargetId);
+      btn.disabled = true; btn.textContent = "بيتم التمديد...";
+      const { error } = await supabaseClient.from("subscriptions")
+        .update({ expires_at: newExpiry, active: true }).eq("id", extTargetId);
+      btn.disabled = false; btn.textContent = "تمديد";
 
-      if (error) {
-        document.getElementById("extMsg").textContent = "حصل خطأ: " + error.message;
-        return;
-      }
-      document.getElementById("extOverlay").classList.remove("show");
+      if (error) { $("extMsg").textContent = "حصل خطأ: " + error.message; return; }
+      closeModal("extOverlay");
+      toast(`تم التمديد ${days} يوم`, "ok");
       await loadRows();
     };
 
-    /* ===== add modal ===== */
-    document.getElementById("addBtn").onclick = () => {
-      document.getElementById("addEmail").value = "";
-      document.getElementById("addDays").value = "30";
-      document.getElementById("addMsg").textContent = "";
-      document.getElementById("addOverlay").classList.add("show");
+    /* ===================== add modal ===================== */
+
+    function updateAddPreview() {
+      const days = parseInt($("addDays").value, 10);
+      if (!days || days < 1) { $("addPreview").textContent = ""; return; }
+      $("addPreview").innerHTML = "هينتهي في <b>" + fmtDate(new Date(Date.now() + days * DAY)) + "</b>";
+    }
+    $("addDays").addEventListener("input", updateAddPreview);
+
+    $("addBtn").onclick = () => {
+      $("addEmail").value = "";
+      $("addDays").value = "30";
+      $("addMsg").textContent = "";
+      updateAddPreview();
+      openModal("addOverlay");
     };
 
-    document.getElementById("addCancel").onclick = () =>
-      document.getElementById("addOverlay").classList.remove("show");
+    $("addCancel").onclick = () => closeModal("addOverlay");
 
-    document.getElementById("addConfirm").onclick = async () => {
-      const email = document.getElementById("addEmail").value.trim();
-      const days = parseInt(document.getElementById("addDays").value, 10);
-      const plan = document.getElementById("addPlan").value;
-      const msg = document.getElementById("addMsg");
+    $("addConfirm").onclick = async () => {
+      const btn = $("addConfirm");
+      const email = $("addEmail").value.trim().toLowerCase();
+      const days = parseInt($("addDays").value, 10);
+      const plan = $("addPlan").value;
+      const msg = $("addMsg");
       msg.textContent = "";
 
-      if (!email || !email.includes("@")) { msg.textContent = "اكتب إيميل صحيح"; return; }
-      if (!days || days < 1) { msg.textContent = "اكتب عدد أيام صحيح"; return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { msg.textContent = "اكتب إيميل صحيح"; return; }
+      if (!days || days < 1 || days > 3650) { msg.textContent = "اكتب عدد أيام بين 1 و 3650"; return; }
+      if (allRows.some((r) => String(r.email).toLowerCase() === email)) {
+        msg.textContent = "الإيميل ده موجود في القايمة بالفعل";
+        return;
+      }
 
       const expires_at = new Date(Date.now() + days * DAY).toISOString();
-      const { error } = await supabaseClient
-        .from("subscriptions")
+      btn.disabled = true; btn.textContent = "بيتم الإضافة...";
+      const { error } = await supabaseClient.from("subscriptions")
         .insert({ email, active: true, plan, expires_at });
+      btn.disabled = false; btn.textContent = "إضافة";
 
       if (error) {
+        // السبب الشائع هنا إن عمود id مربوط بـ auth.users، فالصف مينفعش
+        // يتضاف قبل ما المستخدم يعمل حساب بنفسه من صفحة التسجيل
         msg.textContent = "حصل خطأ: " + error.message;
         return;
       }
-      document.getElementById("addOverlay").classList.remove("show");
+      closeModal("addOverlay");
+      toast("تمت إضافة المشترك", "ok");
       await loadRows();
     };
 
-    /* قفل المودال بالضغط برة */
-    document.querySelectorAll(".overlay").forEach(ov => {
-      ov.addEventListener("click", e => {
-        if (e.target === ov) ov.classList.remove("show");
-      });
-    });
+    /* ===================== export ===================== */
+
+    $("exportBtn").onclick = () => {
+      if (!allRows.length) { toast("مفيش بيانات للتصدير"); return; }
+      const head = ["email", "status", "plan", "created_at", "expires_at", "days_left"];
+      const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+      const lines = [head.join(",")].concat(
+        allRows.map((r) => [r.email, statusOf(r), r.plan, r.created_at, r.expires_at, daysLeft(r) ?? ""]
+          .map(esc).join(","))
+      );
+      // BOM عشان Excel يقرا العربي صح
+      const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `axiom-subscriptions-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast("تم تصدير الملف", "ok");
+    };
+
+    $("refreshBtn").onclick = loadRows;
 
     boot();
   </script>
