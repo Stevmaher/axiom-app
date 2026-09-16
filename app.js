@@ -25,6 +25,7 @@ const tilePickerEl = document.getElementById('tilePicker');
 const btnAnalyze = document.getElementById('btnAnalyze');
 const btnStep = document.getElementById('btnStep');
 const btnReset = document.getElementById('btnReset');
+const btnSave = document.getElementById('btnSave');
 const btnUndo = document.getElementById('btnUndo');
 const btnMode = document.getElementById('btnMode');
 const toggleAutoStepAfterSpawn = document.getElementById('toggleAutoStepAfterSpawn');
@@ -119,6 +120,10 @@ const TRANSLATIONS = {
     elevenStarsLabel: 'دمجات المستوى 11',
     elevenStarsProgress: 'أكملت {n} من 3 دمجات للمستوى 11',
     elevenStarsNone: 'لسه مفيش دمج للمستوى 11 في المحاولة دي',
+    btnSave: 'حفظ اللوحة',
+    statusSaved: 'تم حفظ اللوحة. هتلاقيها جاهزة لما تفتح الصفحة تاني.',
+    statusLoadedSaved: 'تم استرجاع آخر لوحة محفوظة.',
+    statusSaveError: 'تعذّر حفظ اللوحة على الجهاز ده.',
   }
 };
 
@@ -787,6 +792,61 @@ async function ensureSolver() {
   }
 }
 
+const SAVED_BOARD_KEY = 'axiom_saved_state';
+
+function saveBoard() {
+  try {
+    const payload = {
+      board: state.board,
+      pendingBoard: state.pendingBoard,
+      waitingForSpawn: state.waitingForSpawn,
+      setupMode: state.setupMode,
+      selectedTile: state.selectedTile,
+      autoStepAfterSpawn: state.autoStepAfterSpawn,
+      elevenCount: state.elevenCount,
+      savedAt: Date.now(),
+    };
+    localStorage.setItem(SAVED_BOARD_KEY, JSON.stringify(payload));
+    setStatus('statusSaved');
+  } catch (e) {
+    setStatus('statusSaveError');
+  }
+}
+
+// Returns true if a valid saved board was found and restored into `state`.
+function loadSavedBoard() {
+  let raw;
+  try {
+    raw = localStorage.getItem(SAVED_BOARD_KEY);
+  } catch (e) {
+    return false;
+  }
+  if (!raw) return false;
+
+  try {
+    const data = JSON.parse(raw);
+    if (!Array.isArray(data.board) || data.board.length !== 16) return false;
+
+    state.board = data.board;
+    state.pendingBoard = Array.isArray(data.pendingBoard) && data.pendingBoard.length === 16
+      ? data.pendingBoard
+      : null;
+    state.waitingForSpawn = !!data.waitingForSpawn;
+    state.setupMode = typeof data.setupMode === 'boolean' ? data.setupMode : state.setupMode;
+    state.selectedTile = Number.isInteger(data.selectedTile) ? data.selectedTile : state.selectedTile;
+    state.autoStepAfterSpawn = typeof data.autoStepAfterSpawn === 'boolean'
+      ? data.autoStepAfterSpawn
+      : state.autoStepAfterSpawn;
+    state.elevenCount = Number.isInteger(data.elevenCount)
+      ? Math.min(Math.max(data.elevenCount, 0), 3)
+      : 0;
+    state.history = [];
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 function pushHistory() {
   state.history.push({
     board: cloneBoard(state.board),
@@ -973,6 +1033,8 @@ function init() {
     return;
   }
 
+  const restored = loadSavedBoard();
+
   btnAnalyze.addEventListener('click', analyzeBoard);
   btnStep.addEventListener('click', stepBestMove);
   btnReset.addEventListener('click', resetBoard);
@@ -996,6 +1058,10 @@ function init() {
     btnUndo.addEventListener('click', undoMove);
   }
 
+  if (btnSave) {
+    btnSave.addEventListener('click', saveBoard);
+  }
+
   if (btnRescue) {
     btnRescue.addEventListener('click', runRescueAssistant);
   }
@@ -1007,6 +1073,9 @@ function init() {
   }
 
   updateLanguage(state.lang);
+  if (restored) {
+    setStatus('statusLoadedSaved');
+  }
 }
 
 // Support both direct script loading and asynchronous loading
