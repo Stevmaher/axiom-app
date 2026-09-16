@@ -626,30 +626,23 @@
     }
 
     .eleven-stars {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 20;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: clamp(12px, 3vw, 20px);
-      padding: clamp(10px, 2.2vw, 16px) clamp(18px, 4vw, 28px);
-      width: max-content;
+      margin: 0 auto clamp(10px, 2vw, 14px);
+      padding: clamp(8px, 1.8vw, 12px) clamp(18px, 4vw, 26px);
+      width: fit-content;
       border-radius: 999px;
       background: rgba(15, 20, 23, 0.55);
       border: 1px solid rgba(50, 130, 184, 0.4);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      pointer-events: none;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
     .eleven-star {
       position: relative;
       display: inline-block;
-      font-size: clamp(30px, 7vw, 44px);
+      font-size: clamp(26px, 6vw, 36px);
       line-height: 1;
       color: rgba(232, 241, 245, 0.2);
       text-shadow: none;
