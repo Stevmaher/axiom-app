@@ -34,6 +34,9 @@ const rescueCardEl = document.getElementById('rescueCard');
 const rescueDescEl = document.getElementById('rescueDesc');
 const btnRescueSwap = document.getElementById('btnRescueSwap');
 const btnRescueDelete = document.getElementById('btnRescueDelete');
+const elevenStarsEl = document.getElementById('elevenStars');
+const elevenStarEls = elevenStarsEl ? [...elevenStarsEl.querySelectorAll('.eleven-star')] : [];
+const elevenStarsAnnounceEl = document.getElementById('elevenStarsAnnounce');
 
 const state = {
   lastBestMove: -1,
@@ -51,6 +54,7 @@ const state = {
   hiddenIndices: null,
   lang: 'ar',
   rescueSuggestion: null, // { type: 'swap'|'delete', ... }
+  elevenCount: 0, // how many level-11 merges completed this trial (max 3)
 };
 
 const TRANSLATIONS = {
@@ -112,6 +116,9 @@ const TRANSLATIONS = {
     rescueApplied: 'تم. اضغط تحليل أو خطوة مجدداً.',
     statusSolverError: 'تعذّر تحميل محرك الحل. أعد تحميل الصفحة وجرّب تاني.',
     logout: 'تسجيل خروج',
+    elevenStarsLabel: 'دمجات المستوى 11',
+    elevenStarsProgress: 'أكملت {n} من 3 دمجات للمستوى 11',
+    elevenStarsNone: 'لسه مفيش دمج للمستوى 11 في المحاولة دي',
   }
 };
 
@@ -137,6 +144,7 @@ function updateLanguage(lang) {
     statusEl.textContent = strings.statusReady;
   }
   rescueCardEl?.classList.remove('visible');
+  renderElevenStars();
 }
 
 function moveArrow(move) {
@@ -160,6 +168,41 @@ function renderSelectedDirection(move) {
     selectedDirectionArrowEl.textContent = '—';
     selectedDirectionTextEl.textContent = strings.waiting;
   }
+}
+
+function renderElevenStars() {
+  if (!elevenStarEls.length) return;
+  elevenStarEls.forEach((el, idx) => {
+    el.classList.toggle('filled', idx < state.elevenCount);
+  });
+  if (elevenStarsEl) {
+    const strings = TRANSLATIONS[state.lang];
+    const label = state.elevenCount > 0
+      ? (strings.elevenStarsProgress || '').replace('{n}', state.elevenCount)
+      : (strings.elevenStarsNone || '');
+    elevenStarsEl.setAttribute('aria-label', `${strings.elevenStarsLabel || ''} — ${label}`.trim());
+  }
+}
+
+// Called after a move resolves one or more level-11 merges (tiles that hit
+// level 11 vanish from the board). Fills the next star(s) and pops it so the
+// player notices their first/second/third completed merge of the trial.
+function registerElevenMerges(count) {
+  if (!count || count <= 0) return;
+  const strings = TRANSLATIONS[state.lang];
+  for (let i = 0; i < count && state.elevenCount < 3; i++) {
+    state.elevenCount++;
+    const starEl = elevenStarEls[state.elevenCount - 1];
+    if (starEl) {
+      starEl.classList.remove('star-pop');
+      void starEl.offsetWidth; // restart the animation
+      starEl.classList.add('star-pop');
+    }
+    if (elevenStarsAnnounceEl) {
+      elevenStarsAnnounceEl.textContent = (strings.elevenStarsProgress || '').replace('{n}', state.elevenCount);
+    }
+  }
+  renderElevenStars();
 }
 
 function displayValue(exp) {
@@ -401,6 +444,7 @@ function compressLine(line) {
   const arr = line.filter(v => v !== 0);
   const compact = [];
   let score = 0;
+  let elevens = 0;
 
   for (let i = 0; i < arr.length; i++) {
     if (i + 1 < arr.length && arr[i] === arr[i + 1]) {
@@ -410,6 +454,7 @@ function compressLine(line) {
         score += nextValue;
       } else {
         score += 11;
+        elevens++;
       }
       i++;
     } else {
@@ -418,7 +463,7 @@ function compressLine(line) {
   }
 
   while (compact.length < 4) compact.push(0);
-  return { line: compact, score };
+  return { line: compact, score, elevens };
 }
 
 function rows(board) {
@@ -443,33 +488,35 @@ function moveLeft(board) {
   const rs = rows(board);
   let moved = false;
   let score = 0;
+  let elevens = 0;
   const out = rs.map(r => {
     const before = r.join(',');
     const res = compressLine(r);
     if (res.line.join(',') !== before) moved = true;
     score += res.score;
+    elevens += res.elevens;
     return res.line;
   });
-  return { board: fromRows(out), moved, score };
+  return { board: fromRows(out), moved, score, elevens };
 }
 
 function moveRight(board) {
   const rev = reverseRows(board);
   const res = moveLeft(rev);
-  return { board: reverseRows(res.board), moved: res.moved, score: res.score };
+  return { board: reverseRows(res.board), moved: res.moved, score: res.score, elevens: res.elevens };
 }
 
 function moveUp(board) {
   const t = transpose(board);
   const res = moveLeft(t);
-  return { board: transpose(res.board), moved: res.moved, score: res.score };
+  return { board: transpose(res.board), moved: res.moved, score: res.score, elevens: res.elevens };
 }
 
 function moveDown(board) {
   const t = transpose(board);
   const rev = reverseRows(t);
   const res = moveLeft(rev);
-  return { board: transpose(reverseRows(res.board)), moved: res.moved, score: res.score };
+  return { board: transpose(reverseRows(res.board)), moved: res.moved, score: res.score, elevens: res.elevens };
 }
 
 const MOVE_FNS = [moveLeft, moveRight, moveUp, moveDown];
@@ -745,6 +792,7 @@ function pushHistory() {
     board: cloneBoard(state.board),
     pendingBoard: state.pendingBoard ? cloneBoard(state.pendingBoard) : null,
     waitingForSpawn: state.waitingForSpawn,
+    elevenCount: state.elevenCount,
   });
   // Keep history to max 20 states to avoid memory issues
   if (state.history.length > 20) {
@@ -758,6 +806,8 @@ function undoMove() {
   state.board = prev.board;
   state.pendingBoard = prev.pendingBoard;
   state.waitingForSpawn = prev.waitingForSpawn;
+  state.elevenCount = prev.elevenCount ?? state.elevenCount;
+  renderElevenStars();
   render();
   if (state.waitingForSpawn) {
     setStatus('statusWaitingSpawn');
@@ -862,6 +912,7 @@ async function stepBestMove() {
   state.waitingForSpawn = true;
   render();
   triggerMergePops(mergeDestinations);
+  registerElevenMerges(move.elevens);
   setStatus('statusApplied', { move: MOVE_NAMES[moveIndex] });
 }
 
@@ -901,6 +952,8 @@ function resetBoard() {
   renderSelectedDirection(-1);
   state.hiddenIndices = null;
   state.rescueSuggestion = null;
+  state.elevenCount = 0;
+  renderElevenStars();
   rescueCardEl?.classList.remove('visible');
   setStatus('statusCleared');
   render();
@@ -935,6 +988,7 @@ function init() {
   makeTilePicker(tilePickerEl);
   syncTilePickers();
   renderSelectedDirection(-1);
+  renderElevenStars();
   render();
   ensureSolver();
 
