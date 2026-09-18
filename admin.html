@@ -271,6 +271,7 @@
     button.mini.off { background: var(--bad); color: #fff; }
     button.mini.ext { background: var(--gold); color: #fff; }
     button.mini.del { background: rgba(255, 107, 107, 0.18); color: var(--bad); border: 1px solid rgba(255, 107, 107, 0.4); }
+    button.mini.reset { background: rgba(255, 201, 77, 0.18); color: var(--warn); border: 1px solid rgba(255, 201, 77, 0.4); }
 
     /* skeleton loading */
     .sk {
@@ -950,6 +951,8 @@
               </button>
               <button class="mini ext" data-act="extend" data-id="${row.id}"
                       data-email="${escapeHtml(row.email)}" data-exp="${row.expires_at || ""}">تمديد</button>
+              <button class="mini reset" data-act="resetDevice" data-id="${row.id}"
+                      data-email="${escapeHtml(row.email)}">Reset Device</button>
               <button class="mini del" data-act="del" data-id="${row.id}" data-email="${escapeHtml(row.email)}">حذف</button>
             </div>
           </td>`;
@@ -990,6 +993,45 @@
         $("extPreview").textContent = "";
         document.querySelectorAll("#extQuick button").forEach((b) => b.classList.remove("sel"));
         openModal("extOverlay");
+      }
+
+      if (act === "resetDevice") {
+        const ok = await askConfirm(
+          `متأكد إنك عايز تعمل Reset Device لحساب ${btn.dataset.email}؟ ` +
+          `هيتقدر يدخل بعد كده من أي جهاز تاني (أول جهاز يدخل بيه هيتسجّل كجهازه الجديد).`
+        );
+        if (!ok) return;
+
+        btn.disabled = true;
+        const prevText = btn.textContent;
+        btn.textContent = "...";
+
+        try {
+          const { data: { session } } = await supabaseClient.auth.getSession();
+          if (!session) { toast("جلستك منتهية، سجّل دخول تاني", "err"); return; }
+
+          const response = await fetch(`${SUPABASE_URL}/functions/v1/reset-device`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ target_user_id: id }),
+          });
+          const result = await response.json();
+
+          if (!response.ok || !result.success) {
+            toast("مش قادرين نعمل Reset Device: " + (result.reason || "خطأ غير معروف"), "err");
+            return;
+          }
+          toast("تم عمل Reset Device بنجاح", "ok");
+        } catch (err) {
+          console.error(err);
+          toast("مفيش اتصال بالسيرفر", "err");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = prevText;
+        }
       }
 
       if (act === "del") {
