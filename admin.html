@@ -30,6 +30,8 @@
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+    html { background: var(--void); }
+
     body {
       margin: 0;
       min-height: 100vh;
@@ -40,7 +42,7 @@
       padding: clamp(14px, 3vw, 26px);
     }
 
-    .wrap { max-width: 1100px; margin: 0 auto; }
+    .wrap { max-width: 1280px; margin: 0 auto; }
 
     :where(button, input, select, a):focus-visible {
       outline: 2px solid var(--gold);
@@ -54,14 +56,14 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 28px;
       animation: rise 0.5s var(--ease) both;
     }
 
-    h1 { margin: 0; font-family: 'Cinzel', 'Tajawal', sans-serif; font-weight: 700; font-size: 22px; }
+    h1 { margin: 0; font-family: 'Cinzel', 'Tajawal', sans-serif; font-weight: 700; font-size: 24px; }
     h1 span { color: var(--gold); }
 
-    .who { font-size: 12.5px; color: var(--dimmer); margin-top: 3px; }
+    .who { font-size: 13px; color: var(--dimmer); margin-top: 6px; }
 
     .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
@@ -91,9 +93,9 @@
     /* ===================== stats ===================== */
     .stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 14px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
     }
 
     .stat {
@@ -101,7 +103,7 @@
       background: linear-gradient(180deg, rgba(15, 76, 117, 0.55), rgba(27, 38, 44, 0.85));
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 16px 18px;
+      padding: 20px 22px;
       overflow: hidden;
       transition: transform 0.2s var(--ease), border-color 0.2s ease;
       animation: rise 0.55s var(--ease) both;
@@ -141,7 +143,7 @@
       background: linear-gradient(180deg, rgba(15, 76, 117, 0.94), rgba(27, 38, 44, 0.94));
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 20px;
+      padding: 26px;
       margin-bottom: 20px;
       animation: rise 0.55s var(--ease) 0.22s both;
     }
@@ -149,12 +151,12 @@
     .toolbar {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 12px;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 22px;
     }
 
-    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap { position: relative; flex: 1 1 280px; min-width: 200px; }
     .search-wrap svg {
       position: absolute;
       inset-inline-start: 12px;
@@ -186,33 +188,38 @@
     select option { background: var(--void); }
 
     .count { font-size: 13px; color: var(--dimmer); white-space: nowrap; }
+    .toolbar select, .search-wrap input { height: 44px; }
+    .toolbar select { padding-inline: 14px; min-width: 150px; }
 
     /* ===================== table ===================== */
-    .table-scroll { overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
+    .table-scroll { overflow-x: auto; margin: 0 -6px; padding: 0 6px; }
 
     table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
       font-size: 14px;
-      min-width: 1020px;
+      min-width: 1040px;
     }
 
     th, td {
-      padding: 11px 8px;
+      padding: 15px 14px;
       text-align: right;
       border-bottom: 1px solid var(--border-soft);
-      white-space: nowrap;
+      vertical-align: middle;
     }
 
     th {
+      padding-block: 13px;
       color: var(--dim);
       font-weight: 600;
-      font-size: 13px;
-      position: sticky;
-      top: 0;
-      background: #12384e;
-      z-index: 1;
+      font-size: 12.5px;
+      white-space: nowrap;
+      background: rgba(0, 0, 0, 0.24);
+      border-bottom: 1px solid var(--border);
     }
+    th:first-child { border-start-start-radius: 10px; }
+    th:last-child  { border-start-end-radius: 10px; }
     th.sortable { cursor: pointer; user-select: none; transition: color 0.15s ease; }
     th.sortable:hover { color: var(--parchment); }
     th .caret { opacity: 0; font-size: 10px; transition: opacity 0.2s ease, transform 0.2s ease; display: inline-block; }
@@ -220,7 +227,7 @@
     th[aria-sort="ascending"] .caret { transform: rotate(180deg); }
 
     tbody tr { transition: background 0.15s ease; animation: rowIn 0.35s var(--ease) both; }
-    tbody tr:hover { background: rgba(50, 130, 184, 0.08); }
+    tbody tr:hover { background: rgba(50, 130, 184, 0.09); }
     tbody tr:last-child td { border-bottom: none; }
     tbody tr.removing { animation: rowOut 0.3s var(--ease) forwards; }
 
@@ -232,7 +239,31 @@
       to { opacity: 0; transform: translateX(-20px); }
     }
 
-    td.email { white-space: normal; word-break: break-all; min-width: 180px; }
+    td.acct { min-width: 250px; }
+    .acct-email { font-weight: 700; font-size: 14.5px; line-height: 1.5; overflow-wrap: anywhere; }
+    .acct-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 10px;
+      margin-top: 7px;
+      font-size: 12px;
+      color: var(--dimmer);
+    }
+    .chip {
+      padding: 2px 9px;
+      border-radius: 6px;
+      background: rgba(50, 130, 184, 0.2);
+      border: 1px solid var(--border-soft);
+      color: var(--dim);
+      font-size: 11.5px;
+    }
+    th:nth-child(2) { width: 92px; }
+    th:nth-child(3) { width: 170px; }
+    th:nth-child(4) { width: 190px; }
+    th:nth-child(5) { width: 150px; }
+    th:nth-child(6) { width: 220px; }
+    td.actions-cell { width: 220px; }
 
     .badge {
       padding: 3px 10px;
@@ -246,20 +277,23 @@
     .badge.expired  { background: rgba(255, 201, 77, 0.15); color: var(--warn); }
 
     .days { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .days { white-space: nowrap; }
+    .dev .days { font-size: 12.5px; }
     .days.ok   { color: var(--good); }
     .days.soon { color: var(--warn); }
     .days.over { color: var(--bad); }
     .days.none { color: var(--dimmer); font-weight: 400; }
 
-    .dev { display: flex; flex-direction: column; gap: 2px; }
-    .dev b { font-weight: 700; font-size: 13.5px; }
-    .dev small { color: var(--dimmer); font-size: 11.5px; }
+    .dev { display: flex; flex-direction: column; gap: 4px; }
+    .dev b { font-weight: 700; font-size: 13.5px; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+    .dev small { color: var(--dimmer); font-size: 11.5px; white-space: nowrap; }
     .dev small.reset-tag { color: var(--warn); font-weight: 700; }
 
-    .actions { display: flex; gap: 6px; justify-content: flex-start; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
     button.mini {
-      padding: 6px 12px;
+      padding: 9px 10px;
+      white-space: nowrap;
       border-radius: 8px;
       border: none;
       cursor: pointer;
@@ -438,29 +472,34 @@
       to { opacity: 0; transform: translateX(-24px); }
     }
 
-    /* ===================== mobile: table becomes cards ===================== */
-    @media (max-width: 720px) {
-      table, thead, tbody, tr, td { display: block; width: 100%; }
+    /* ===================== tablet + mobile: rows become cards ===================== */
+    @media (max-width: 1160px) {
+      table, thead, tbody, tr, td { display: block; }
       thead { display: none; }
       table { min-width: 0; }
+      .table-scroll { margin: 0; padding: 0; overflow: visible; }
+
+      tbody {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+        gap: 14px;
+      }
 
       tbody tr {
+        position: relative;
         border: 1px solid var(--border-soft);
-        border-radius: 12px;
-        padding: 12px 14px;
-        margin-bottom: 10px;
-        background: rgba(0, 0, 0, 0.16);
+        border-radius: 14px;
+        padding: 16px 18px 16px;
+        background: rgba(0, 0, 0, 0.18);
       }
-      tbody tr:last-child { margin-bottom: 0; }
 
       td {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 12px;
-        padding: 5px 0;
+        gap: 14px;
+        padding: 9px 0;
         border: none;
-        white-space: normal;
       }
       td::before {
         content: attr(data-label);
@@ -468,12 +507,45 @@
         font-size: 12.5px;
         flex-shrink: 0;
       }
-      td.email { font-weight: 700; }
-      td .dev { align-items: flex-end; }
-      td.actions-cell { padding-top: 10px; }
+      td .dev { align-items: flex-end; text-align: left; }
+
+      tbody tr td.acct {
+        display: block;
+        min-width: 0;
+        padding: 0 0 14px;
+        margin-bottom: 4px;
+        padding-inline-end: 84px;
+        border-bottom: 1px solid var(--border-soft);
+      }
+      td.acct::before { display: none; }
+
+      td.col-status { position: absolute; top: 16px; inset-inline-end: 18px; padding: 0; }
+      td.col-status::before { display: none; }
+
+      tbody tr td.actions-cell {
+        display: block;
+        width: auto;
+        margin-top: 6px;
+        padding: 14px 0 0;
+        border-top: 1px solid var(--border-soft);
+      }
       td.actions-cell::before { display: none; }
-      .actions { width: 100%; }
-      .actions button { flex: 1; }
+    }
+
+    @media (max-width: 560px) {
+      body { padding: 14px; }
+      header { margin-bottom: 20px; }
+      .header-actions { width: 100%; }
+      .header-actions .btn { flex: 1 1 auto; }
+      .stats { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 18px; }
+      .stat { padding: 16px; }
+      .panel { padding: 16px; }
+      tbody tr td.acct { padding-inline-end: 0; }
+      td.col-status { position: static; display: flex; padding: 9px 0; }
+      td.col-status::before { content: "الحالة"; display: block; }
+      .search-wrap { flex-basis: 100%; }
+      .toolbar select { flex: 1; min-width: 0; }
+      .count { width: 100%; }
       #toasts { inset-inline: 14px; bottom: 14px; }
       .toast { max-width: none; }
     }
@@ -538,6 +610,13 @@
           <option value="expired">منتهي</option>
           <option value="inactive">موقوف</option>
         </select>
+        <select id="sortSel" aria-label="ترتيب">
+          <option value="created_at:desc">الأحدث تسجيلاً</option>
+          <option value="created_at:asc">الأقدم تسجيلاً</option>
+          <option value="email:asc">الإيميل (أ ← ي)</option>
+          <option value="days:asc">الأقرب انتهاءً</option>
+          <option value="last_seen:desc">آخر دخول</option>
+        </select>
         <span class="count" id="count"></span>
       </div>
 
@@ -545,14 +624,11 @@
         <table>
           <thead>
             <tr>
-              <th class="sortable" data-sort="email">الإيميل <span class="caret">▼</span></th>
+              <th class="sortable" data-sort="email">الحساب <span class="caret">▼</span></th>
               <th>الحالة</th>
-              <th>الباقة</th>
               <th>الجهاز المسجّل</th>
               <th class="sortable" data-sort="last_seen">آخر دخول <span class="caret">▼</span></th>
-              <th class="sortable" data-sort="created_at">تاريخ التسجيل <span class="caret">▼</span></th>
-              <th class="sortable" data-sort="expires_at">تاريخ الانتهاء <span class="caret">▼</span></th>
-              <th class="sortable" data-sort="days">الأيام المتبقية <span class="caret">▼</span></th>
+              <th class="sortable" data-sort="days">الاشتراك <span class="caret">▼</span></th>
               <th>إجراءات</th>
             </tr>
           </thead>
@@ -723,7 +799,7 @@
       const sub = d.is_active
         ? `<small>اتسجّل ${fmtDate(d.first_seen_at)}</small>`
         : `<small class="reset-tag">اتعمله Reset</small>`;
-      return `<div class="dev"><b>${name}</b>${sub}</div>`;
+      return `<div class="dev"><b title="${name}">${name}</b>${sub}</div>`;
     }
 
     function lastSeenCell(row) {
@@ -885,17 +961,14 @@
     /* ===================== data ===================== */
 
     function skeleton(n = 4) {
+      const cell = (w) => `<td><span class="sk" style="width:${w}"></span></td>`;
       let html = "";
       for (let i = 0; i < n; i++) {
-        html += "<tr>" + '<td><span class="sk" style="width:62%"></span></td>'
-              + '<td><span class="sk" style="width:46px"></span></td>'.repeat(2)
-              + '<td><span class="sk" style="width:74px"></span></td>'.repeat(5)
-              + '<td><span class="sk" style="width:120px"></span></td>' + "</tr>";
+        html += "<tr>" + cell("70%") + cell("52px") + cell("110px") + cell("96px") + cell("96px") + cell("150px") + "</tr>";
       }
       return html;
     }
 
-    // بيجيب الجهاز المسجّل لكل مستخدم: الجهاز الفعّال لو موجود، وإلا آخر جهاز اتعمله Reset
     async function attachDevices(rows) {
       const { data, error } = await adminClient.from("user_devices")
         .select("user_id,device_name,is_active,first_seen_at,last_seen_at")
@@ -934,7 +1007,7 @@
           .order("created_at", { ascending: false });
 
         if (error) {
-          rowsEl.innerHTML = `<tr><td colspan="9" class="muted">حصل خطأ: ${escapeHtml(error.message)}</td></tr>`;
+          rowsEl.innerHTML = `<tr><td colspan="6" class="muted">حصل خطأ: ${escapeHtml(error.message)}</td></tr>`;
           toast("مش قادرين نحمّل البيانات", "err");
           return;
         }
@@ -950,7 +1023,7 @@
         render();
       } catch (err) {
         console.error(err);
-        rowsEl.innerHTML = `<tr><td colspan="9" class="muted">مفيش اتصال بالسيرفر.</td></tr>`;
+        rowsEl.innerHTML = `<tr><td colspan="6" class="muted">مفيش اتصال بالسيرفر.</td></tr>`;
         toast("مفيش اتصال بالسيرفر", "err");
       } finally {
         btn.classList.remove("spinning");
@@ -974,9 +1047,21 @@
         sortKey = key;
         document.querySelectorAll("th.sortable").forEach((o) => o.removeAttribute("aria-sort"));
         th.setAttribute("aria-sort", sortDir === "asc" ? "ascending" : "descending");
+        const v = sortKey + ":" + sortDir;
+        if ([...$("sortSel").options].some((o) => o.value === v)) $("sortSel").value = v;
         render();
       };
     });
+
+    // الترتيب من القايمة (شغّال على الموبايل كمان حيث الهيدر مخفي)
+    $("sortSel").onchange = () => {
+      [sortKey, sortDir] = $("sortSel").value.split(":");
+      document.querySelectorAll("th.sortable").forEach((o) => {
+        if (o.dataset.sort === sortKey) o.setAttribute("aria-sort", sortDir === "asc" ? "ascending" : "descending");
+        else o.removeAttribute("aria-sort");
+      });
+      render();
+    };
 
     function sortRows(list) {
       const dir = sortDir === "asc" ? 1 : -1;
@@ -1051,18 +1136,25 @@
         else if (d <= 7) daysHtml = `<span class="days soon">${d} يوم</span>`;
         else             daysHtml = `<span class="days ok">${d} يوم</span>`;
 
+        const subHtml = d === null
+          ? '<span class="days none">بدون تاريخ انتهاء</span>'
+          : `<div class="dev"><b>${fmtDate(row.expires_at)}</b>${daysHtml}</div>`;
+
         const tr = document.createElement("tr");
         tr.style.animationDelay = Math.min(i * 22, 300) + "ms";
         tr.innerHTML = `
-          <td class="email" data-label="الإيميل">${escapeHtml(row.email)}</td>
-          <td data-label="الحالة">${BADGES[st]}</td>
-          <td data-label="الباقة">${escapeHtml(row.plan) || "—"}</td>
+          <td class="acct">
+            <div class="acct-email">${escapeHtml(row.email)}</div>
+            <div class="acct-meta">
+              ${row.plan ? `<span class="chip">${escapeHtml(row.plan)}</span>` : ""}
+              <span>سجّل ${fmtDate(row.created_at)}</span>
+            </div>
+          </td>
+          <td class="col-status">${BADGES[st]}</td>
           <td data-label="الجهاز">${deviceCell(row)}</td>
           <td data-label="آخر دخول">${lastSeenCell(row)}</td>
-          <td data-label="التسجيل">${fmtDate(row.created_at)}</td>
-          <td data-label="الانتهاء">${fmtDate(row.expires_at)}</td>
-          <td data-label="المتبقي">${daysHtml}</td>
-          <td class="actions-cell" data-label="إجراءات">
+          <td data-label="الاشتراك">${subHtml}</td>
+          <td class="actions-cell">
             <div class="actions">
               <button class="mini ${row.active ? "off" : "on"}" data-act="toggle" data-id="${row.id}" data-active="${row.active}">
                 ${row.active ? "إيقاف" : "تفعيل"}
