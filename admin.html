@@ -632,6 +632,12 @@
        من غير كده أي مستخدم يقدر يفعّل اشتراكه بنفسه مجاناً.
        ──────────────────────────────────────────────────────────────── */
 
+    // كلاينت منفصل للأدمن بمفتاح تخزين خاص: كده تسجيل دخول أي مستخدم عادي
+    // في تاب تاني (login.html) مايمسحش ولا يستبدل جلسة الأدمن.
+    const adminClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { storageKey: "axiom-admin-auth", persistSession: true, autoRefreshToken: true }
+    });
+
     const $ = (id) => document.getElementById(id);
     const DAY = 86400000;
 
@@ -745,7 +751,7 @@
 
     async function boot() {
       try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
+        const { data: { session } } = await adminClient.auth.getSession();
         if (session && ADMIN_EMAILS.includes(session.user.email)) {
           showDashboard(session.user.email);
         }
@@ -753,6 +759,37 @@
         console.error(err);
       }
     }
+
+    // بيرجّع الجلسة لو لسه أدمن، وإلا بيرجّع للبوابة برسالة واضحة
+    // (بدل ما الجدول يفضى بصمت لأن RLS بترجّع قايمة فاضية من غير error)
+    async function ensureAdminSession() {
+      const { data: { session } } = await adminClient.auth.getSession();
+      if (!session) { showGate("الجلسة انتهت، سجّل دخول تاني"); return null; }
+      if (!ADMIN_EMAILS.includes(session.user.email)) {
+        showGate("المتصفح اتسجّل فيه بحساب تاني (" + session.user.email + ")، سجّل دخول بحساب الأدمن");
+        return null;
+      }
+      return session;
+    }
+
+    function showGate(message) {
+      allRows = [];
+      dashboard.hidden = true;
+      gate.hidden = false;
+      gate.style.display = "";
+      gMsg.textContent = message || "";
+    }
+
+    // لو حد سجّل دخول/خروج في تاب تاني في نفس المتصفح، الجلسة بتتبدّل
+    // (نفس localStorage) — ده غالباً سبب اختفاء الحسابات.
+    adminClient.auth.onAuthStateChange((event, session) => {
+      if (dashboard.hidden) return;
+      if (event === "SIGNED_OUT" || !session) {
+        showGate("الجلسة انتهت، سجّل دخول تاني");
+      } else if (event === "SIGNED_IN" && !ADMIN_EMAILS.includes(session.user.email)) {
+        showGate("اتعمل دخول بحساب تاني في نفس المتصفح، سجّل دخول بحساب الأدمن");
+      }
+    });
 
     $("gateForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -770,7 +807,7 @@
       btn.disabled = true;
       btn.textContent = "بيتم الدخول...";
       try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        const { data, error } = await adminClient.auth.signInWithPassword({ email, password });
         if (error) {
           gMsg.textContent = "بيانات الدخول غلط";
           gate.classList.remove("shake"); void gate.offsetWidth; gate.classList.add("shake");
@@ -778,7 +815,7 @@
         }
         if (!ADMIN_EMAILS.includes(data.user.email)) {
           gMsg.textContent = "الحساب ده مش أدمن";
-          await supabaseClient.auth.signOut();
+          await adminClient.auth.signOut();
           return;
         }
         showDashboard(data.user.email);
@@ -800,7 +837,7 @@
     }
 
     $("logoutBtn").onclick = async () => {
-      await supabaseClient.auth.signOut();
+      await adminClient.auth.signOut();
       window.location.href = "./login.html";
     };
 
@@ -825,7 +862,9 @@
       emptyEl.hidden = true;
 
       try {
-        const { data, error } = await supabaseClient
+        if (!(await ensureAdminSession())) return;
+
+        const { data, error } = await adminClient
           .from("subscriptions")
           .select("id,email,active,created_at,expires_at,plan")
           .order("created_at", { ascending: false });
@@ -833,6 +872,13 @@
         if (error) {
           rowsEl.innerHTML = `<tr><td colspan="7" class="muted">حصل خطأ: ${escapeHtml(error.message)}</td></tr>`;
           toast("مش قادرين نحمّل البيانات", "err");
+          return;
+        }
+        // RLS بترجّع [] من غير error لو الجلسة/الصلاحية بايظة.
+        // لو كان عندنا بيانات قبل كده وفجأة جت فاضية، منمسحش الشاشة.
+        if ((!data || !data.length) && allRows.length > 1) {
+          toast("السيرفر رجّع قايمة فاضية — راجع صلاحيات RLS أو سجّل دخول تاني", "err");
+          render();
           return;
         }
         allRows = data || [];
@@ -977,9 +1023,10 @@
         const current = btn.dataset.active === "true";
         btn.disabled = true;
         btn.textContent = "...";
-        const { error } = await supabaseClient.from("subscriptions")
-          .update({ active: !current }).eq("id", id);
+        const { data: upd, error } = await adminClient.from("subscriptions")
+          .update({ active: !current }).eq("id", id).select("id");
         if (error) { toast("مش قادرين نغيّر الحالة: " + error.message, "err"); btn.disabled = false; return; }
+        if (!upd || !upd.length) { toast("التعديل ماتنفّذش (غالباً صلاحيات RLS)", "err"); btn.disabled = false; btn.textContent = current ? "إيقاف" : "تفعيل"; return; }
         toast(current ? "تم إيقاف الاشتراك" : "تم تفعيل الاشتراك", "ok");
         await loadRows();
       }
@@ -1007,7 +1054,7 @@
         btn.textContent = "...";
 
         try {
-          const { data: { session } } = await supabaseClient.auth.getSession();
+          const { data: { session } } = await adminClient.auth.getSession();
           if (!session) { toast("جلستك منتهية، سجّل دخول تاني", "err"); return; }
 
           const response = await fetch(`${SUPABASE_URL}/functions/v1/reset-device`, {
@@ -1038,8 +1085,9 @@
         const ok = await askConfirm(`متأكد إنك عايز تحذف ${btn.dataset.email}؟ الخطوة دي مش بترجع.`);
         if (!ok) return;
         const tr = btn.closest("tr");
-        const { error } = await supabaseClient.from("subscriptions").delete().eq("id", id);
+        const { data: del, error } = await adminClient.from("subscriptions").delete().eq("id", id).select("id");
         if (error) { toast("مش قادرين نحذف: " + error.message, "err"); return; }
+        if (!del || !del.length) { toast("الحذف ماتنفّذش (غالباً صلاحيات RLS)", "err"); return; }
         tr.classList.add("removing");
         tr.addEventListener("animationend", loadRows, { once: true });
         toast("تم حذف المشترك", "ok");
@@ -1089,11 +1137,12 @@
       const newExpiry = new Date(extBase() + days * DAY).toISOString();
 
       btn.disabled = true; btn.textContent = "بيتم التمديد...";
-      const { error } = await supabaseClient.from("subscriptions")
-        .update({ expires_at: newExpiry, active: true }).eq("id", extTargetId);
+      const { data: upd, error } = await adminClient.from("subscriptions")
+        .update({ expires_at: newExpiry, active: true }).eq("id", extTargetId).select("id");
       btn.disabled = false; btn.textContent = "تمديد";
 
       if (error) { $("extMsg").textContent = "حصل خطأ: " + error.message; return; }
+      if (!upd || !upd.length) { $("extMsg").textContent = "التمديد ماتنفّذش (غالباً صلاحيات RLS)"; return; }
       closeModal("extOverlay");
       toast(`تم التمديد ${days} يوم`, "ok");
       await loadRows();
@@ -1135,7 +1184,7 @@
 
       const expires_at = new Date(Date.now() + days * DAY).toISOString();
       btn.disabled = true; btn.textContent = "بيتم الإضافة...";
-      const { error } = await supabaseClient.from("subscriptions")
+      const { error } = await adminClient.from("subscriptions")
         .insert({ email, active: true, plan, expires_at });
       btn.disabled = false; btn.textContent = "إضافة";
 
