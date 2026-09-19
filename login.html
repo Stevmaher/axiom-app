@@ -7,6 +7,10 @@
   <meta name="theme-color" content="#1B262C" />
   <meta name="description" content="Axiom — تسجيل الدخول لمحرّك الحل الذكي" />
   <title>Axiom — تسجيل الدخول</title>
+  <link rel="icon" href="./favicon.ico" sizes="any">
+  <link rel="icon" href="./favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="./favicon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="./favicon-180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -120,11 +124,12 @@
     .leaf-form > *, .fields > * {
       animation: riseIn 0.6s var(--ease) both;
     }
-    .leaf-form > *:nth-child(1) { animation-delay: 0.10s; }
-    .leaf-form > *:nth-child(2) { animation-delay: 0.16s; }
-    .leaf-form > *:nth-child(3) { animation-delay: 0.22s; }
-    .leaf-form > *:nth-child(4) { animation-delay: 0.28s; }
-    .leaf-form > *:nth-child(5) { animation-delay: 0.34s; }
+    .leaf-form > *:nth-child(1) { animation-delay: 0.06s; }
+    .leaf-form > *:nth-child(2) { animation-delay: 0.12s; }
+    .leaf-form > *:nth-child(3) { animation-delay: 0.18s; }
+    .leaf-form > *:nth-child(4) { animation-delay: 0.24s; }
+    .leaf-form > *:nth-child(5) { animation-delay: 0.30s; }
+    .leaf-form > *:nth-child(6) { animation-delay: 0.36s; }
 
     @keyframes riseIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -146,6 +151,13 @@
       font-size: 26px;
       letter-spacing: 0.02em;
       margin: 0 0 2px;
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: auto;
+      margin: 0 0 10px;
+      filter: drop-shadow(0 0 10px rgba(216, 167, 82, 0.45));
     }
 
     .sub {
@@ -496,6 +508,7 @@
 <body>
   <main class="book" id="book">
     <section class="leaf-form spine">
+      <img class="brand-mark" src="./dragon-icon-gold.png" alt="" aria-hidden="true">
       <p class="greeting" id="greeting"></p>
       <h1 class="brand">Axiom</h1>
       <p class="sub">سجّل دخولك أو افتح حساب جديد عشان توصل لمحرّك الحل الذكي.</p>
