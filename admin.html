@@ -194,7 +194,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
-      min-width: 780px;
+      min-width: 1020px;
     }
 
     th, td {
@@ -250,6 +250,11 @@
     .days.soon { color: var(--warn); }
     .days.over { color: var(--bad); }
     .days.none { color: var(--dimmer); font-weight: 400; }
+
+    .dev { display: flex; flex-direction: column; gap: 2px; }
+    .dev b { font-weight: 700; font-size: 13.5px; }
+    .dev small { color: var(--dimmer); font-size: 11.5px; }
+    .dev small.reset-tag { color: var(--warn); font-weight: 700; }
 
     .actions { display: flex; gap: 6px; justify-content: flex-start; }
 
@@ -464,6 +469,7 @@
         flex-shrink: 0;
       }
       td.email { font-weight: 700; }
+      td .dev { align-items: flex-end; }
       td.actions-cell { padding-top: 10px; }
       td.actions-cell::before { display: none; }
       .actions { width: 100%; }
@@ -524,7 +530,7 @@
       <div class="toolbar">
         <div class="search-wrap">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-          <input id="search" type="search" placeholder="ابحث بالإيميل..." aria-label="بحث بالإيميل" />
+          <input id="search" type="search" placeholder="ابحث بالإيميل أو اسم الجهاز..." aria-label="بحث بالإيميل أو الجهاز" />
         </div>
         <select id="filter" aria-label="فلترة بالحالة">
           <option value="all">كل الحالات</option>
@@ -542,6 +548,8 @@
               <th class="sortable" data-sort="email">الإيميل <span class="caret">▼</span></th>
               <th>الحالة</th>
               <th>الباقة</th>
+              <th>الجهاز المسجّل</th>
+              <th class="sortable" data-sort="last_seen">آخر دخول <span class="caret">▼</span></th>
               <th class="sortable" data-sort="created_at">تاريخ التسجيل <span class="caret">▼</span></th>
               <th class="sortable" data-sort="expires_at">تاريخ الانتهاء <span class="caret">▼</span></th>
               <th class="sortable" data-sort="days">الأيام المتبقية <span class="caret">▼</span></th>
@@ -653,6 +661,7 @@
     let extTargetId = null;
     let extTargetExpiry = null;
     let lastFocused = null;
+    let deviceErrShown = false;
 
     /* ===================== utilities ===================== */
 
@@ -689,6 +698,38 @@
       if (!d) return "—";
       const date = new Date(d);
       return isNaN(date) ? "—" : date.toLocaleDateString("ar-EG", { year: "numeric", month: "short", day: "numeric" });
+    }
+
+    function fmtDateTime(d) {
+      const date = new Date(d);
+      return isNaN(date) ? "—" : date.toLocaleString("ar-EG", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+
+    function relTime(d) {
+      const diff = Date.now() - new Date(d).getTime();
+      if (isNaN(diff)) return "—";
+      const m = Math.floor(diff / 60000);
+      if (m < 1) return "دلوقتي";
+      if (m < 60) return `من ${m} دقيقة`;
+      const h = Math.floor(m / 60);
+      if (h < 24) return `من ${h} ساعة`;
+      return `من ${Math.floor(h / 24)} يوم`;
+    }
+
+    function deviceCell(row) {
+      const d = row.device;
+      if (!d) return '<span class="days none">لسه ماسجّلش</span>';
+      const name = escapeHtml(d.device_name || "جهاز غير معروف");
+      const sub = d.is_active
+        ? `<small>اتسجّل ${fmtDate(d.first_seen_at)}</small>`
+        : `<small class="reset-tag">اتعمله Reset</small>`;
+      return `<div class="dev"><b>${name}</b>${sub}</div>`;
+    }
+
+    function lastSeenCell(row) {
+      const d = row.device;
+      if (!d || !d.last_seen_at) return '<span class="days none">—</span>';
+      return `<div class="dev"><b>${escapeHtml(relTime(d.last_seen_at))}</b><small>${escapeHtml(fmtDateTime(d.last_seen_at))}</small></div>`;
     }
 
     // عدّاد بيتحرك للرقم الجديد بدل ما ينطّ فجأة
@@ -848,10 +889,33 @@
       for (let i = 0; i < n; i++) {
         html += "<tr>" + '<td><span class="sk" style="width:62%"></span></td>'
               + '<td><span class="sk" style="width:46px"></span></td>'.repeat(2)
-              + '<td><span class="sk" style="width:74px"></span></td>'.repeat(3)
+              + '<td><span class="sk" style="width:74px"></span></td>'.repeat(5)
               + '<td><span class="sk" style="width:120px"></span></td>' + "</tr>";
       }
       return html;
+    }
+
+    // بيجيب الجهاز المسجّل لكل مستخدم: الجهاز الفعّال لو موجود، وإلا آخر جهاز اتعمله Reset
+    async function attachDevices(rows) {
+      const { data, error } = await adminClient.from("user_devices")
+        .select("user_id,device_name,is_active,first_seen_at,last_seen_at")
+        .order("last_seen_at", { ascending: false });
+      if (error) {
+        console.error(error);
+        if (!deviceErrShown) { deviceErrShown = true; toast("مش قادرين نقرا بيانات الأجهزة: " + error.message, "err"); }
+        rows.forEach((r) => { r.device = null; });
+        return;
+      }
+      if (!data.length && rows.length && !deviceErrShown) {
+        deviceErrShown = true;
+        toast("مفيش بيانات أجهزة راجعة — لو المفروض فيه، راجع صلاحية SELECT للأدمن على user_devices", "err");
+      }
+      const map = new Map();
+      for (const d of data) {
+        const cur = map.get(d.user_id);
+        if (!cur || (d.is_active && !cur.is_active)) map.set(d.user_id, d);
+      }
+      rows.forEach((r) => { r.device = map.get(r.id) || null; });
     }
 
     async function loadRows() {
@@ -870,7 +934,7 @@
           .order("created_at", { ascending: false });
 
         if (error) {
-          rowsEl.innerHTML = `<tr><td colspan="7" class="muted">حصل خطأ: ${escapeHtml(error.message)}</td></tr>`;
+          rowsEl.innerHTML = `<tr><td colspan="9" class="muted">حصل خطأ: ${escapeHtml(error.message)}</td></tr>`;
           toast("مش قادرين نحمّل البيانات", "err");
           return;
         }
@@ -882,10 +946,11 @@
           return;
         }
         allRows = data || [];
+        await attachDevices(allRows);
         render();
       } catch (err) {
         console.error(err);
-        rowsEl.innerHTML = `<tr><td colspan="7" class="muted">مفيش اتصال بالسيرفر.</td></tr>`;
+        rowsEl.innerHTML = `<tr><td colspan="9" class="muted">مفيش اتصال بالسيرفر.</td></tr>`;
         toast("مفيش اتصال بالسيرفر", "err");
       } finally {
         btn.classList.remove("spinning");
@@ -918,7 +983,12 @@
       return [...list].sort((a, b) => {
         let va, vb;
         if (sortKey === "email") return a.email.localeCompare(b.email, "en") * dir;
-        if (sortKey === "days") {
+        if (sortKey === "last_seen") {
+          va = a.device?.last_seen_at ? new Date(a.device.last_seen_at).getTime() : null;
+          vb = b.device?.last_seen_at ? new Date(b.device.last_seen_at).getTime() : null;
+          if (va === null) return 1;
+          if (vb === null) return -1;
+        } else if (sortKey === "days") {
           // الصفوف من غير تاريخ انتهاء بتتحط في الآخر دايماً
           va = daysLeft(a); vb = daysLeft(b);
           if (va === null) return 1;
@@ -956,7 +1026,7 @@
       animateNumber($("stOff"), total - active);
 
       const list = sortRows(allRows.filter((r) => {
-        if (q && !String(r.email || "").toLowerCase().includes(q)) return false;
+        if (q && !(String(r.email || "") + " " + String(r.device?.device_name || "")).toLowerCase().includes(q)) return false;
         if (f !== "all" && statusOf(r) !== f) return false;
         return true;
       }));
@@ -987,6 +1057,8 @@
           <td class="email" data-label="الإيميل">${escapeHtml(row.email)}</td>
           <td data-label="الحالة">${BADGES[st]}</td>
           <td data-label="الباقة">${escapeHtml(row.plan) || "—"}</td>
+          <td data-label="الجهاز">${deviceCell(row)}</td>
+          <td data-label="آخر دخول">${lastSeenCell(row)}</td>
           <td data-label="التسجيل">${fmtDate(row.created_at)}</td>
           <td data-label="الانتهاء">${fmtDate(row.expires_at)}</td>
           <td data-label="المتبقي">${daysHtml}</td>
@@ -1054,24 +1126,16 @@
         btn.textContent = "...";
 
         try {
-          const { data: { session } } = await adminClient.auth.getSession();
-          if (!session) { toast("جلستك منتهية، سجّل دخول تاني", "err"); return; }
+          if (!(await ensureAdminSession())) return;
 
-          const response = await fetch(`${SUPABASE_URL}/functions/v1/reset-device`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${session.access_token}`,
-            },
-            body: JSON.stringify({ target_user_id: id }),
-          });
-          const result = await response.json();
-
-          if (!response.ok || !result.success) {
-            toast("مش قادرين نعمل Reset Device: " + (result.reason || "خطأ غير معروف"), "err");
+          const { data: result, error } = await adminClient.rpc("reset_user_devices", { p_target_user_id: id });
+          if (error) { toast("مش قادرين نعمل Reset Device: " + error.message, "err"); return; }
+          if (!result || !result.success) {
+            toast("مش قادرين نعمل Reset Device: " + (result?.reason || "خطأ غير معروف"), "err");
             return;
           }
           toast("تم عمل Reset Device بنجاح", "ok");
+          await loadRows();
         } catch (err) {
           console.error(err);
           toast("مفيش اتصال بالسيرفر", "err");
@@ -1203,10 +1267,11 @@
 
     $("exportBtn").onclick = () => {
       if (!allRows.length) { toast("مفيش بيانات للتصدير"); return; }
-      const head = ["email", "status", "plan", "created_at", "expires_at", "days_left"];
+      const head = ["email", "status", "plan", "created_at", "expires_at", "days_left", "device_name", "device_state", "last_seen_at"];
       const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
       const lines = [head.join(",")].concat(
-        allRows.map((r) => [r.email, statusOf(r), r.plan, r.created_at, r.expires_at, daysLeft(r) ?? ""]
+        allRows.map((r) => [r.email, statusOf(r), r.plan, r.created_at, r.expires_at, daysLeft(r) ?? "",
+          r.device?.device_name, r.device ? (r.device.is_active ? "active" : "reset") : "", r.device?.last_seen_at]
           .map(esc).join(","))
       );
       // BOM عشان Excel يقرا العربي صح
