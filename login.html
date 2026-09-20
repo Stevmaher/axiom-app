@@ -621,15 +621,43 @@
     // المخزّن محليًا — مش على access_token ولا أي حاجة بتتغيّر مع كل
     // تحديث للجلسة (عشان كده كانت بتظهر "جهاز تاني" غلط بعد قفل المتصفح).
     async function checkDeviceAccess() {
+      const {
+        data: { session },
+        error: sessionError
+      } = await supabaseClient.auth.getSession();
+
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        throw new Error("device_check_failed");
+      }
+
+      if (!session) {
+        console.error("No active session");
+        throw new Error("device_check_failed");
+      }
+
+      const deviceId = getDeviceId();
+
+      console.log("Session user:", session.user.id);
+      console.log("Device ID:", deviceId);
+
+      if (!deviceId) {
+        console.error("Device ID is empty");
+        throw new Error("device_check_failed");
+      }
+
       const { data, error } = await supabaseClient.rpc("check_or_register_device", {
-        p_device_id: getDeviceId(),
+        p_device_id: String(deviceId),
       });
+
+      console.log("RPC data:", data);
+      console.log("RPC error:", error);
 
       if (error) {
         console.error(error);
         throw new Error("device_check_failed");
       }
-      if (!data) {
+      if (data !== true) {
         throw new Error("different_device");
       }
       return true;
