@@ -558,7 +558,7 @@
         </div>
 
         <div class="row-extra" id="rowExtra">
-          <button type="button" class="link" id="forgotBtn">نسيت كلمة المرور؟</button>
+          <a class="link" id="forgotBtn" href="./forgot-password.html">نسيت كلمة المرور؟</a>
         </div>
 
         <button class="submit" id="submitBtn" type="submit">
@@ -730,6 +730,17 @@
         h < 12 ? "صباح الخير" :
         h < 17 ? "مساء الخير" :
         h < 21 ? "مساء الفل" : "مساء الخير";
+    })();
+
+    /* ===================== returning from password reset ===================== */
+
+    (function checkResetSuccess() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("reset") === "success") {
+        showMsg("تم تغيير كلمة المرور بنجاح. سجّل دخولك بكلمة المرور الجديدة.", "ok");
+        // ننضّف الرابط عشان الرسالة متتكررش لو المستخدم عمل refresh
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     })();
 
     /* ===================== password ===================== */
@@ -922,30 +933,6 @@
         fail("حصل خطأ غير متوقع. اتأكد من الاتصال بالنت وجرّب تاني.");
       } finally {
         setLoading(false);
-      }
-    });
-
-    /* ===================== forgot password ===================== */
-
-    els.forgotBtn.addEventListener("click", async () => {
-      const email = els.email.value.trim();
-      if (!EMAIL_RE.test(email)) {
-        fail("اكتب إيميلك في الخانة الأول، وبعدين اضغط نسيت كلمة المرور", els.emailWrap);
-        return;
-      }
-      els.forgotBtn.disabled = true;
-      try {
-        await supabaseClient.auth.resetPasswordForEmail(email, {
-          redirectTo: new URL("./login.html", window.location.href).href,
-        });
-        // بنرد نفس الرسالة سواء الإيميل موجود أو لأ، عشان محدش يستخدم
-        // الزرار ده عشان يعرف مين مسجّل عندنا
-        showMsg("لو الإيميل ده مسجّل عندنا، هتوصلك رسالة لإعادة التعيين.", "ok");
-      } catch (err) {
-        console.error(err);
-        showMsg("مش قادرين نبعت الرسالة دلوقتي. جرّب تاني بعد شوية.", "error");
-      } finally {
-        els.forgotBtn.disabled = false;
       }
     });
 
