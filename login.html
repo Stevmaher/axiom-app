@@ -295,15 +295,6 @@
     }
     .strength-text { font-size: 12px; margin-top: 6px; color: var(--parchment-dim); }
 
-    /* ---- extra signup row ---- */
-    .row-extra {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-top: 14px;
-      font-size: 13px;
-    }
     .link {
       background: none;
       border: none;
@@ -557,10 +548,6 @@
           </div>
         </div>
 
-        <div class="row-extra" id="rowExtra">
-          <a class="link" id="forgotBtn" href="./forgot-password.html">نسيت كلمة المرور؟</a>
-        </div>
-
         <button class="submit" id="submitBtn" type="submit">
           <span class="spinner" id="submitSpinner" aria-hidden="true"></span>
           <span id="submitLabel">دخول</span>
@@ -607,7 +594,6 @@
       togglePassword: $("togglePassword"), greeting: $("greeting"),
       strength: $("strength"), strengthText: $("strengthText"),
       bars: document.querySelectorAll(".bars i"),
-      forgotBtn: $("forgotBtn"),
     };
 
     let mode = "login";
@@ -701,7 +687,6 @@
       els.password.setAttribute("autocomplete", isLogin ? "current-password" : "new-password");
       els.strength.classList.toggle("show", !isLogin);
       els.strength.setAttribute("aria-hidden", String(isLogin));
-      els.forgotBtn.style.display = isLogin ? "" : "none";
       if (!isLogin) updateStrength();
       showMsg("");
       els.emailWrap.classList.remove("invalid");
