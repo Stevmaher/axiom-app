@@ -24,13 +24,13 @@
     .maybeSingle();
 
   if (error || !sub || !sub.active) {
-    await supabaseClient.auth.signOut();
+    await supabaseClient.auth.signOut({ scope: "local" });
     window.location.href = "./login.html";
   }
 })();
 
 // دالة تقدر تربطها بزرار "تسجيل خروج" لو ضفته في الصفحة
 async function axiomLogout() {
-  await supabaseClient.auth.signOut();
+  await supabaseClient.auth.signOut({ scope: "local" });
   window.location.href = "./login.html";
 }

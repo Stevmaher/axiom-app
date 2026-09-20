@@ -8,4 +8,16 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // إيميل/إيميلات الأدمن (لازم تتطابق مع الـ is_admin() في قاعدة البيانات SQL)
 const ADMIN_EMAILS = ["estevanmaher5@gmail.com"];
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// إعدادات الـ Auth هنا صريحة عشان الجلسة تفضل ثابتة بين الزيارات:
+// persistSession + storage=localStorage يخلّوا تسجيل الدخول يفضل شغّال
+// بعد قفل المتصفح وفتحه تاني على نفس الجهاز، وautoRefreshToken يجدّد
+// التوكن لوحده من غير ما يطلب من المستخدم يسجّل دخول تاني.
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage,
+    storageKey: "my-app-auth",
+  },
+});
