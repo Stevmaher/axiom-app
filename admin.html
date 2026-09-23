@@ -1209,7 +1209,7 @@
       if (act === "resetDevice") {
         const ok = await askConfirm(
           `متأكد إنك عايز تعمل Reset Device لحساب ${btn.dataset.email}؟ ` +
-          `هيتقدر يدخل بعد كده من أي جهاز تاني (أول جهاز يدخل بيه هيتسجّل كجهازه الجديد).`
+          `الجهاز الحالي هيتفك، وأول جهاز يدخل بعد كده هيتسجّل كالجهاز الجديد.`
         );
         if (!ok) return;
 
@@ -1218,19 +1218,53 @@
         btn.textContent = "...";
 
         try {
-          if (!(await ensureAdminSession())) return;
+          const {
+            data: { session },
+            error: sessionError
+          } = await adminClient.auth.getSession();
 
-          const { data: result, error } = await adminClient.rpc("reset_user_devices", { p_target_user_id: id });
-          if (error) { toast("مش قادرين نعمل Reset Device: " + error.message, "err"); return; }
-          if (!result || !result.success) {
-            toast("مش قادرين نعمل Reset Device: " + (result?.reason || "خطأ غير معروف"), "err");
+          if (sessionError || !session?.access_token) {
+            toast("جلسة الأدمن انتهت، سجّل دخول تاني", "err");
             return;
           }
-          toast("تم عمل Reset Device بنجاح", "ok");
+
+          const response = await fetch(
+            `${SUPABASE_URL}/functions/v1/admin-actions`,
+            {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${session.access_token}`,
+                "apikey": SUPABASE_ANON_KEY,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                action: "reset_device",
+                user_id: id
+              })
+            }
+          );
+
+          const result = await response.json().catch(() => ({}));
+
+          if (!response.ok || !result?.ok) {
+            console.error("RESET DEVICE ERROR:", result);
+            toast(
+              "Reset Device فشل: " +
+              (result?.error || result?.message || `HTTP ${response.status}`),
+              "err"
+            );
+            return;
+          }
+
+          toast(
+            "تم Reset Device بنجاح — الجهاز القديم اتفك والجلسات اتلغت",
+            "ok"
+          );
+
           await loadRows();
         } catch (err) {
-          console.error(err);
-          toast("مفيش اتصال بالسيرفر", "err");
+          console.error("RESET DEVICE EXCEPTION:", err);
+          toast("حصل خطأ أثناء Reset Device", "err");
         } finally {
           btn.disabled = false;
           btn.textContent = prevText;
