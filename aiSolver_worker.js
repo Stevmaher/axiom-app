@@ -528,6 +528,14 @@
   }
 
   let searchNextTile = 0;
+  // The board-seeded "next tile" hint is only true for the very first spawn
+  // after the root move (that's what the game UI actually shows the
+  // player). It must NOT be applied to deeper chance nodes, which represent
+  // spawns several moves in the future and are genuinely random. Since depth
+  // decreases monotonically on every recursive call, depth === searchRootDepth
+  // holds exactly once per analyze() call: at the root chance node. That's
+  // used below to scope the known-tile assumption correctly.
+  let searchRootDepth = 0;
   // Soft wall-clock budget for a whole analyze() call. Certain board
   // structures (scattered low tiles with no natural merges) can blow up the
   // exhaustive chance-node branching combinatorially even at moderate depth
@@ -560,8 +568,12 @@
       if (empties.length === 0) {
         value = expectimax(rows, depth - 1, true);
       } else {
-        const tiles = searchNextTile >= 1 && searchNextTile <= 7 ? [searchNextTile] : SPAWN_VALS;
-        const probs = searchNextTile >= 1 && searchNextTile <= 7 ? [1] : SPAWN_P;
+        // Only the root chance node (depth === searchRootDepth) may use the
+        // known next-tile hint — every deeper chance node is a future spawn
+        // that hasn't been revealed and must be treated as genuinely random.
+        const knownTile = searchNextTile >= 1 && searchNextTile <= 7 && depth === searchRootDepth;
+        const tiles = knownTile ? [searchNextTile] : SPAWN_VALS;
+        const probs = knownTile ? [1] : SPAWN_P;
 
         // Exhaustive at shallow depth or when few empties remain (endgame
         // precision matters more than speed there); smart deterministic
@@ -620,14 +632,20 @@
     }
     let bestIdx = empties[0];
     let bestScore = Infinity;
+    // Test both value 1 and value 2 (the two most probable spawns) rather
+    // than only 1: a "1" isn't always the worse placement — sometimes a "2"
+    // is what blocks a merge the line was counting on. Keeping the worse of
+    // the two gives rollouts a more honest read of endgame risk.
     for (let e = 0; e < empties.length; e++) {
       const idx = empties[e];
-      const trial = copyRows(board);
-      setCell(trial, idx, 1);
-      const s = evaluate(trial);
-      if (s < bestScore) {
-        bestScore = s;
-        bestIdx = idx;
+      for (const testVal of [1, 2]) {
+        const trial = copyRows(board);
+        setCell(trial, idx, testVal);
+        const s = evaluate(trial);
+        if (s < bestScore) {
+          bestScore = s;
+          bestIdx = idx;
+        }
       }
     }
     return bestIdx;
@@ -710,8 +728,18 @@
     let count10 = 0;
     for (let i = 0; i < 16; i++) if (cells[i] === 10) count10++;
 
-    const risky = legalMoves <= 2 || count10 >= 1;
-    if (risky) mcTrials = Math.min(800, Math.round(mcTrials * 1.1));
+    // Building the SECOND Level-10 tile (to merge into a Level-11 clear) is
+    // the real bottleneck for ever reaching Level 11 — reaching a single
+    // Level-10 tile is comparatively easy. Once one exists on the board,
+    // spend noticeably more search budget hunting the merge than the
+    // generic "few legal moves" case gets, since that case is about not
+    // dying rather than about finishing the 10 -> 11 push.
+    if (count10 >= 1) {
+      mcTrials = Math.min(900, Math.round(mcTrials * 1.35));
+      if (depth < 6) depth += 1;
+    } else if (legalMoves <= 2) {
+      mcTrials = Math.min(800, Math.round(mcTrials * 1.1));
+    }
 
     return { depth, mcTrials, mcSteps };
   }
@@ -721,8 +749,7 @@
     const { depth, mcTrials, mcSteps } = computeSearchParams(rows);
 
     searchNextTile = nextTile | 0;
-    // Budget covers the whole analyze() call (all 4 directions combined).
-    searchDeadline = Date.now() + 3000;
+    searchRootDepth = depth;
     // The transposition table caches expectimax values that depend on
     // searchNextTile (chance nodes branch differently when the next tile is
     // known vs. unknown). Since searchNextTile changes on every analyze()
@@ -731,6 +758,16 @@
     // a transposed board here and silently corrupt the search. Clearing per
     // call keeps every cached value valid for the current searchNextTile.
     TT.clear();
+
+    // Budget covers the whole analyze() call, split evenly across the 4
+    // directions. A single shared deadline processed left/right/up/down in
+    // order would let earlier directions consume the whole budget and starve
+    // later ones into a shallow evaluate() fallback — biasing move choice
+    // toward whichever direction happens to be checked first rather than
+    // whichever is actually best. An equal per-direction slice keeps the
+    // comparison fair.
+    const totalBudget = 3000;
+    const perDirBudget = totalBudget / 4;
 
     const recs = [];
     for (let d = 0; d < 4; d++) {
@@ -745,6 +782,8 @@
         });
         continue;
       }
+
+      searchDeadline = Date.now() + perDirBudget;
 
       // Root move scoring: deep expectimax value plus the same level-11 /
       // level-10 / merge / empty-cell / snake bonuses used for move ordering,
