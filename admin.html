@@ -288,6 +288,7 @@
     .dev b { font-weight: 700; font-size: 13.5px; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
     .dev small { color: var(--dimmer); font-size: 11.5px; white-space: nowrap; }
     .dev small.reset-tag { color: var(--warn); font-weight: 700; }
+    .dev small.info-tag { color: var(--dimmer); }
 
     .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
@@ -792,14 +793,129 @@
       return `من ${Math.floor(h / 24)} يوم`;
     }
 
+    function parseDeviceFromUserAgent(ua) {
+      const text = String(ua || "");
+      let os = "نظام غير معروف";
+      let type = "Desktop";
+      let browser = "متصفح غير معروف";
+      let model = "";
+
+      if (/Android/i.test(text)) {
+        const m = text.match(/Android\s+([0-9._]+)/i);
+        os = m ? `Android ${m[1].replace(/_/g, ".")}` : "Android";
+        type = /Mobile/i.test(text) ? "Mobile" : "Tablet";
+        const mm = text.match(/Android[^;)]*;\s*(?:wv;\s*)?([^;)]+?)(?:\s+Build\/[^;)]+)?[;)]/i);
+        if (mm && mm[1]) model = mm[1].trim();
+      } else if (/iPhone|iPod/i.test(text)) {
+        os = "iOS"; type = "Mobile"; model = "iPhone";
+      } else if (/iPad/i.test(text)) {
+        os = "iPadOS"; type = "Tablet"; model = "iPad";
+      } else if (/Windows/i.test(text)) {
+        os = "Windows"; type = "Desktop";
+      } else if (/Mac OS X|Macintosh/i.test(text)) {
+        os = "macOS"; type = "Desktop";
+      } else if (/Linux/i.test(text)) {
+        os = "Linux"; type = "Desktop";
+      }
+
+      if (/Edg\//i.test(text)) browser = "Edge";
+      else if (/OPR\//i.test(text)) browser = "Opera";
+      else if (/SamsungBrowser/i.test(text)) browser = "Samsung Internet";
+      else if (/Firefox\//i.test(text)) browser = "Firefox";
+      else if (/CriOS\//i.test(text) || /Chrome\//i.test(text)) browser = "Chrome";
+      else if (/Safari\//i.test(text) && !/Chrome|Chromium|CriOS|Edg|OPR/i.test(text)) browser = "Safari";
+
+      if (!model) {
+        if (type === "Desktop") model = os;
+        else if (type === "Tablet") model = "Tablet";
+        else if (/Android/i.test(os)) model = "Android Device";
+        else if (/iOS/i.test(os)) model = "iPhone";
+      }
+
+      return {
+        name: model,
+        type,
+        os,
+        browser,
+        model: model || null,
+        user_agent: text
+      };
+    }
+
+    // اسم مفهوم للعرض لو معندناش device_name/موديل صريح، لكن عندنا نوع/نظام معروف
+    function fallbackDeviceName(type, os) {
+      const t = String(type || ""), o = String(os || "");
+      if (/Android/i.test(o)) return "Android Device";
+      if (/iPadOS/i.test(o)) return "iPad";
+      if (/iOS/i.test(o)) return "iPhone";
+      if (/Windows/i.test(o)) return "Windows PC";
+      if (/macOS/i.test(o)) return "Mac";
+      if (/Linux/i.test(o)) return "Linux PC";
+      if (t) return t === "Mobile" ? "Mobile Device" : t === "Tablet" ? "Tablet" : "Desktop";
+      return "";
+    }
+
+    // ترتيب الأولوية للمعلومات المعروضة (مش لحالة "مسجّل فعليًا"، دي بتيجي من
+    // user_devices بس وبتتحفظ زي ما هي عن طريق spread(d) تحت):
+    //   1) security_logs.metadata
+    //   2) security_logs.user_agent (بيتحلل هنا)
+    //   3) user_devices (الحقول القديمة المخزّنة عليه لو موجودة)
+    //   4) fallback من تحليل أي user_agent قديم في user_devices نفسه
+    function normalizeDevice(d, log) {
+      d = d || {};
+      const meta = log?.metadata && typeof log.metadata === "object" ? log.metadata : {};
+      const logUaInfo = log?.user_agent ? parseDeviceFromUserAgent(log.user_agent) : null;
+      const dUaInfo = !logUaInfo && d.user_agent ? parseDeviceFromUserAgent(d.user_agent) : null;
+      const uaInfo = logUaInfo || dUaInfo || { name: "", type: "", os: "", browser: "", model: "" };
+
+      const device_type = meta.device_type || logUaInfo?.type || d.device_type || uaInfo.type || "";
+      const os = meta.os || logUaInfo?.os || d.os || uaInfo.os || "";
+      const browser = meta.browser || logUaInfo?.browser || d.browser || uaInfo.browser || "";
+      const device_model = meta.device_model || meta.model || logUaInfo?.model || d.model || uaInfo.model || "";
+      const device_name = meta.device_name || d.device_name || device_model ||
+        fallbackDeviceName(device_type, os) || uaInfo.name || "جهاز غير معروف";
+      const user_agent = log?.user_agent || d.user_agent || "";
+
+      return {
+        ...d,
+        device_name,
+        device_type,
+        device_model: device_model || null,
+        model: device_model || null, // للتوافق مع أي كود قديم بيقرا model
+        os,
+        browser,
+        user_agent
+      };
+    }
+
     function deviceCell(row) {
-      const d = row.device;
-      if (!d) return '<span class="days none">لسه ماسجّلش</span>';
-      const name = escapeHtml(d.device_name || "جهاز غير معروف");
-      const sub = d.is_active
-        ? `<small>اتسجّل ${fmtDate(d.first_seen_at)}</small>`
-        : `<small class="reset-tag">اتعمله Reset</small>`;
-      return `<div class="dev"><b title="${name}">${name}</b>${sub}</div>`;
+      const d = row.device;               // معلومات العرض (من log/metadata/UA)، ممكن توجد من غير جهاز مسجّل
+      const registered = row.registeredDevice; // الصف الفعلي من user_devices، أو null
+
+      if (!d && !registered) return '<span class="days none">لسه ماسجّلش</span>';
+
+      const name = escapeHtml(d?.device_name || "جهاز غير معروف");
+      const type = escapeHtml(d?.device_type || "");
+      const os = escapeHtml(d?.os || "");
+      const browser = escapeHtml(d?.browser || "");
+      const details = [type, os, browser].filter(Boolean).join(" • ");
+      const icon = /Mobile|iPhone|Android/i.test(d?.device_type || d?.os || "")
+        ? "📱"
+        : /Tablet|iPad/i.test(d?.device_type || d?.os || "")
+          ? "▣"
+          : "💻";
+
+      // is_active بيجي حصريًا من user_devices، مش من وجود log
+      let sub;
+      if (registered && registered.is_active) {
+        sub = `<small>${details || `اتسجّل ${fmtDate(registered.first_seen_at)}`}</small>`;
+      } else if (registered && !registered.is_active) {
+        sub = `<small class="reset-tag">اتعمله Reset</small>`;
+      } else {
+        // فيه معلومات جهاز جاية من السجلات، لكن مفيش جهاز مسجّل فعليًا في user_devices
+        sub = `<small>${details}</small><small class="info-tag">مش مسجّل كجهاز نشط</small>`;
+      }
+      return `<div class="dev"><b title="${name}">${icon} ${name}</b>${sub}</div>`;
     }
 
     function lastSeenCell(row) {
@@ -976,7 +1092,7 @@
       if (error) {
         console.error(error);
         if (!deviceErrShown) { deviceErrShown = true; toast("مش قادرين نقرا بيانات الأجهزة: " + error.message, "err"); }
-        rows.forEach((r) => { r.device = null; });
+        rows.forEach((r) => { r.registeredDevice = null; r.device = null; });
         return;
       }
       if (!data.length && rows.length && !deviceErrShown) {
@@ -988,7 +1104,34 @@
         const cur = map.get(d.user_id);
         if (!cur || (d.is_active && !cur.is_active)) map.set(d.user_id, d);
       }
-      rows.forEach((r) => { r.device = map.get(r.id) || null; });
+      // registeredDevice = الجهاز الفعلي المسجّل في user_devices (أو null).
+      // is_active وتوقيتات first_seen/last_seen بتيجي من هنا حصريًا، مش من الـlogs.
+      rows.forEach((r) => { r.registeredDevice = map.get(r.id) || null; r.device = null; });
+
+      // نستخدم آخر دخول ناجح/تسجيل جهاز لتحسين معلومات العرض (اسم/نوع/نظام/متصفح)
+      // فقط. وجود log لوحده مايعتبرش "جهاز مسجّل" — ده فرق واضح عن registeredDevice.
+      try {
+        const { data: logs, error: logError } = await adminClient
+          .from("security_logs")
+          .select("user_id,event_type,user_agent,metadata,created_at")
+          .in("event_type", ["login_success", "device_registered"])
+          .order("created_at", { ascending: false });
+
+        if (!logError && Array.isArray(logs)) {
+          const logMap = new Map();
+          for (const log of logs) {
+            if (!logMap.has(log.user_id)) logMap.set(log.user_id, log);
+          }
+          rows.forEach((r) => {
+            const log = logMap.get(r.id);
+            if (log || r.registeredDevice) r.device = normalizeDevice(r.registeredDevice, log || null);
+          });
+        } else {
+          rows.forEach((r) => { if (r.registeredDevice) r.device = normalizeDevice(r.registeredDevice, null); });
+        }
+      } catch (_) {
+        rows.forEach((r) => { if (r.registeredDevice) r.device = normalizeDevice(r.registeredDevice, null); });
+      }
     }
 
     async function loadRows() {
@@ -1431,11 +1574,12 @@
 
     $("exportBtn").onclick = () => {
       if (!allRows.length) { toast("مفيش بيانات للتصدير"); return; }
-      const head = ["email", "status", "plan", "created_at", "expires_at", "days_left", "device_name", "device_state", "last_seen_at"];
+      const head = ["email", "status", "plan", "created_at", "expires_at", "days_left", "device_name", "device_type", "device_model", "os", "browser", "user_agent", "device_state", "last_seen_at"];
       const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
       const lines = [head.join(",")].concat(
         allRows.map((r) => [r.email, statusOf(r), r.plan, r.created_at, r.expires_at, daysLeft(r) ?? "",
-          r.device?.device_name, r.device ? (r.device.is_active ? "active" : "reset") : "", r.device?.last_seen_at]
+          r.device?.device_name, r.device?.device_type, r.device?.device_model, r.device?.os, r.device?.browser, r.device?.user_agent,
+          r.registeredDevice ? (r.registeredDevice.is_active ? "active" : "reset") : "", r.registeredDevice?.last_seen_at]
           .map(esc).join(","))
       );
       // BOM عشان Excel يقرا العربي صح
