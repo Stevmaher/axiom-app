@@ -1240,32 +1240,51 @@
       if (act === "del") {
         const ok = await askConfirm(`متأكد إنك عايز تحذف ${btn.dataset.email}؟ الخطوة دي مش بترجع.`);
         if (!ok) return;
+
         const tr = btn.closest("tr");
+        btn.disabled = true;
+        const oldText = btn.textContent;
+        btn.textContent = "...";
 
-        const { data: result, error } = await adminClient.rpc(
-          "delete_user_completely",
-          {
-            p_target_user_id: id
-          }
-        );
+        try {
+          if (!(await ensureAdminSession())) return;
 
-        if (error) {
-          toast("مش قادرين نحذف: " + error.message, "err");
-          return;
-        }
-
-        if (!result || !result.success) {
-          toast(
-            "الحذف فشل: " + (result?.reason || "خطأ غير معروف"),
-            "err"
+          const { data: result, error } = await adminClient.rpc(
+            "delete_user_completely",
+            {
+              p_target_user_id: String(id)
+            }
           );
-          return;
+
+          if (error) {
+            console.error("DELETE RPC ERROR:", error);
+            toast("مش قادرين نحذف: " + error.message, "err");
+            return;
+          }
+
+          if (!result || result.success !== true) {
+            console.error("DELETE RPC RESULT:", result);
+            toast(
+              "الحذف فشل: " + (result?.reason || "خطأ غير معروف"),
+              "err"
+            );
+            return;
+          }
+
+          toast(
+            `تم الحذف — الأجهزة: ${result.deleted_devices ?? 0} | الاشتراك: ${result.deleted_subscriptions ?? 0}`,
+            "ok"
+          );
+
+          tr.classList.add("removing");
+          tr.addEventListener("animationend", loadRows, { once: true });
+        } catch (err) {
+          console.error("DELETE ERROR:", err);
+          toast("مفيش اتصال بالسيرفر أو حصل خطأ غير متوقع", "err");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = oldText;
         }
-
-        toast("تم حذف المشترك وبيانات جهازه من Supabase", "ok");
-
-        tr.classList.add("removing");
-        tr.addEventListener("animationend", loadRows, { once: true });
       }
     }
 
