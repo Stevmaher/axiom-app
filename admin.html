@@ -1241,12 +1241,31 @@
         const ok = await askConfirm(`متأكد إنك عايز تحذف ${btn.dataset.email}؟ الخطوة دي مش بترجع.`);
         if (!ok) return;
         const tr = btn.closest("tr");
-        const { data: del, error } = await adminClient.from("subscriptions").delete().eq("id", id).select("id");
-        if (error) { toast("مش قادرين نحذف: " + error.message, "err"); return; }
-        if (!del || !del.length) { toast("الحذف ماتنفّذش (غالباً صلاحيات RLS)", "err"); return; }
+
+        const { data: result, error } = await adminClient.rpc(
+          "delete_user_completely",
+          {
+            p_target_user_id: id
+          }
+        );
+
+        if (error) {
+          toast("مش قادرين نحذف: " + error.message, "err");
+          return;
+        }
+
+        if (!result || !result.success) {
+          toast(
+            "الحذف فشل: " + (result?.reason || "خطأ غير معروف"),
+            "err"
+          );
+          return;
+        }
+
+        toast("تم حذف المشترك وبيانات جهازه من Supabase", "ok");
+
         tr.classList.add("removing");
         tr.addEventListener("animationend", loadRows, { once: true });
-        toast("تم حذف المشترك", "ok");
       }
     }
 
