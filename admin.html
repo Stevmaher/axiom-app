@@ -1252,7 +1252,7 @@
           const { data: result, error } = await adminClient.rpc(
             "delete_user_completely",
             {
-              p_target_user_id: String(id)
+              p_target_user_id: id
             }
           );
 
