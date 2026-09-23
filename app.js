@@ -54,7 +54,9 @@ const state = {
   animating: false,
   hiddenIndices: null,
   lang: 'ar',
-  rescueSuggestion: null, // { type: 'swap'|'delete', ... }
+  rescueSuggestion: null, // { swap: {...}|null, delete: {...}|null, recommended: 'swap'|'delete'|null }
+  rescueHighlight: null, // { swap: [i1, i2] } | { delete: i } | null — cells to glow on the board
+  rescueBusy: false, // true while the assistant is scoring candidates against the real solver
   elevenCount: 0, // how many level-11 merges completed this trial (max 3)
 };
 
@@ -109,9 +111,13 @@ const TRANSLATIONS = {
     rescueTitle: 'مساعد الذكاء',
     rescueNotLocked: 'اللوحة لسه فيها حركات ممكنة — مش محتاج مساعدة دلوقتي. جرّب الزرار ده لما تتقفل.',
     rescueEmptyBoard: 'حط بعض البلاطات الأول، وبعدين اسأل المساعد لو اتقفلت.',
-    rescueSwapDesc: 'الاقتراح: بدّل بلاطة {a} ببلاطة {b}. اضغط تأكيد تحت عشان ينفّذها.',
-    rescueDeleteDesc: 'الاقتراح: احذف بلاطة {a} بدل ما هي عليه، عشان تفتح مساحة. اضغط تأكيد تحت عشان ينفّذها.',
+    rescueAnalyzing: 'المساعد بيقارن كل الاحتمالات باستخدام نفس محرك الحل الحقيقي... ثواني وهيجهز.',
+    rescueSwapDesc: 'الاقتراح: بدّل البلاطة المتوهجة ① ({a}) بالبلاطة ② ({b}) — الخليتين متعلّمين على اللوحة. اضغط تأكيد تحت عشان ينفّذها.',
+    rescueDeleteDesc: 'الاقتراح: احذف البلاطة المتوهجة بالأحمر ({a})، عشان تفتح مساحة. اضغط تأكيد تحت عشان ينفّذها.',
     rescueNoneDesc: 'اللوحة مقفلة ولم يتم إيجاد تبديل أو حذف يفتحها. جرّب إعادة الضبط.',
+    rescueRecommendedTag: '⭐ أفضل اقتراح حسب المحرك: ',
+    rescueSwapLabel: 'تبديل',
+    rescueDeleteLabel: 'حذف',
     rescueSwapBtn: 'تأكيد: بدّل {a} ↔ {b}',
     rescueDeleteBtn: 'تأكيد: احذف {a}',
     rescueApplied: 'تم. اضغط تحليل أو خطوة مجدداً.',
@@ -290,6 +296,11 @@ function render() {
     }
 
     cell.classList.toggle('hidden-source', !!state.hiddenIndices?.has(i));
+
+    const hl = state.rescueHighlight;
+    cell.classList.toggle('rescue-highlight-a', !!hl?.swap && hl.swap[0] === i);
+    cell.classList.toggle('rescue-highlight-b', !!hl?.swap && hl.swap[1] === i);
+    cell.classList.toggle('rescue-highlight-delete', hl?.delete === i);
   }
 
   if (moveLayerEl) moveLayerEl.innerHTML = '';
@@ -300,70 +311,93 @@ function tileLabel(value) {
   return String(value);
 }
 
-// The assistant is on-demand: pressing the button computes a suggestion for
-// the current board and shows it in the result card. It does not run
-// automatically on every render.
-function runRescueAssistant() {
+function clearRescueUI() {
+  state.rescueSuggestion = null;
+  state.rescueHighlight = null;
+  if (btnRescueSwap) btnRescueSwap.style.display = 'none';
+  if (btnRescueDelete) btnRescueDelete.style.display = 'none';
+}
+
+// The assistant is on-demand: pressing the button ranks every legal swap and
+// delete that unlocks the board using the solver's real positional heuristic
+// (one batched call), then re-checks the top candidate of each kind with the
+// actual expectimax/Monte Carlo search the rest of the app uses — so the
+// suggestion reflects what the AI itself thinks is strongest, not a
+// stand-alone shortcut. The winning cells are also highlighted on the board
+// itself so there's no ambiguity when several tiles share the same value.
+async function runRescueAssistant() {
   if (!rescueCardEl) return;
   const strings = TRANSLATIONS[state.lang];
+  clearRescueUI();
+  render();
 
   if (state.setupMode || state.waitingForSpawn) {
-    state.rescueSuggestion = null;
     rescueCardEl.classList.add('visible');
     rescueDescEl.textContent = strings.rescueNotLocked;
-    btnRescueSwap.style.display = 'none';
-    btnRescueDelete.style.display = 'none';
     return;
   }
 
   if (!state.board.some(Boolean)) {
-    state.rescueSuggestion = null;
     rescueCardEl.classList.add('visible');
     rescueDescEl.textContent = strings.rescueEmptyBoard;
-    btnRescueSwap.style.display = 'none';
-    btnRescueDelete.style.display = 'none';
     return;
   }
 
   if (!isBoardLocked(state.board)) {
-    state.rescueSuggestion = null;
     rescueCardEl.classList.add('visible');
     rescueDescEl.textContent = strings.rescueNotLocked;
-    btnRescueSwap.style.display = 'none';
-    btnRescueDelete.style.display = 'none';
     return;
   }
 
-  const suggestion = computeRescueSuggestion(state.board);
-  state.rescueSuggestion = suggestion;
   rescueCardEl.classList.add('visible');
+  rescueDescEl.textContent = strings.rescueAnalyzing;
+  state.rescueBusy = true;
 
-  const lines = [];
+  try {
+    await ensureSolver();
+    const suggestion = await computeRescueSuggestion(state.board);
+    if (state.rescueBusy === false) return; // superseded by a later call
+    state.rescueSuggestion = suggestion;
 
-  if (suggestion.swap) {
-    const aLabel = tileLabel(suggestion.swap.v1);
-    const bLabel = tileLabel(suggestion.swap.v2);
-    lines.push(strings.rescueSwapDesc
-      .replace('{a}', aLabel)
-      .replace('{b}', bLabel));
-    btnRescueSwap.textContent = strings.rescueSwapBtn
-      .replace('{a}', aLabel)
-      .replace('{b}', bLabel);
-    btnRescueSwap.style.display = '';
-  } else {
-    btnRescueSwap.style.display = 'none';
+    if (!suggestion.swap && !suggestion.delete) {
+      rescueDescEl.textContent = strings.rescueNoneDesc;
+      return;
+    }
+
+    const lines = [];
+
+    if (suggestion.swap) {
+      const aLabel = tileLabel(suggestion.swap.v1);
+      const bLabel = tileLabel(suggestion.swap.v2);
+      let line = strings.rescueSwapDesc.replace('{a}', aLabel).replace('{b}', bLabel);
+      if (suggestion.recommended === 'swap') line = strings.rescueRecommendedTag + strings.rescueSwapLabel + ' — ' + line;
+      lines.push(line);
+      btnRescueSwap.textContent = strings.rescueSwapBtn.replace('{a}', aLabel).replace('{b}', bLabel);
+      btnRescueSwap.style.display = '';
+    }
+
+    if (suggestion.delete) {
+      const aLabel = tileLabel(suggestion.delete.v);
+      let line = strings.rescueDeleteDesc.replace('{a}', aLabel);
+      if (suggestion.recommended === 'delete') line = strings.rescueRecommendedTag + strings.rescueDeleteLabel + ' — ' + line;
+      lines.push(line);
+      btnRescueDelete.textContent = strings.rescueDeleteBtn.replace('{a}', aLabel);
+      btnRescueDelete.style.display = '';
+    }
+
+    rescueDescEl.textContent = lines.join('  ·  ');
+
+    // Glow the actual cells on the board so the suggestion is unambiguous
+    // even when duplicate tile values are present.
+    state.rescueHighlight = suggestion.recommended === 'delete' && suggestion.delete
+      ? { delete: suggestion.delete.i }
+      : suggestion.swap
+        ? { swap: [suggestion.swap.i1, suggestion.swap.i2] }
+        : (suggestion.delete ? { delete: suggestion.delete.i } : null);
+    render();
+  } finally {
+    state.rescueBusy = false;
   }
-
-  if (suggestion.delete) {
-    const aLabel = tileLabel(suggestion.delete.v);
-    lines.push(strings.rescueDeleteDesc.replace('{a}', aLabel));
-    btnRescueDelete.textContent = strings.rescueDeleteBtn.replace('{a}', aLabel);
-    btnRescueDelete.style.display = '';
-  } else {
-    btnRescueDelete.style.display = 'none';
-  }
-
-  rescueDescEl.textContent = lines.length ? lines.join('  ·  ') : strings.rescueNoneDesc;
 }
 
 function applyRescueSuggestion(kind) {
@@ -386,9 +420,9 @@ function applyRescueSuggestion(kind) {
     return;
   }
 
+  clearRescueUI();
   render();
   rescueCardEl.classList.remove('visible');
-  state.rescueSuggestion = null;
   setStatus('rescueApplied');
 }
 
@@ -536,81 +570,108 @@ function countLegalMoves(board) {
   return n;
 }
 
-// Look for the best pair of tiles to swap so the board unlocks.
-// Prefers swaps that (a) unlock the most directions and (b) are physically
-// close together (adjacent row/col), since that reads as the most sensible move.
-function findBestSwap(board) {
+// Enumerate every swap of two differently-valued tiles that unlocks the
+// board. Each candidate carries the trial board so it can be scored in one
+// batched call to the solver's real heuristic instead of a cheap stand-in.
+function enumerateSwapCandidates(board) {
   const tiles = board.map((v, i) => ({ v, i })).filter((t) => t.v !== 0);
-  let best = null;
-
+  const out = [];
   for (let a = 0; a < tiles.length; a++) {
     for (let b = a + 1; b < tiles.length; b++) {
       const { v: v1, i: i1 } = tiles[a];
       const { v: v2, i: i2 } = tiles[b];
       if (v1 === v2) continue; // swapping equal values changes nothing useful
-
       const trial = board.slice();
       trial[i1] = v2;
       trial[i2] = v1;
       if (isBoardLocked(trial)) continue;
-
-      const row1 = Math.floor(i1 / 4), col1 = i1 % 4;
-      const row2 = Math.floor(i2 / 4), col2 = i2 % 4;
-      const adjacent = (row1 === row2 && Math.abs(col1 - col2) === 1) ||
-        (col1 === col2 && Math.abs(row1 - row2) === 1);
-
-      const score = countLegalMoves(trial) * 10 + (adjacent ? 3 : 0);
-
-      if (!best || score > best.score) {
-        best = { i1, i2, v1, v2, score };
-      }
+      out.push({ i1, i2, v1, v2, trial });
     }
   }
-
-  return best;
+  return out;
 }
 
-// Look for the best single tile to remove so the board unlocks.
-// Prefers removing the lowest-value tile (least costly to lose), and among
-// ties prefers a tile with fewer equal neighbours (less likely to break a
-// pending merge opportunity elsewhere).
-function findBestDelete(board) {
+// Enumerate every single-tile removal that unlocks the board, each carrying
+// its trial board for the same real-heuristic scoring pass.
+function enumerateDeleteCandidates(board) {
   const tiles = board.map((v, i) => ({ v, i })).filter((t) => t.v !== 0);
-  let best = null;
-
+  const out = [];
   for (const { v, i } of tiles) {
     const trial = board.slice();
     trial[i] = 0;
     if (isBoardLocked(trial)) continue;
-
-    const row = Math.floor(i / 4), col = i % 4;
-    let equalNeighbors = 0;
-    if (col > 0 && board[i - 1] === v) equalNeighbors++;
-    if (col < 3 && board[i + 1] === v) equalNeighbors++;
-    if (row > 0 && board[i - 4] === v) equalNeighbors++;
-    if (row < 3 && board[i + 4] === v) equalNeighbors++;
-
-    // Lower value + fewer equal neighbours = better candidate to sacrifice.
-    const score = -(v * 100) - equalNeighbors;
-
-    if (!best || score > best.score) {
-      best = { i, v, score };
-    }
+    out.push({ i, v, trial });
   }
-
-  return best;
+  return out;
 }
 
-function computeRescueSuggestion(board) {
-  if (!board.some(Boolean)) return null;
-  if (!isBoardLocked(board)) return null;
+// Picks the best rescue suggestion by (1) scoring every legal swap/delete
+// candidate against the solver's real positional heuristic in a single
+// batched worker call, then (2) running the actual expectimax + Monte Carlo
+// search (the same one "Analyze" uses) on the resulting board for the top
+// candidate of each kind, so the final pick — and which of swap/delete is
+// marked as recommended — reflects the AI's genuine best judgment rather
+// than a simplified stand-in.
+async function computeRescueSuggestion(board) {
+  if (!board.some(Boolean)) return { swap: null, delete: null, recommended: null };
+  if (!isBoardLocked(board)) return { swap: null, delete: null, recommended: null };
 
-  const swap = findBestSwap(board);
-  const del = findBestDelete(board);
+  const swapCandidates = enumerateSwapCandidates(board);
+  const deleteCandidates = enumerateDeleteCandidates(board);
+  const allTrials = [...swapCandidates, ...deleteCandidates].map((c) => c.trial);
 
-  // Return both options (when they exist) so the person can pick which
-  // action to apply themselves — the assistant never chooses for them.
-  return { swap: swap || null, delete: del || null };
+  if (!allTrials.length) return { swap: null, delete: null, recommended: null };
+
+  let scores;
+  try {
+    const { results } = await state.evaluateCandidates(allTrials);
+    scores = results;
+  } catch (e) {
+    scores = null; // solver unavailable — fall back to "more legal moves is better"
+  }
+
+  const scoreOf = (idx, trial) => scores
+    ? scores[idx].score
+    : countLegalMoves(trial) * 1000;
+
+  let bestSwap = null;
+  swapCandidates.forEach((c, idx) => {
+    const score = scoreOf(idx, c.trial);
+    if (!bestSwap || score > bestSwap.score) bestSwap = { ...c, score };
+  });
+
+  let bestDelete = null;
+  deleteCandidates.forEach((c, idx) => {
+    const score = scoreOf(swapCandidates.length + idx, c.trial);
+    if (!bestDelete || score > bestDelete.score) bestDelete = { ...c, score };
+  });
+
+  // Confirm the top candidate(s) with the real search so the recommendation
+  // is grounded in the same engine that drives "Analyze" / "Step best move".
+  let swapSurvival = -Infinity;
+  let deleteSurvival = -Infinity;
+  try {
+    if (bestSwap) {
+      const r = await state.analyze(Uint8Array.from(bestSwap.trial));
+      swapSurvival = Math.max(...r.recommendations.filter((m) => m.valid).map((m) => m.survivalScore), -Infinity);
+    }
+    if (bestDelete) {
+      const r = await state.analyze(Uint8Array.from(bestDelete.trial));
+      deleteSurvival = Math.max(...r.recommendations.filter((m) => m.valid).map((m) => m.survivalScore), -Infinity);
+    }
+  } catch (e) {
+    // If the deep confirmation pass fails, fall back to the fast heuristic
+    // scores already computed above rather than leaving no recommendation.
+    swapSurvival = bestSwap ? bestSwap.score : -Infinity;
+    deleteSurvival = bestDelete ? bestDelete.score : -Infinity;
+  }
+
+  let recommended = null;
+  if (bestSwap && bestDelete) recommended = swapSurvival >= deleteSurvival ? 'swap' : 'delete';
+  else if (bestSwap) recommended = 'swap';
+  else if (bestDelete) recommended = 'delete';
+
+  return { swap: bestSwap, delete: bestDelete, recommended };
 }
 
 function lineIndices(move, line) {
@@ -785,6 +846,20 @@ async function ensureSolver() {
       });
     });
 
+    // Fast batch scoring (no expectimax/Monte Carlo) used to rank many
+    // candidate boards at once — e.g. every possible rescue swap/delete —
+    // against the solver's real positional heuristic instead of a cheap
+    // ad-hoc score.
+    state.evaluateCandidates = (candidateBoards) => new Promise((resolve, reject) => {
+      const requestId = nextRequestId++;
+      pending.set(requestId, { resolve, reject });
+      state.worker.postMessage({
+        type: 'evaluateCandidates',
+        candidates: candidateBoards.map((b) => Array.from(b)),
+        requestId,
+      });
+    });
+
     setStatus('statusReady');
   } catch (err) {
     console.warn('AI Solver unavailable.', err);
@@ -868,6 +943,8 @@ function undoMove() {
   state.waitingForSpawn = prev.waitingForSpawn;
   state.elevenCount = prev.elevenCount ?? state.elevenCount;
   renderElevenStars();
+  clearRescueUI();
+  rescueCardEl?.classList.remove('visible');
   render();
   if (state.waitingForSpawn) {
     setStatus('statusWaitingSpawn');
@@ -1011,7 +1088,7 @@ function resetBoard() {
   chosenMoveEl.textContent = '—';
   renderSelectedDirection(-1);
   state.hiddenIndices = null;
-  state.rescueSuggestion = null;
+  clearRescueUI();
   state.elevenCount = 0;
   renderElevenStars();
   rescueCardEl?.classList.remove('visible');
@@ -1024,7 +1101,9 @@ function toggleMode() {
   const strings = TRANSLATIONS[state.lang];
   btnMode.textContent = state.setupMode ? strings.btnModePlay : strings.btnModeSetup;
   setStatus(state.setupMode ? 'statusSetupMode' : 'statusPlayMode');
+  clearRescueUI();
   rescueCardEl?.classList.remove('visible');
+  render();
 }
 
 function init() {

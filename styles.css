@@ -325,6 +325,65 @@
       visibility: hidden;
     }
 
+    /* Rescue assistant: glow the actual suggested cell(s) on the board so the
+       suggestion is unambiguous even when duplicate tile values exist. */
+    .cell.rescue-highlight-a,
+    .cell.rescue-highlight-b,
+    .cell.rescue-highlight-delete {
+      position: relative;
+      z-index: 1;
+      animation: rescuePulse 1.4s ease-in-out infinite;
+    }
+
+    .cell.rescue-highlight-a,
+    .cell.rescue-highlight-b {
+      box-shadow: 0 0 0 3px var(--gold-bright), 0 0 18px 4px var(--gold-dim);
+    }
+
+    .cell.rescue-highlight-delete {
+      box-shadow: 0 0 0 3px #e05c5c, 0 0 18px 4px rgba(224, 92, 92, 0.55);
+    }
+
+    .cell.rescue-highlight-a::after,
+    .cell.rescue-highlight-b::after,
+    .cell.rescue-highlight-delete::after {
+      position: absolute;
+      top: -8px;
+      inset-inline-end: -8px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-family: 'Cinzel', 'Tajawal', serif;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1B262C;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .cell.rescue-highlight-a::after {
+      content: '①';
+      background: var(--gold-bright);
+    }
+
+    .cell.rescue-highlight-b::after {
+      content: '②';
+      background: var(--gold-bright);
+    }
+
+    .cell.rescue-highlight-delete::after {
+      content: '✕';
+      background: #e05c5c;
+      color: #fff;
+    }
+
+    @keyframes rescuePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
     .tile-icon {
       width: 114%;
       height: 114%;

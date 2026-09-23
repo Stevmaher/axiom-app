@@ -907,13 +907,37 @@
     return { weights: best, score: bestScore };
   }
 
+  // Fast, synchronous scoring for a batch of candidate boards (no expectimax,
+  // no Monte Carlo) — used by the rescue assistant to rank many possible
+  // swap/delete candidates against the same static heuristic the solver's
+  // move ordering and quality checks use, instead of a cheap ad-hoc score.
+  function countLegalMovesRows(rows) {
+    let n = 0;
+    for (let d = 0; d < 4; d++) if (moveBoard(rows, d)[1]) n++;
+    return n;
+  }
+
+  function evaluateCandidate(cells) {
+    const rows = packBoard(cells);
+    const legalMoves = countLegalMovesRows(rows);
+    return {
+      score: evaluate(rows),
+      legalMoves,
+      locked: legalMoves === 0,
+    };
+  }
+
   if (typeof self !== "undefined" && typeof self.postMessage === "function") {
     self.onmessage = function (event) {
-      const { type, board, requestId, nextTile } = event.data || {};
-      if (type !== "analyze") return;
+      const { type, board, requestId, nextTile, candidates } = event.data || {};
       try {
-        const data = analyze(board, nextTile || 0);
-        self.postMessage({ type: "result", data, requestId });
+        if (type === "analyze") {
+          const data = analyze(board, nextTile || 0);
+          self.postMessage({ type: "result", data, requestId });
+        } else if (type === "evaluateCandidates") {
+          const results = (candidates || []).map((cells) => evaluateCandidate(cells));
+          self.postMessage({ type: "result", data: { results }, requestId });
+        }
       } catch (err) {
         self.postMessage({ type: "error", message: String(err), requestId });
       }
