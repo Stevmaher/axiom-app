@@ -60,7 +60,12 @@
         </div>
 
         <div class="analysis-column">
-          <h2 data-i18n="analysisTitle">Analysis</h2>
+          <div class="picker-card" id="pickerCard">
+            <h2 data-i18n="tilePickerTitle">Tile picker</h2>
+            <div class="picker" id="tilePicker" role="group" aria-label="Tile picker"></div>
+          </div>
+
+          <h2 class="analysis-title" data-i18n="analysisTitle">Analysis</h2>
           <div><strong data-i18n="chosenMoveTitle">Chosen move:</strong> <span id="chosenMove">—</span></div>
           <div class="direction-card" aria-live="polite">
             <div class="direction-card-label" data-i18n="playDirectionLabel">Play this direction</div>
@@ -86,9 +91,6 @@
       </div>
 
       <div class="section-divider"></div>
-
-      <h2 data-i18n="tilePickerTitle">Tile picker</h2>
-      <div class="picker" id="tilePicker" role="group" aria-label="Tile picker"></div>
 
       <div class="controls">
         <button id="btnMode" data-i18n="btnModePlay">Switch to Play Mode</button>

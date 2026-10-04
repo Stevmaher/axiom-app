@@ -913,3 +913,67 @@
         transition-duration: 0.001ms !important;
       }
     }
+
+
+    /* ===== Tile picker: beside the board (desktop) / fixed bottom bar (mobile) ===== */
+    .picker-card h2 {
+      margin-top: 0;
+      color: var(--mist);
+    }
+
+    .analysis-column .picker {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      justify-content: stretch;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .analysis-column .pick {
+      min-width: 0;
+      min-height: 0;
+      aspect-ratio: 1 / 1;
+      width: 100%;
+    }
+
+    .analysis-column .analysis-title {
+      margin-top: 18px;
+    }
+
+    @media (max-width: 799px) {
+      .picker-card {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 50;
+        padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+        background: linear-gradient(180deg, rgba(15, 76, 117, 0.97), rgba(27, 38, 44, 0.99));
+        border-top: 1px solid var(--border);
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.45);
+      }
+
+      .picker-card h2 {
+        display: none;
+      }
+
+      .analysis-column .picker {
+        margin-top: 0;
+        gap: 6px;
+        max-width: 420px;
+        margin-inline: auto;
+      }
+
+      .analysis-column .pick {
+        aspect-ratio: auto;
+        height: 52px;
+        padding: 2px;
+      }
+
+      .analysis-column .pick.active {
+        transform: scale(1.04);
+      }
+
+      .wrap {
+        padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+      }
+    }
