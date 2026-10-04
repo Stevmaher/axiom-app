@@ -76,7 +76,7 @@ const TRANSLATIONS = {
     statusWaitingSpawn: 'اختر موقع البلاطة التالية أولاً.',
     statusAnalysis: 'اكتمل التحليل في {time} مللي ثانية.',
     statusCleared: 'تم مسح اللوحة.',
-    statusSetupMode: 'وضع الإعداد: انقر على الخلايا لتبديل البلاطة المختارة.',
+    statusSetupMode: 'وضع الإعداد: اضغط على أي خلية ثم اختر الوحش.',
     statusPlayMode: 'وضع اللعب: استخدم تحليل / خطوة، ثم ضع البلاطة الناتجة يدوياً.',
     emptiesLabel: 'الفراغات:',
     tilePickerTitle: 'منتقي البلاطات',
@@ -1053,19 +1053,33 @@ async function stepBestMove() {
   setStatus('statusApplied', { move: MOVE_NAMES[moveIndex] });
 }
 
+// Tapping a cell opens the beast chooser sheet; the chosen beast is then applied.
 function onCellClick(index) {
   if (state.setupMode) {
     if (state.animating) return;
-    pushHistory();
-    state.board[index] = state.board[index] === state.selectedTile ? 0 : state.selectedTile;
-    render();
+    openTileSheet(index);
     return;
   }
 
   if (!state.waitingForSpawn || !state.pendingBoard) return;
   if (state.pendingBoard[index] !== 0) return;
+  openTileSheet(index);
+}
+
+// value === 0 clears the cell (setup mode only).
+function applyCellTile(index, value) {
+  if (state.setupMode) {
+    if (state.animating) return;
+    pushHistory();
+    state.board[index] = value;
+    render();
+    return;
+  }
+
+  if (!state.waitingForSpawn || !state.pendingBoard || !value) return;
+  if (state.pendingBoard[index] !== 0) return;
   pushHistory();
-  state.pendingBoard[index] = state.selectedTile;
+  state.pendingBoard[index] = value;
   state.board = cloneBoard(state.pendingBoard);
   state.pendingBoard = null;
   state.waitingForSpawn = false;
@@ -1077,6 +1091,163 @@ function onCellClick(index) {
   } else {
     setStatus('statusSpawnedManual');
   }
+}
+
+// ---------- Beast chooser sheet ----------
+const tileSheetEl = document.getElementById('tileSheet');
+const tileSheetPanelEl = document.getElementById('tileSheetPanel');
+const tileSheetGridEl = document.getElementById('tileSheetGrid');
+const tileSheetClearEl = document.getElementById('tileSheetClear');
+const tileSheetTitleEl = document.getElementById('tileSheetTitle');
+const tileSheetCloseEl = document.getElementById('tileSheetClose');
+const tileSheetDragEl = document.getElementById('tileSheetDrag');
+
+const SHEET_STRINGS = {
+  ar: { title: 'اختر الوحش', clear: 'إفراغ الخلية', close: 'إغلاق' },
+  en: { title: 'Choose a beast', clear: 'Clear cell', close: 'Close' },
+};
+
+let sheetTarget = -1;
+let sheetHideTimer = 0;
+
+function buildTileSheet() {
+  if (!tileSheetGridEl) return;
+  tileSheetGridEl.innerHTML = '';
+  for (let value = 1; value <= 10; value++) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'sheet-tile';
+    btn.dataset.value = String(value);
+    btn.style.setProperty('--i', String(value - 1));
+    btn.setAttribute('aria-label', String(value));
+    if (TILE_IMAGES[value]) {
+      const img = document.createElement('img');
+      img.src = TILE_IMAGES[value];
+      img.className = 'tile-icon';
+      img.alt = '';
+      img.draggable = false;
+      btn.appendChild(img);
+    }
+    const num = document.createElement('span');
+    num.className = 'sheet-num';
+    num.textContent = String(value);
+    btn.appendChild(num);
+    btn.addEventListener('click', () => chooseSheetTile(value));
+    tileSheetGridEl.appendChild(btn);
+  }
+}
+
+function openTileSheet(index) {
+  if (!tileSheetEl) return;
+  window.clearTimeout(sheetHideTimer);
+  closeSheetTargetMark();
+  sheetTarget = index;
+
+  const strings = SHEET_STRINGS[state.lang] || SHEET_STRINGS.en;
+  tileSheetTitleEl.textContent = strings.title;
+  tileSheetClearEl.textContent = strings.clear;
+  tileSheetCloseEl.setAttribute('aria-label', strings.close);
+
+  const source = state.pendingBoard ?? state.board;
+  const current = source[index] || 0;
+  // Highlight the cell's current beast, or the last one used for empty cells.
+  const highlight = current || state.selectedTile;
+  let activeBtn = null;
+  for (const btn of tileSheetGridEl.children) {
+    const on = Number(btn.dataset.value) === highlight;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (on) activeBtn = btn;
+  }
+
+  tileSheetClearEl.hidden = !(state.setupMode && current !== 0);
+
+  if (cellEls && cellEls[index]) cellEls[index].dataset.targeted = '1';
+  tileSheetPanelEl.style.transform = '';
+  tileSheetEl.hidden = false;
+  document.body.classList.add('sheet-open');
+  void tileSheetEl.offsetWidth; // flush so the open transition plays
+  tileSheetEl.classList.add('open');
+  (activeBtn || tileSheetGridEl.firstElementChild)?.focus({ preventScroll: true });
+}
+
+function closeSheetTargetMark() {
+  if (!cellEls) return;
+  for (const c of cellEls) delete c.dataset.targeted;
+}
+
+function closeTileSheet(restoreFocus = true) {
+  if (!tileSheetEl || tileSheetEl.hidden) return;
+  const idx = sheetTarget;
+  tileSheetEl.classList.remove('open');
+  tileSheetPanelEl.classList.remove('dragging');
+  tileSheetPanelEl.style.transform = '';
+  document.body.classList.remove('sheet-open');
+  closeSheetTargetMark();
+  sheetTarget = -1;
+  window.clearTimeout(sheetHideTimer);
+  sheetHideTimer = window.setTimeout(() => { tileSheetEl.hidden = true; }, 340);
+  if (restoreFocus && cellEls && cellEls[idx]) cellEls[idx].focus({ preventScroll: true });
+}
+
+function chooseSheetTile(value) {
+  const idx = sheetTarget;
+  if (idx < 0) return;
+  state.selectedTile = value;
+  syncTilePickers();
+  closeTileSheet(false);
+  applyCellTile(idx, value);
+}
+
+function initTileSheet() {
+  if (!tileSheetEl) return;
+  buildTileSheet();
+
+  tileSheetEl.querySelectorAll('[data-sheet-close]').forEach(el =>
+    el.addEventListener('click', () => closeTileSheet()));
+
+  tileSheetClearEl.addEventListener('click', () => {
+    const idx = sheetTarget;
+    if (idx < 0) return;
+    closeTileSheet(false);
+    applyCellTile(idx, 0);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (tileSheetEl.hidden) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeTileSheet(); return; }
+    if (e.key === 'Tab') {
+      const items = [...tileSheetEl.querySelectorAll('button:not([hidden])')];
+      if (!items.length) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  // Swipe down on the handle/header to dismiss (mobile).
+  let startY = 0, dragging = false, dy = 0;
+  tileSheetDragEl.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('button')) return;
+    if (window.matchMedia('(min-width: 700px)').matches) return;
+    dragging = true; startY = e.clientY; dy = 0;
+    tileSheetPanelEl.classList.add('dragging');
+    tileSheetDragEl.setPointerCapture(e.pointerId);
+  });
+  tileSheetDragEl.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    dy = Math.max(0, e.clientY - startY);
+    tileSheetPanelEl.style.transform = `translateY(${dy}px)`;
+  });
+  const endDrag = () => {
+    if (!dragging) return;
+    dragging = false;
+    tileSheetPanelEl.classList.remove('dragging');
+    if (dy > 90) closeTileSheet();
+    else tileSheetPanelEl.style.transform = '';
+  };
+  tileSheetDragEl.addEventListener('pointerup', endDrag);
+  tileSheetDragEl.addEventListener('pointercancel', endDrag);
 }
 
 function resetBoard() {
@@ -1128,6 +1299,7 @@ function init() {
 
   makeTilePicker(tilePickerEl);
   syncTilePickers();
+  initTileSheet();
   renderSelectedDirection(-1);
   renderElevenStars();
   render();

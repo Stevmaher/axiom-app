@@ -915,65 +915,188 @@
     }
 
 
-    /* ===== Tile picker: beside the board (desktop) / fixed bottom bar (mobile) ===== */
-    .picker-card h2 {
-      margin-top: 0;
-      color: var(--mist);
+    /* ===== Beast chooser sheet (opens on cell tap) ===== */
+    .picker[hidden] { display: none; }
+
+    body.sheet-open { overflow: hidden; }
+
+    .cell[data-targeted="1"] {
+      outline: 2px solid var(--gold-bright);
+      outline-offset: 2px;
+      z-index: 3;
+      box-shadow: 0 0 0 4px rgba(216, 167, 82, 0.18), 0 0 22px rgba(240, 199, 122, 0.45);
     }
 
-    .analysis-column .picker {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      justify-content: stretch;
-      gap: 8px;
-      margin-top: 10px;
+    .tile-sheet {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
     }
 
-    .analysis-column .pick {
-      min-width: 0;
+    .tile-sheet[hidden] { display: none; }
+
+    .tile-sheet-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(6, 12, 16, 0.6);
+      -webkit-backdrop-filter: blur(3px);
+      backdrop-filter: blur(3px);
+      opacity: 0;
+      transition: opacity 0.24s ease;
+    }
+
+    .tile-sheet.open .tile-sheet-backdrop { opacity: 1; }
+
+    .tile-sheet-panel {
+      position: relative;
+      width: min(100%, 520px);
+      padding: 0 16px calc(18px + env(safe-area-inset-bottom, 0px));
+      background: linear-gradient(180deg, rgba(15, 76, 117, 0.98), rgba(27, 38, 44, 0.99));
+      border: 1px solid var(--border);
+      border-bottom: 0;
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -22px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      transform: translateY(105%);
+      transition: transform 0.34s cubic-bezier(0.2, 0.9, 0.25, 1.04);
+      will-change: transform;
+    }
+
+    .tile-sheet.open .tile-sheet-panel { transform: translateY(0); }
+    .tile-sheet-panel.dragging { transition: none; }
+
+    .tile-sheet-drag { touch-action: none; cursor: grab; }
+
+    .tile-sheet-grip {
+      width: 44px;
+      height: 5px;
+      margin: 10px auto 6px;
+      border-radius: 999px;
+      background: rgba(232, 241, 245, 0.28);
+    }
+
+    .tile-sheet-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 2px 12px;
+    }
+
+    .tile-sheet-head h3 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--gold-bright);
+    }
+
+    .tile-sheet-close {
+      width: 36px;
+      height: 36px;
       min-height: 0;
+      padding: 0;
+      border-radius: 50%;
+      font-size: 22px;
+      line-height: 1;
+      background: rgba(232, 241, 245, 0.08);
+      border: 1px solid var(--border-soft);
+      color: var(--mist);
+      cursor: pointer;
+    }
+
+    .tile-sheet-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      direction: ltr;
+    }
+
+    .sheet-tile {
+      position: relative;
       aspect-ratio: 1 / 1;
+      min-height: 0;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      background: rgba(232, 241, 245, 0.06);
+      border: 1px solid var(--border-soft);
+      color: var(--mist);
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.16s var(--ease), border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .sheet-tile .tile-icon { width: 100%; height: 100%; }
+
+    .sheet-tile:active { transform: scale(0.92); }
+
+    .sheet-tile.active {
+      border-color: var(--gold-bright);
+      background: linear-gradient(135deg, rgba(232, 241, 245, 0.18), rgba(50, 130, 184, 0.22));
+      box-shadow: 0 0 0 1px var(--gold-bright), 0 8px 22px rgba(216, 167, 82, 0.28);
+    }
+
+    .sheet-num {
+      position: absolute;
+      right: 3px;
+      bottom: 3px;
+      min-width: 17px;
+      height: 17px;
+      padding: 0 4px;
+      border-radius: 999px;
+      font-size: 10px;
+      line-height: 17px;
+      text-align: center;
+      background: rgba(27, 38, 44, 0.85);
+      border: 1px solid var(--gold-dim);
+      color: var(--gold-bright);
+    }
+
+    .tile-sheet.open .sheet-tile {
+      animation: sheetTilePop 0.36s var(--ease) both;
+      animation-delay: calc(var(--i, 0) * 24ms + 90ms);
+    }
+
+    @keyframes sheetTilePop {
+      from { opacity: 0; transform: translateY(14px) scale(0.85); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .tile-sheet-clear {
       width: 100%;
+      margin-top: 14px;
+      min-height: 46px;
+      border-radius: 14px;
+      background: rgba(201, 112, 63, 0.14);
+      border: 1px solid rgba(201, 112, 63, 0.5);
+      color: #f2b896;
+      font-weight: 700;
+      cursor: pointer;
     }
 
-    .analysis-column .analysis-title {
-      margin-top: 18px;
+    .tile-sheet-clear[hidden] { display: none; }
+
+    @media (min-width: 700px) {
+      .tile-sheet { align-items: center; }
+
+      .tile-sheet-panel {
+        border-bottom: 1px solid var(--border);
+        border-radius: 24px;
+        transform: translateY(18px) scale(0.96);
+        opacity: 0;
+        transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.25, 1.04), opacity 0.2s ease;
+      }
+
+      .tile-sheet.open .tile-sheet-panel { transform: none; opacity: 1; }
+      .tile-sheet-grip { display: none; }
+      .tile-sheet-drag { cursor: default; }
     }
 
-    @media (max-width: 799px) {
-      .picker-card {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 50;
-        padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
-        background: linear-gradient(180deg, rgba(15, 76, 117, 0.97), rgba(27, 38, 44, 0.99));
-        border-top: 1px solid var(--border);
-        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.45);
-      }
-
-      .picker-card h2 {
-        display: none;
-      }
-
-      .analysis-column .picker {
-        margin-top: 0;
-        gap: 6px;
-        max-width: 420px;
-        margin-inline: auto;
-      }
-
-      .analysis-column .pick {
-        aspect-ratio: auto;
-        height: 52px;
-        padding: 2px;
-      }
-
-      .analysis-column .pick.active {
-        transform: scale(1.04);
-      }
-
-      .wrap {
-        padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
-      }
+    @media (prefers-reduced-motion: reduce) {
+      .tile-sheet-panel, .tile-sheet-backdrop { transition: none; }
+      .tile-sheet.open .sheet-tile { animation: none; }
     }

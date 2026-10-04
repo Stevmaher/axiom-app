@@ -60,12 +60,7 @@
         </div>
 
         <div class="analysis-column">
-          <div class="picker-card" id="pickerCard">
-            <h2 data-i18n="tilePickerTitle">Tile picker</h2>
-            <div class="picker" id="tilePicker" role="group" aria-label="Tile picker"></div>
-          </div>
-
-          <h2 class="analysis-title" data-i18n="analysisTitle">Analysis</h2>
+          <h2 data-i18n="analysisTitle">Analysis</h2>
           <div><strong data-i18n="chosenMoveTitle">Chosen move:</strong> <span id="chosenMove">—</span></div>
           <div class="direction-card" aria-live="polite">
             <div class="direction-card-label" data-i18n="playDirectionLabel">Play this direction</div>
@@ -91,6 +86,9 @@
       </div>
 
       <div class="section-divider"></div>
+
+      <!-- Kept (hidden) so the app's selected-tile state stays in sync; picking now happens in the sheet below. -->
+      <div class="picker" id="tilePicker" hidden></div>
 
       <div class="controls">
         <button id="btnMode" data-i18n="btnModePlay">Switch to Play Mode</button>
@@ -119,6 +117,23 @@
         corner anchoring, snake bonus, and dedicated endgame scoring).</p>
     </section>
   </div>
+
+  <!-- Beast chooser: opens when a board cell is tapped -->
+  <div class="tile-sheet" id="tileSheet" hidden>
+    <div class="tile-sheet-backdrop" data-sheet-close></div>
+    <div class="tile-sheet-panel" id="tileSheetPanel" role="dialog" aria-modal="true" aria-labelledby="tileSheetTitle">
+      <div class="tile-sheet-drag" id="tileSheetDrag">
+        <div class="tile-sheet-grip" aria-hidden="true"></div>
+        <div class="tile-sheet-head">
+          <h3 id="tileSheetTitle">اختر الوحش</h3>
+          <button type="button" class="tile-sheet-close" id="tileSheetClose" data-sheet-close aria-label="إغلاق">×</button>
+        </div>
+      </div>
+      <div class="tile-sheet-grid" id="tileSheetGrid" role="group"></div>
+      <button type="button" class="tile-sheet-clear" id="tileSheetClear" hidden>إفراغ الخلية</button>
+    </div>
+  </div>
+
   <script src="./app.js"></script>
 </body>
 
