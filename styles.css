@@ -942,10 +942,8 @@
       position: absolute;
       inset: 0;
       background: rgba(6, 12, 16, 0.6);
-      -webkit-backdrop-filter: blur(3px);
-      backdrop-filter: blur(3px);
       opacity: 0;
-      transition: opacity 0.24s ease;
+      transition: opacity 0.12s ease;
     }
 
     .tile-sheet.open .tile-sheet-backdrop { opacity: 1; }
@@ -960,7 +958,7 @@
       border-radius: 24px 24px 0 0;
       box-shadow: 0 -22px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
       transform: translateY(105%);
-      transition: transform 0.34s cubic-bezier(0.2, 0.9, 0.25, 1.04);
+      transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.3, 1);
       will-change: transform;
     }
 
@@ -1026,7 +1024,7 @@
       color: var(--mist);
       font-weight: 800;
       cursor: pointer;
-      transition: transform 0.16s var(--ease), border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+      transition: transform 0.1s ease, border-color 0.1s ease, background 0.1s ease;
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -1056,14 +1054,11 @@
       color: var(--gold-bright);
     }
 
-    .tile-sheet.open .sheet-tile {
-      animation: sheetTilePop 0.36s var(--ease) both;
-      animation-delay: calc(var(--i, 0) * 24ms + 90ms);
-    }
+    .cell, .sheet-tile { touch-action: manipulation; }
 
-    @keyframes sheetTilePop {
-      from { opacity: 0; transform: translateY(14px) scale(0.85); }
-      to   { opacity: 1; transform: none; }
+    .tile-sheet.instant, .tile-sheet.instant * {
+      transition: none !important;
+      animation: none !important;
     }
 
     .tile-sheet-clear {
@@ -1088,7 +1083,7 @@
         border-radius: 24px;
         transform: translateY(18px) scale(0.96);
         opacity: 0;
-        transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.25, 1.04), opacity 0.2s ease;
+        transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.3, 1), opacity 0.12s ease;
       }
 
       .tile-sheet.open .tile-sheet-panel { transform: none; opacity: 1; }
@@ -1098,5 +1093,4 @@
 
     @media (prefers-reduced-motion: reduce) {
       .tile-sheet-panel, .tile-sheet-backdrop { transition: none; }
-      .tile-sheet.open .sheet-tile { animation: none; }
     }

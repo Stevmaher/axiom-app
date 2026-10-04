@@ -1164,6 +1164,7 @@ function openTileSheet(index) {
 
   if (cellEls && cellEls[index]) cellEls[index].dataset.targeted = '1';
   tileSheetPanelEl.style.transform = '';
+  tileSheetEl.classList.remove('instant');
   tileSheetEl.hidden = false;
   document.body.classList.add('sheet-open');
   void tileSheetEl.offsetWidth; // flush so the open transition plays
@@ -1176,7 +1177,7 @@ function closeSheetTargetMark() {
   for (const c of cellEls) delete c.dataset.targeted;
 }
 
-function closeTileSheet(restoreFocus = true) {
+function closeTileSheet(restoreFocus = true, instant = false) {
   if (!tileSheetEl || tileSheetEl.hidden) return;
   const idx = sheetTarget;
   tileSheetEl.classList.remove('open');
@@ -1186,7 +1187,12 @@ function closeTileSheet(restoreFocus = true) {
   closeSheetTargetMark();
   sheetTarget = -1;
   window.clearTimeout(sheetHideTimer);
-  sheetHideTimer = window.setTimeout(() => { tileSheetEl.hidden = true; }, 340);
+  if (instant) {
+    tileSheetEl.classList.add('instant');
+    tileSheetEl.hidden = true;
+  } else {
+    sheetHideTimer = window.setTimeout(() => { tileSheetEl.hidden = true; }, 190);
+  }
   if (restoreFocus && cellEls && cellEls[idx]) cellEls[idx].focus({ preventScroll: true });
 }
 
@@ -1195,7 +1201,7 @@ function chooseSheetTile(value) {
   if (idx < 0) return;
   state.selectedTile = value;
   syncTilePickers();
-  closeTileSheet(false);
+  closeTileSheet(false, true);
   applyCellTile(idx, value);
 }
 
@@ -1209,7 +1215,7 @@ function initTileSheet() {
   tileSheetClearEl.addEventListener('click', () => {
     const idx = sheetTarget;
     if (idx < 0) return;
-    closeTileSheet(false);
+    closeTileSheet(false, true);
     applyCellTile(idx, 0);
   });
 
