@@ -815,7 +815,7 @@
     async function routeAfterLogin(session) {
       const email = session.user.email;
 
-      if (typeof ADMIN_EMAILS !== "undefined" && ADMIN_EMAILS.includes(email)) {
+      if (axiomIsAdmin(session.user)) {
         showMsg("أهلاً بيك يا أدمن، بنحوّلك...", "ok");
         window.location.href = "./admin.html";
         return;

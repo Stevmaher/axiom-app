@@ -985,7 +985,7 @@
     async function boot() {
       try {
         const { data: { session } } = await adminClient.auth.getSession();
-        if (session && ADMIN_EMAILS.includes(session.user.email)) {
+        if (session && axiomIsAdmin(session.user)) {
           showDashboard(session.user.email);
         }
       } catch (err) {
@@ -998,7 +998,7 @@
     async function ensureAdminSession() {
       const { data: { session } } = await adminClient.auth.getSession();
       if (!session) { showGate("الجلسة انتهت، سجّل دخول تاني"); return null; }
-      if (!ADMIN_EMAILS.includes(session.user.email)) {
+      if (!axiomIsAdmin(session.user)) {
         showGate("المتصفح اتسجّل فيه بحساب تاني (" + session.user.email + ")، سجّل دخول بحساب الأدمن");
         return null;
       }
@@ -1019,7 +1019,7 @@
       if (dashboard.hidden) return;
       if (event === "SIGNED_OUT" || !session) {
         showGate("الجلسة انتهت، سجّل دخول تاني");
-      } else if (event === "SIGNED_IN" && !ADMIN_EMAILS.includes(session.user.email)) {
+      } else if (event === "SIGNED_IN" && !axiomIsAdmin(session.user)) {
         showGate("اتعمل دخول بحساب تاني في نفس المتصفح، سجّل دخول بحساب الأدمن");
       }
     });
@@ -1046,7 +1046,7 @@
           gate.classList.remove("shake"); void gate.offsetWidth; gate.classList.add("shake");
           return;
         }
-        if (!ADMIN_EMAILS.includes(data.user.email)) {
+        if (!axiomIsAdmin(data.user)) {
           gMsg.textContent = "الحساب ده مش أدمن";
           await adminClient.auth.signOut();
           return;
@@ -1111,13 +1111,23 @@
       // نستخدم آخر دخول ناجح/تسجيل جهاز لتحسين معلومات العرض (اسم/نوع/نظام/متصفح)
       // فقط. وجود log لوحده مايعتبرش "جهاز مسجّل" — ده فرق واضح عن registeredDevice.
       try {
-        const { data: logs, error: logError } = await adminClient
+        // مقيّد بمستخدمي الصفحة الحالية ومقسّم دفعات: بدل ما نسحب كل اللوجات
+        // (والـ API بيقطعها عند 1000 صف بصمت فمستخدمين بيفقدوا بيانات الجهاز).
+        const ids = rows.map((r) => r.id);
+        const chunks = [];
+        for (let i = 0; i < ids.length; i += 40) chunks.push(ids.slice(i, i + 40));
+        const results = await Promise.all(chunks.map((c) => adminClient
           .from("security_logs")
           .select("user_id,event_type,user_agent,metadata,created_at")
+          .in("user_id", c)
           .in("event_type", ["login_success", "device_registered"])
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: false })
+          .limit(400)));
+        const logError = results.find((r) => r.error)?.error || null;
+        const logs = results.flatMap((r) => r.data || [])
+          .sort((x, y) => (y.created_at > x.created_at ? 1 : -1));
 
-        if (!logError && Array.isArray(logs)) {
+        if (!logError) {
           const logMap = new Map();
           for (const log of logs) {
             if (!logMap.has(log.user_id)) logMap.set(log.user_id, log);
