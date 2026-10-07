@@ -163,7 +163,7 @@ async function axiomCheckAccess() {
   // أو الأفضل تطبّقه في RLS/view عشان يتفرض من السيرفر.
   const { data: sub, error: sErr, status } = await supabaseClient
     .from("subscriptions")
-    .select("active")
+    .select("active,expires_at")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -172,6 +172,9 @@ async function axiomCheckAccess() {
     return { ok: false, reason: net ? "network" : "denied" };
   }
   if (!sub || !sub.active) return { ok: false, reason: "denied" };
+  if (sub.expires_at && new Date(sub.expires_at).getTime() < Date.now()) {
+    return { ok: false, reason: "denied" };
+  }
   return { ok: true, user, admin: false };
 }
 
