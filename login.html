@@ -1,10 +1,9 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#1B262C" />
+  <meta name="theme-color" content="#06111A" />
   <meta name="description" content="Axiom — تسجيل الدخول لمحرّك الحل الذكي" />
   <title>Axiom — تسجيل الدخول</title>
   <link rel="icon" href="./favicon.ico" sizes="any">
@@ -13,24 +12,21 @@
   <link rel="apple-touch-icon" href="./favicon-180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Cormorant+Garamond:wght@500;600&family=Tajawal:wght@400;500;700;800&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"
     integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
   <style>
     :root {
-      --void: #1B262C;
-      --leather: #0F4C75;
-      --leather-2: #1B262C;
-      --parchment: #E8F1F5;
-      --parchment-dim: rgba(232, 241, 245, 0.72);
-      --gold: #D8A752;
-      --gold-dim: rgba(216, 167, 82, 0.55);
-      --border: rgba(50, 130, 184, 0.35);
-      --border-soft: rgba(50, 130, 184, 0.18);
-      --ember: #C98A4A;
-      --ember-dim: rgba(201, 138, 74, 0.5);
+      --bg: #06111a;
+      --panel: rgba(5, 16, 25, 0.83);
+      --panel-strong: rgba(4, 14, 22, 0.93);
+      --text: #f7f4ed;
+      --muted: rgba(247, 244, 237, 0.66);
+      --gold: #e7b84d;
+      --gold-soft: #c89134;
+      --line: rgba(231, 184, 77, 0.27);
+      --line-soft: rgba(255, 255, 255, 0.09);
+      --blue: #1e6f9e;
       --error: #ff9a9a;
       --ok: #8fd9ac;
       --wait: #e8c07d;
@@ -38,62 +34,112 @@
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-    html, body { height: 100%; }
+    html, body { width: 100%; min-height: 100%; }
 
     body {
       margin: 0;
-      min-height: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
       font-family: 'Tajawal', system-ui, sans-serif;
-      color: var(--parchment);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: clamp(16px, 4vw, 40px);
-      background:
-        radial-gradient(ellipse 70% 50% at 20% 0%, rgba(50, 130, 184, 0.16), transparent 60%),
-        radial-gradient(ellipse 70% 50% at 100% 100%, rgba(201, 138, 74, 0.08), transparent 55%),
-        linear-gradient(180deg, var(--void) 0%, var(--leather-2) 55%, var(--void) 100%);
+      color: var(--text);
+      background: var(--bg) url('./axiom-login-bg.jpg') center center / cover no-repeat fixed;
+      position: relative;
     }
 
+    /* Dark cinematic veil: intentionally hides the promotional copy and game-board
+       from the source artwork while keeping the warrior/dragon/lion visible. */
     body::before {
       content: '';
       position: fixed;
-      inset: -40px;
-      background-image: radial-gradient(rgba(232, 241, 245, 0.10) 1px, transparent 1px);
-      background-size: 26px 26px;
-      opacity: 0.3;
+      inset: 0;
       pointer-events: none;
-      z-index: -1;
-      animation: drift 40s linear infinite;
+      z-index: 0;
+      background:
+        linear-gradient(90deg,
+          rgba(3, 11, 17, 0.995) 0%,
+          rgba(3, 11, 17, 0.98) 32%,
+          rgba(3, 11, 17, 0.94) 49%,
+          rgba(3, 11, 17, 0.82) 61%,
+          rgba(3, 11, 17, 0.55) 72%,
+          rgba(3, 11, 17, 0.12) 86%,
+          rgba(3, 11, 17, 0.02) 100%),
+        linear-gradient(180deg,
+          rgba(2, 8, 12, 0.24) 0%,
+          rgba(2, 8, 12, 0.02) 42%,
+          rgba(2, 8, 12, 0.40) 100%);
     }
 
-    @keyframes drift {
-      from { transform: translate(0, 0); }
-      to   { transform: translate(26px, 26px); }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 74% 48%, rgba(231, 184, 77, 0.08), transparent 28%),
+        radial-gradient(circle at 18% 50%, rgba(30, 111, 158, 0.10), transparent 34%);
+      mix-blend-mode: screen;
     }
 
-    /* ===================== card ===================== */
-    .book {
+    .auth-stage {
+      min-height: 100vh;
+      min-height: 100dvh;
       width: 100%;
-      max-width: 860px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      background: linear-gradient(180deg, rgba(15, 76, 117, 0.92), rgba(27, 38, 44, 0.94));
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+      z-index: 1;
+      padding: clamp(22px, 4vw, 54px);
+    }
+
+    .auth-shell {
+      width: min(470px, 100%);
+      margin-inline-start: clamp(14px, 7vw, 96px);
+      background: linear-gradient(160deg, rgba(7, 20, 30, 0.86), rgba(3, 12, 19, 0.94));
+      border: 1px solid rgba(231, 184, 77, 0.22);
+      border-radius: 24px;
+      padding: clamp(26px, 4vw, 42px);
+      box-shadow:
+        0 36px 100px rgba(0, 0, 0, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(13px) saturate(115%);
+      -webkit-backdrop-filter: blur(13px) saturate(115%);
+      position: relative;
       overflow: hidden;
-      animation: cardIn 0.7s var(--ease) both;
+      animation: cardIn 0.75s var(--ease) both;
+    }
+
+    .auth-shell::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      inset-inline: 13%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0.9;
+    }
+
+    .auth-shell::after {
+      content: '';
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      top: -140px;
+      inset-inline-end: -100px;
+      border-radius: 50%;
+      background: rgba(231, 184, 77, 0.10);
+      filter: blur(35px);
+      pointer-events: none;
     }
 
     @keyframes cardIn {
       from { opacity: 0; transform: translateY(18px) scale(0.985); }
-      to   { opacity: 1; transform: none; }
+      to { opacity: 1; transform: none; }
     }
 
-    .book.shake { animation: shake 0.42s ease; }
-
+    .auth-shell.shake { animation: shake 0.42s ease; }
     @keyframes shake {
       10%, 90% { transform: translateX(-2px); }
       20%, 80% { transform: translateX(4px); }
@@ -101,267 +147,234 @@
       40%, 60% { transform: translateX(6px); }
     }
 
-    .spine { position: relative; }
-
-    .spine::after {
-      content: '';
-      position: absolute;
-      top: 8%;
-      bottom: 8%;
-      inset-inline-end: 0;
-      width: 1px;
-      background: linear-gradient(180deg, transparent, var(--border), transparent);
-    }
-
-    /* ===================== form ===================== */
-    .leaf-form {
-      padding: clamp(28px, 4vw, 40px);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    /* staggered entrance for everything inside the form */
-    .leaf-form > *, .fields > * {
-      animation: riseIn 0.6s var(--ease) both;
-    }
-    .leaf-form > *:nth-child(1) { animation-delay: 0.10s; }
-    .leaf-form > *:nth-child(2) { animation-delay: 0.16s; }
-    .leaf-form > *:nth-child(3) { animation-delay: 0.22s; }
-    .leaf-form > *:nth-child(4) { animation-delay: 0.28s; }
-    .leaf-form > *:nth-child(5) { animation-delay: 0.34s; }
-
+    .leaf-form { position: relative; z-index: 1; }
+    .leaf-form > *, .fields > * { animation: riseIn 0.6s var(--ease) both; }
+    .leaf-form > *:nth-child(1) { animation-delay: .08s; }
+    .leaf-form > *:nth-child(2) { animation-delay: .14s; }
+    .leaf-form > *:nth-child(3) { animation-delay: .20s; }
+    .leaf-form > *:nth-child(4) { animation-delay: .26s; }
+    .leaf-form > *:nth-child(5) { animation-delay: .32s; }
     @keyframes riseIn {
       from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: none; }
+      to { opacity: 1; transform: none; }
     }
 
     .greeting {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-size: 14px;
+      margin: 0 0 9px;
       color: var(--gold);
-      margin: 0 0 4px;
-      min-height: 18px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .02em;
     }
 
     .brand-lockup {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin: 0 0 2px;
+      gap: 12px;
+      margin: 0 0 9px;
     }
 
     .brand-mark {
-      width: 28px;
-      height: auto;
-      flex-shrink: 0;
-      filter: drop-shadow(0 0 8px rgba(216, 167, 82, 0.45));
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 13px rgba(231, 184, 77, 0.35));
     }
 
     .brand {
-      font-family: 'Cinzel', serif;
-      font-weight: 700;
-      font-size: 26px;
-      letter-spacing: 0.02em;
       margin: 0;
+      font-family: 'Cinzel', serif;
+      font-size: clamp(28px, 4vw, 34px);
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: .05em;
+      color: var(--gold);
+      text-shadow: 0 0 24px rgba(231, 184, 77, .12);
+      direction: ltr;
     }
 
     .sub {
-      margin: 0 0 24px;
-      color: var(--parchment-dim);
-      font-size: 14.5px;
-      line-height: 1.6;
+      margin: 0 0 28px;
       max-width: 34ch;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.75;
     }
 
-    /* ---- tabs with a sliding indicator ---- */
     .tabs {
       position: relative;
       display: flex;
-      border-bottom: 1px solid var(--border-soft);
+      gap: 2px;
+      border-bottom: 1px solid var(--line-soft);
       margin-bottom: 8px;
     }
 
     .tabs button {
       flex: 1;
-      padding: 10px 4px;
+      padding: 12px 5px 13px;
+      border: 0;
       background: transparent;
-      border: none;
-      color: var(--parchment-dim);
-      font-family: inherit;
-      font-size: 14.5px;
-      font-weight: 500;
+      color: rgba(247, 244, 237, .50);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
       cursor: pointer;
-      transition: color 0.25s var(--ease);
+      transition: color .25s var(--ease);
     }
-
-    .tabs button[aria-selected="true"] { color: var(--parchment); font-weight: 700; }
+    .tabs button[aria-selected="true"] { color: var(--text); }
 
     .tab-indicator {
       position: absolute;
       bottom: -1px;
       height: 2px;
       width: 50%;
-      background: var(--gold);
-      border-radius: 2px;
-      transition: transform 0.35s var(--ease);
+      border-radius: 4px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      transition: transform .35s var(--ease);
     }
-    /* RTL: login tab is on the right */
-    .tab-indicator[data-mode="login"]  { transform: translateX(0); }
+    .tab-indicator[data-mode="login"] { transform: translateX(0); }
     .tab-indicator[data-mode="signup"] { transform: translateX(-100%); }
 
     .fields { display: flex; flex-direction: column; }
 
     label {
       display: block;
-      font-size: 13px;
-      color: var(--parchment-dim);
-      margin: 16px 0 6px;
+      margin: 16px 0 7px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: rgba(247, 244, 237, .64);
     }
 
     .field-wrap { position: relative; }
 
     input {
       width: 100%;
-      padding: 11px 2px;
-      border: none;
-      border-bottom: 1px solid var(--border);
+      padding: 13px 2px 11px;
+      border: 0;
+      border-bottom: 1px solid rgba(255,255,255,.16);
       background: transparent;
-      color: var(--parchment);
+      color: var(--text);
+      font: inherit;
       font-size: 15.5px;
-      font-family: inherit;
-      transition: border-color 0.25s var(--ease);
+      transition: border-color .25s var(--ease);
     }
-
-    input::placeholder { color: rgba(232, 241, 245, 0.35); }
+    input::placeholder { color: rgba(247, 244, 237, .25); }
     input:focus { outline: none; }
-    input:focus-visible { outline: none; }
 
-    /* animated underline that grows from the center on focus */
     .field-wrap::after {
       content: '';
       position: absolute;
       inset-inline: 0;
       bottom: 0;
       height: 2px;
+      border-radius: 3px;
       background: var(--gold);
       transform: scaleX(0);
       transform-origin: center;
-      transition: transform 0.3s var(--ease), background-color 0.2s ease;
+      transition: transform .30s var(--ease), background-color .2s ease;
     }
     .field-wrap:focus-within::after { transform: scaleX(1); }
     .field-wrap.invalid::after { transform: scaleX(1); background: var(--error); }
 
-    .field-wrap.has-eye input { padding-inline-start: 34px; }
-
+    .field-wrap.has-eye input { padding-inline-start: 38px; }
     .toggle-eye {
       position: absolute;
       inset-inline-start: 0;
       top: 50%;
       transform: translateY(-50%);
-      background: transparent;
-      border: none;
-      cursor: pointer;
       padding: 6px;
-      line-height: 0;
-      color: var(--parchment);
-      opacity: 0.5;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      opacity: .5;
+      cursor: pointer;
       border-radius: 8px;
-      transition: opacity 0.2s ease;
+      transition: opacity .2s ease;
     }
-    .toggle-eye:hover { opacity: 0.95; }
-    .toggle-eye svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; }
-    .toggle-eye .slash { stroke-dasharray: 26; stroke-dashoffset: 26; transition: stroke-dashoffset 0.25s var(--ease); }
+    .toggle-eye:hover { opacity: .95; }
+    .toggle-eye svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+    .toggle-eye .slash { stroke-dasharray: 26; stroke-dashoffset: 26; transition: stroke-dashoffset .25s var(--ease); }
     .toggle-eye[aria-pressed="true"] .slash { stroke-dashoffset: 0; }
 
-    /* ---- password strength (signup only) ---- */
     .strength {
       display: grid;
       grid-template-rows: 0fr;
       opacity: 0;
-      transition: grid-template-rows 0.35s var(--ease), opacity 0.25s ease, margin 0.35s var(--ease);
       margin-top: 0;
+      transition: grid-template-rows .35s var(--ease), opacity .25s ease, margin .35s var(--ease);
     }
     .strength.show { grid-template-rows: 1fr; opacity: 1; margin-top: 10px; }
     .strength > div { overflow: hidden; }
-
     .bars { display: flex; gap: 5px; }
     .bars i {
       flex: 1;
       height: 3px;
-      border-radius: 2px;
-      background: rgba(232, 241, 245, 0.14);
-      transition: background-color 0.3s var(--ease);
+      border-radius: 4px;
+      background: rgba(247,244,237,.12);
+      transition: background-color .3s var(--ease);
     }
-    .strength-text { font-size: 12px; margin-top: 6px; color: var(--parchment-dim); }
+    .strength-text { margin-top: 6px; font-size: 11.5px; color: var(--muted); }
 
-    .link {
-      background: none;
-      border: none;
-      padding: 0;
-      color: var(--gold);
-      font-family: inherit;
-      font-size: 13px;
-      cursor: pointer;
-      text-decoration: underline;
-      text-underline-offset: 3px;
-      transition: color 0.2s ease;
-    }
-    .link:hover { color: var(--parchment); }
-
-    /* ---- submit ---- */
     button.submit {
       position: relative;
       width: 100%;
-      margin-top: 22px;
-      padding: 13px;
+      margin-top: 23px;
+      padding: 14px 16px;
+      border: 1px solid rgba(231, 184, 77, .48);
       border-radius: 12px;
-      border: 1px solid var(--ember-dim);
-      background: linear-gradient(180deg, var(--ember), #A8703A);
-      color: #1B140C;
-      font-weight: 800;
+      background: linear-gradient(135deg, #f0c65c 0%, #c58b2f 100%);
+      color: #161008;
+      font: inherit;
       font-size: 15px;
-      font-family: inherit;
+      font-weight: 800;
       cursor: pointer;
       overflow: hidden;
-      transition: filter 0.2s ease, transform 0.12s ease, box-shadow 0.25s ease;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 9px;
+      box-shadow: 0 10px 24px rgba(197, 139, 47, .16);
+      transition: filter .2s ease, transform .12s ease, box-shadow .25s ease;
     }
     button.submit:hover:not(:disabled) {
-      filter: brightness(1.08);
-      box-shadow: 0 8px 22px rgba(201, 138, 74, 0.22);
+      filter: brightness(1.07);
+      box-shadow: 0 12px 30px rgba(197, 139, 47, .23);
     }
-    button.submit:active:not(:disabled) { transform: scale(0.985); }
-    button.submit:disabled { opacity: 0.7; cursor: not-allowed; }
-
-    /* sheen sweep while loading */
+    button.submit:active:not(:disabled) { transform: scale(.985); }
+    button.submit:disabled { opacity: .7; cursor: not-allowed; }
     button.submit.loading::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.26), transparent);
       animation: sheen 1.15s linear infinite;
     }
-    @keyframes sheen {
-      from { transform: translateX(-100%); }
-      to   { transform: translateX(100%); }
-    }
+    @keyframes sheen { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 
     .spinner {
       display: none;
       width: 15px;
       height: 15px;
-      border: 2px solid rgba(27, 20, 12, 0.3);
-      border-top-color: #1B140C;
+      border: 2px solid rgba(22,16,8,.25);
+      border-top-color: #161008;
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      animation: spin .7s linear infinite;
     }
     button.submit.loading .spinner { display: inline-block; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    .msg {
+      min-height: 20px;
+      margin-top: 14px;
+      font-size: 13px;
+      line-height: 1.55;
+      text-align: center;
+    }
+    .msg:not(:empty) { animation: msgIn .35s var(--ease) both; }
+    @keyframes msgIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+    .msg.error { color: var(--error); }
+    .msg.ok { color: var(--ok); }
+    .msg.wait { color: var(--wait); }
 
     :where(button, input, a):focus-visible {
       outline: 2px solid var(--gold);
@@ -369,218 +382,91 @@
       border-radius: 6px;
     }
 
-    /* ---- message ---- */
-    .msg {
-      margin-top: 14px;
-      font-size: 13.5px;
-      text-align: center;
-      min-height: 20px;
-      line-height: 1.55;
-    }
-    .msg:not(:empty) { animation: msgIn 0.35s var(--ease) both; }
-    @keyframes msgIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to   { opacity: 1; transform: none; }
-    }
-    .msg.error { color: var(--error); }
-    .msg.ok    { color: var(--ok); }
-    .msg.wait  { color: var(--wait); }
-
-    /* ===================== hero ===================== */
-    .leaf-hero {
-      padding: clamp(28px, 4vw, 40px);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 18px;
-      background: radial-gradient(circle at 50% 20%, rgba(50, 130, 184, 0.14), transparent 65%);
-      animation: riseIn 0.7s var(--ease) 0.2s both;
+    @media (max-width: 900px) {
+      body { background-position: 76% center; }
+      body::before {
+        background:
+          linear-gradient(90deg,
+            rgba(3,11,17,.995) 0%,
+            rgba(3,11,17,.98) 48%,
+            rgba(3,11,17,.82) 68%,
+            rgba(3,11,17,.30) 84%,
+            rgba(3,11,17,.06) 100%),
+          linear-gradient(180deg, rgba(2,8,12,.18), rgba(2,8,12,.52));
+      }
+      .auth-stage { justify-content: center; padding: 20px; }
+      .auth-shell { margin-inline-start: 0; width: min(500px, 100%); }
     }
 
-    .hero-eyebrow {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-size: 15px;
-      color: var(--gold);
-      margin: 0;
-    }
-
-    .hero-title {
-      font-family: 'Cinzel', 'Tajawal', serif;
-      font-weight: 700;
-      font-size: 22px;
-      line-height: 1.5;
-      margin: 0;
-    }
-
-    .hero-desc {
-      font-size: 14px;
-      line-height: 1.75;
-      color: var(--parchment-dim);
-      margin: 0;
-      max-width: 32ch;
-    }
-
-    /* ---- merge diagram: a real 4s merge loop ---- */
-    .merge {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin: 10px 0 4px;
-      min-height: 66px;
-    }
-
-    .token {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      background: radial-gradient(circle at 35% 30%, rgba(232, 241, 245, 0.14), rgba(15, 76, 117, 0.6));
-      border: 1px solid var(--border);
-    }
-
-    .token svg { width: 24px; height: 24px; stroke: var(--parchment); fill: none; stroke-width: 1.4; }
-
-    .token.a { animation: mergeA 4s var(--ease) infinite; }
-    .token.b { animation: mergeB 4s var(--ease) infinite; }
-    .plus, .arrow { animation: fadeMid 4s var(--ease) infinite; }
-
-    .plus  { color: var(--gold-dim); font-size: 15px; }
-    .arrow { color: var(--parchment-dim); font-size: 15px; transform: scaleX(-1); }
-
-    .token.result {
-      width: 62px;
-      height: 62px;
-      border-color: var(--ember-dim);
-      animation: pop 4s var(--ease) infinite;
-    }
-    .token.result svg { width: 30px; height: 30px; stroke: var(--ember); }
-
-    /* the two tokens slide together, fade, then the result pops */
-    @keyframes mergeA {
-      0%, 20%   { transform: translateX(0) scale(1); opacity: 1; }
-      45%       { transform: translateX(-26px) scale(0.9); opacity: 1; }
-      55%, 85%  { transform: translateX(-26px) scale(0.6); opacity: 0; }
-      100%      { transform: translateX(0) scale(1); opacity: 1; }
-    }
-    @keyframes mergeB {
-      0%, 20%   { transform: translateX(0) scale(1); opacity: 1; }
-      45%       { transform: translateX(26px) scale(0.9); opacity: 1; }
-      55%, 85%  { transform: translateX(26px) scale(0.6); opacity: 0; }
-      100%      { transform: translateX(0) scale(1); opacity: 1; }
-    }
-    @keyframes fadeMid {
-      0%, 25%  { opacity: 1; }
-      45%, 85% { opacity: 0; }
-      100%     { opacity: 1; }
-    }
-    @keyframes pop {
-      0%, 45%  { transform: scale(1); box-shadow: 0 0 0 0 rgba(201, 138, 74, 0); }
-      58%      { transform: scale(1.18); box-shadow: 0 0 26px 6px rgba(201, 138, 74, 0.4); }
-      72%      { transform: scale(1); box-shadow: 0 0 14px 2px rgba(201, 138, 74, 0.2); }
-      100%     { transform: scale(1); box-shadow: 0 0 0 0 rgba(201, 138, 74, 0); }
-    }
-
-    /* ===================== responsive ===================== */
-    @media (max-width: 760px) {
-      .book { grid-template-columns: 1fr; }
-      .spine::after { display: none; }
-      .leaf-hero { order: -1; padding-bottom: 8px; gap: 14px; }
-      .leaf-form { padding-top: 8px; }
-      .hero-desc { max-width: none; }
-      .hero-title { font-size: 19px; }
+    @media (max-width: 580px) {
+      body { overflow: auto; background-position: 73% center; }
+      .auth-stage { min-height: 100dvh; align-items: center; padding: 14px; }
+      .auth-shell { border-radius: 20px; padding: 24px 20px 22px; }
+      .brand-mark { width: 35px; height: 35px; }
+      .brand { font-size: 28px; }
+      .sub { margin-bottom: 20px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.001ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.001ms !important;
-      }
+      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
     }
   </style>
 </head>
-
 <body>
-  <main class="book" id="book">
-    <section class="leaf-form spine">
-      <p class="greeting" id="greeting"></p>
-      <div class="brand-lockup">
-        <img class="brand-mark" src="./dragon-icon-gold.png" alt="" aria-hidden="true">
-        <h1 class="brand">Axiom</h1>
-      </div>
-      <p class="sub">سجّل دخولك أو افتح حساب جديد عشان توصل لمحرّك الحل الذكي.</p>
+  <main class="auth-stage">
+    <section class="auth-shell" id="book" aria-label="Axiom authentication">
+      <div class="leaf-form">
+        <p class="greeting" id="greeting"></p>
 
-      <div class="tabs" role="tablist" aria-label="نوع العملية">
-        <button id="tabLogin" role="tab" aria-selected="true" aria-controls="authForm" type="button">تسجيل الدخول</button>
-        <button id="tabSignup" role="tab" aria-selected="false" aria-controls="authForm" type="button">إنشاء حساب</button>
-        <span class="tab-indicator" id="tabIndicator" data-mode="login" aria-hidden="true"></span>
-      </div>
-
-      <form class="fields" id="authForm" novalidate>
-        <label for="email">الإيميل</label>
-        <div class="field-wrap" id="emailWrap">
-          <input id="email" name="email" type="email" placeholder="you@example.com"
-                 autocomplete="email" inputmode="email" required />
+        <div class="brand-lockup">
+          <img class="brand-mark" src="./dragon-icon-gold.png" alt="" aria-hidden="true">
+          <h1 class="brand">AXIOM</h1>
         </div>
 
-        <label for="password">كلمة المرور</label>
-        <div class="field-wrap has-eye" id="passwordWrap">
-          <button type="button" class="toggle-eye" id="togglePassword"
-                  aria-pressed="false" aria-label="إظهار كلمة المرور" aria-controls="password">
-            <svg viewBox="0 0 24 24">
-              <path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" />
-              <circle cx="12" cy="12" r="3" />
-              <path class="slash" d="M4 20L20 4" />
-            </svg>
-          </button>
-          <input id="password" name="password" type="password" placeholder="••••••••"
-                 autocomplete="current-password" required minlength="6" />
+        <p class="sub">ادخل عالم Axiom وكمّل رحلتك. سجّل دخولك أو أنشئ حساب جديد للبدء.</p>
+
+        <div class="tabs" role="tablist" aria-label="نوع العملية">
+          <button id="tabLogin" role="tab" aria-selected="true" aria-controls="authForm" type="button">تسجيل الدخول</button>
+          <button id="tabSignup" role="tab" aria-selected="false" aria-controls="authForm" type="button">إنشاء حساب</button>
+          <span class="tab-indicator" id="tabIndicator" data-mode="login" aria-hidden="true"></span>
         </div>
 
-        <div class="strength" id="strength" aria-hidden="true">
-          <div>
-            <div class="bars">
-              <i></i><i></i><i></i><i></i>
-            </div>
-            <div class="strength-text" id="strengthText">اكتب 8 حروف على الأقل، وخلّي فيها أرقام ورموز.</div>
+        <form class="fields" id="authForm" novalidate>
+          <label for="email">البريد الإلكتروني</label>
+          <div class="field-wrap" id="emailWrap">
+            <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" inputmode="email" required />
           </div>
-        </div>
 
-        <button class="submit" id="submitBtn" type="submit">
-          <span class="spinner" id="submitSpinner" aria-hidden="true"></span>
-          <span id="submitLabel">دخول</span>
-        </button>
-      </form>
+          <label for="password">كلمة المرور</label>
+          <div class="field-wrap has-eye" id="passwordWrap">
+            <button type="button" class="toggle-eye" id="togglePassword" aria-pressed="false" aria-label="إظهار كلمة المرور" aria-controls="password">
+              <svg viewBox="0 0 24 24">
+                <path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" />
+                <circle cx="12" cy="12" r="3" />
+                <path class="slash" d="M4 20L20 4" />
+              </svg>
+            </button>
+            <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required minlength="6" />
+          </div>
 
-      <div class="msg" id="msg" role="status" aria-live="polite"></div>
-    </section>
+          <div class="strength" id="strength" aria-hidden="true">
+            <div>
+              <div class="bars"><i></i><i></i><i></i><i></i></div>
+              <div class="strength-text" id="strengthText">اكتب 8 حروف على الأقل، وخلّي فيها أرقام ورموز.</div>
+            </div>
+          </div>
 
-    <section class="leaf-hero">
-      <p class="hero-eyebrow">The Bestiary Trial</p>
-      <h2 class="hero-title">اتنين من نفس النوع بيتحدوا ويطلعوا وحش أقوى</h2>
+          <button class="submit" id="submitBtn" type="submit">
+            <span class="spinner" id="submitSpinner" aria-hidden="true"></span>
+            <span id="submitLabel">دخول</span>
+          </button>
+        </form>
 
-      <div class="merge" aria-hidden="true">
-        <div class="token a">
-          <svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.7-4 4 1 5.5L12 15.8 7 18.2l1-5.5-4-4 5.5-.7z"/></svg>
-        </div>
-        <span class="plus">+</span>
-        <div class="token b">
-          <svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.7-4 4 1 5.5L12 15.8 7 18.2l1-5.5-4-4 5.5-.7z"/></svg>
-        </div>
-        <span class="arrow">←</span>
-        <div class="token result">
-          <svg viewBox="0 0 24 24"><path d="M12 2l3 6 6.5.9-4.7 4.6 1.1 6.5L12 16.8 6.1 20l1.1-6.5L2.5 8.9 9 8z"/></svg>
-        </div>
+        <div class="msg" id="msg" role="status" aria-live="polite"></div>
       </div>
-
-      <p class="hero-desc">كل مستوى وحش جديد، لحد ما توصل للمستوى 11 وتتحرر اللوحة منه. الحل الذكي اللي جوّه بيحسبلك أفضل حركة في كل خطوة.</p>
     </section>
   </main>
-
-  <script src="./supabase-config.js"></script>
+<script src="./supabase-config.js"></script>
   <script>
     "use strict";
 
