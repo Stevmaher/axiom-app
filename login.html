@@ -1,9 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#06111A" />
+  <meta name="theme-color" content="#1B262C" />
   <meta name="description" content="Axiom — تسجيل الدخول لمحرّك الحل الذكي" />
   <title>Axiom — تسجيل الدخول</title>
   <link rel="icon" href="./favicon.ico" sizes="any">
@@ -12,134 +13,144 @@
   <link rel="apple-touch-icon" href="./favicon-180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Tajawal:wght@400;500;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="preload" as="image" href="./assets/login-art.webp">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"
     integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
   <style>
     :root {
-      --bg: #06111a;
-      --panel: rgba(5, 16, 25, 0.83);
-      --panel-strong: rgba(4, 14, 22, 0.93);
-      --text: #f7f4ed;
-      --muted: rgba(247, 244, 237, 0.66);
-      --gold: #e7b84d;
-      --gold-soft: #c89134;
-      --line: rgba(231, 184, 77, 0.27);
-      --line-soft: rgba(255, 255, 255, 0.09);
-      --blue: #1e6f9e;
+      --void: #1B262C;
+      --navy: #0F4C75;
+      --navy-deep: #0B1A26;
+      --sky: #3282B8;
+      --parchment: #E8F1F5;
+      --parchment-dim: rgba(232, 241, 245, 0.72);
+      --gold: #D8A752;
+      --gold-bright: #F0C77A;
+      --gold-deep: #A8742A;
+      --gold-dim: rgba(216, 167, 82, 0.55);
+      --border: rgba(50, 130, 184, 0.45);
+      --border-soft: rgba(50, 130, 184, 0.22);
       --error: #ff9a9a;
       --ok: #8fd9ac;
       --wait: #e8c07d;
       --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+      --hex-tab: polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%);
+      --hex-btn: polygon(20px 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 20px 100%, 0 50%);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { width: 100%; min-height: 100%; }
+
+    html, body { min-height: 100%; }
 
     body {
       margin: 0;
-      min-height: 100vh;
       min-height: 100dvh;
-      overflow: hidden;
       font-family: 'Tajawal', system-ui, sans-serif;
-      color: var(--text);
-      background: var(--bg) url('./axiom-login-bg.jpg') center center / cover no-repeat fixed;
-      position: relative;
-    }
-
-    /* Dark cinematic veil: intentionally hides the promotional copy and game-board
-       from the source artwork while keeping the warrior/dragon/lion visible. */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
+      color: var(--parchment);
       background:
-        linear-gradient(90deg,
-          rgba(3, 11, 17, 0.995) 0%,
-          rgba(3, 11, 17, 0.98) 32%,
-          rgba(3, 11, 17, 0.94) 49%,
-          rgba(3, 11, 17, 0.82) 61%,
-          rgba(3, 11, 17, 0.55) 72%,
-          rgba(3, 11, 17, 0.12) 86%,
-          rgba(3, 11, 17, 0.02) 100%),
-        linear-gradient(180deg,
-          rgba(2, 8, 12, 0.24) 0%,
-          rgba(2, 8, 12, 0.02) 42%,
-          rgba(2, 8, 12, 0.40) 100%);
+        radial-gradient(ellipse 60% 55% at 12% 0%, rgba(50, 130, 184, 0.28), transparent 65%),
+        radial-gradient(ellipse 55% 45% at 0% 100%, rgba(201, 112, 63, 0.14), transparent 60%),
+        linear-gradient(180deg, #14202A 0%, var(--void) 55%, #101A21 100%);
+      overflow-x: hidden;
     }
 
-    body::after {
-      content: '';
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+
+    /* ===================== artwork (right side) ===================== */
+    .art {
       position: fixed;
-      inset: 0;
-      pointer-events: none;
+      top: 0; bottom: 0; right: 0;
+      width: min(64vw, 1040px);
       z-index: 0;
+      pointer-events: none;
       background:
-        radial-gradient(circle at 74% 48%, rgba(231, 184, 77, 0.08), transparent 28%),
-        radial-gradient(circle at 18% 50%, rgba(30, 111, 158, 0.10), transparent 34%);
-      mix-blend-mode: screen;
+        linear-gradient(180deg, transparent 60%, rgba(16, 26, 33, 0.75) 100%),
+        linear-gradient(90deg, rgba(15, 76, 117, 0.42), rgba(15, 76, 117, 0.04) 70%),
+        url("./assets/login-art.webp") 40% center / cover no-repeat;
+      -webkit-mask-image: linear-gradient(to left, #000 52%, transparent 100%);
+              mask-image: linear-gradient(to left, #000 52%, transparent 100%);
+      animation: artIn 1.4s var(--ease) both;
     }
 
-    .auth-stage {
-      min-height: 100vh;
-      min-height: 100dvh;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
+    @keyframes artIn {
+      from { opacity: 0; transform: scale(1.03); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ===================== stage ===================== */
+    .stage {
       position: relative;
       z-index: 1;
-      padding: clamp(22px, 4vw, 54px);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      direction: ltr;
+      padding: clamp(20px, 4vw, 48px) clamp(16px, 12vw, 200px);
     }
 
-    .auth-shell {
-      width: min(470px, 100%);
-      margin-inline-start: clamp(14px, 7vw, 96px);
-      background: linear-gradient(160deg, rgba(7, 20, 30, 0.86), rgba(3, 12, 19, 0.94));
-      border: 1px solid rgba(231, 184, 77, 0.22);
-      border-radius: 24px;
-      padding: clamp(26px, 4vw, 42px);
-      box-shadow:
-        0 36px 100px rgba(0, 0, 0, 0.65),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(13px) saturate(115%);
-      -webkit-backdrop-filter: blur(13px) saturate(115%);
+    /* ---- logo ---- */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: clamp(8px, 1.4vw, 18px);
+      margin: 0 0 clamp(16px, 2.6vw, 30px) clamp(0px, 0.4vw, 6px);
+      filter: drop-shadow(0 2px 16px rgba(216, 167, 82, 0.35));
+    }
+
+    .logo img {
+      height: clamp(46px, 7.4vw, 92px);
+      width: auto;
+      flex-shrink: 0;
+    }
+
+    .logo h1 {
+      margin: 0;
+      font-family: 'Cinzel', serif;
+      font-weight: 800;
+      font-size: clamp(42px, 7.4vw, 92px);
+      line-height: 1;
+      letter-spacing: 0.01em;
+      background: linear-gradient(180deg, #FFEDB8 0%, var(--gold-bright) 38%, var(--gold) 66%, var(--gold-deep) 100%);
+      -webkit-background-clip: text;
+              background-clip: text;
+      color: transparent;
+    }
+
+    /* ===================== panel ===================== */
+    .panel {
       position: relative;
-      overflow: hidden;
-      animation: cardIn 0.75s var(--ease) both;
+      width: min(100%, 560px);
+      padding: clamp(26px, 3.4vw, 40px) clamp(20px, 3.4vw, 44px) clamp(20px, 2.6vw, 28px);
+      background:
+        radial-gradient(ellipse 90% 40% at 50% 0%, rgba(50, 130, 184, 0.14), transparent 70%),
+        linear-gradient(180deg, rgba(13, 40, 62, 0.93), rgba(17, 29, 37, 0.95));
+      border: 1px solid rgba(216, 167, 82, 0.72);
+      border-radius: 3px;
+      box-shadow:
+        inset 0 0 0 4px rgba(11, 26, 38, 0.6),
+        inset 0 0 0 5px rgba(216, 167, 82, 0.16),
+        0 30px 80px rgba(0, 0, 0, 0.55),
+        0 0 46px rgba(50, 130, 184, 0.14);
+      -webkit-backdrop-filter: blur(6px);
+              backdrop-filter: blur(6px);
+      animation: riseIn 0.7s var(--ease) both;
     }
 
-    .auth-shell::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      inset-inline: 13%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-      opacity: 0.9;
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: none; }
     }
 
-    .auth-shell::after {
-      content: '';
-      position: absolute;
-      width: 220px;
-      height: 220px;
-      top: -140px;
-      inset-inline-end: -100px;
-      border-radius: 50%;
-      background: rgba(231, 184, 77, 0.10);
-      filter: blur(35px);
-      pointer-events: none;
-    }
+    .panel.shake { animation: shake 0.42s ease; }
 
-    @keyframes cardIn {
-      from { opacity: 0; transform: translateY(18px) scale(0.985); }
-      to { opacity: 1; transform: none; }
-    }
-
-    .auth-shell.shake { animation: shake 0.42s ease; }
     @keyframes shake {
       10%, 90% { transform: translateX(-2px); }
       20%, 80% { transform: translateX(4px); }
@@ -147,326 +158,426 @@
       40%, 60% { transform: translateX(6px); }
     }
 
-    .leaf-form { position: relative; z-index: 1; }
-    .leaf-form > *, .fields > * { animation: riseIn 0.6s var(--ease) both; }
-    .leaf-form > *:nth-child(1) { animation-delay: .08s; }
-    .leaf-form > *:nth-child(2) { animation-delay: .14s; }
-    .leaf-form > *:nth-child(3) { animation-delay: .20s; }
-    .leaf-form > *:nth-child(4) { animation-delay: .26s; }
-    .leaf-form > *:nth-child(5) { animation-delay: .32s; }
-    @keyframes riseIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: none; }
+    /* gold corner brackets */
+    .corner {
+      position: absolute;
+      width: 26px; height: 26px;
+      border: 0 solid var(--gold-bright);
+      pointer-events: none;
+    }
+    .corner::after {
+      content: '';
+      position: absolute;
+      width: 5px; height: 5px;
+      background: var(--gold-bright);
+      transform: rotate(45deg);
+    }
+    .corner.tl { top: -5px;    left: -5px;  border-top-width: 2px;    border-left-width: 2px; }
+    .corner.tr { top: -5px;    right: -5px; border-top-width: 2px;    border-right-width: 2px; }
+    .corner.bl { bottom: -5px; left: -5px;  border-bottom-width: 2px; border-left-width: 2px; }
+    .corner.br { bottom: -5px; right: -5px; border-bottom-width: 2px; border-right-width: 2px; }
+    .corner.tl::after { top: -3px;    left: -3px; }
+    .corner.tr::after { top: -3px;    right: -3px; }
+    .corner.bl::after { bottom: -3px; left: -3px; }
+    .corner.br::after { bottom: -3px; right: -3px; }
+
+    /* sapphire gems on the frame, top and bottom center */
+    .gem {
+      position: absolute;
+      left: 50%;
+      width: 0; height: 0;
+      pointer-events: none;
+    }
+    .gem.top { top: 0; }
+    .gem.bottom { bottom: 0; }
+    .gem::before, .gem::after {
+      content: '';
+      position: absolute;
+      top: -1px;
+      width: 64px; height: 3px;
+    }
+    .gem::before { right: 14px; background: linear-gradient(270deg, var(--gold-bright), transparent); }
+    .gem::after  { left: 14px;  background: linear-gradient(90deg,  var(--gold-bright), transparent); }
+    .gem i {
+      position: absolute;
+      left: -11px; top: -11px;
+      width: 22px; height: 22px;
+      transform: rotate(45deg);
+      border: 2px solid var(--gold-bright);
+      background: linear-gradient(135deg, #8FD0F7 0%, var(--sky) 50%, var(--navy) 100%);
+      box-shadow: 0 0 14px rgba(50, 130, 184, 0.75), inset 0 0 4px rgba(255, 255, 255, 0.5);
     }
 
-    .greeting {
-      margin: 0 0 9px;
-      color: var(--gold);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: .02em;
-    }
-
-    .brand-lockup {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 0 0 9px;
-    }
-
-    .brand-mark {
-      width: 40px;
-      height: 40px;
-      object-fit: contain;
-      filter: drop-shadow(0 0 13px rgba(231, 184, 77, 0.35));
-    }
-
-    .brand {
-      margin: 0;
-      font-family: 'Cinzel', serif;
-      font-size: clamp(28px, 4vw, 34px);
-      line-height: 1;
-      font-weight: 800;
-      letter-spacing: .05em;
-      color: var(--gold);
-      text-shadow: 0 0 24px rgba(231, 184, 77, .12);
-      direction: ltr;
-    }
-
-    .sub {
-      margin: 0 0 28px;
-      max-width: 34ch;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.75;
-    }
-
+    /* ===================== tabs ===================== */
     .tabs {
-      position: relative;
+      direction: ltr;
       display: flex;
-      gap: 2px;
-      border-bottom: 1px solid var(--line-soft);
-      margin-bottom: 8px;
+      margin: 0 0 24px;
     }
 
     .tabs button {
+      position: relative;
+      isolation: isolate;
       flex: 1;
-      padding: 12px 5px 13px;
+      height: 48px;
+      padding: 0 18px;
       border: 0;
       background: transparent;
-      color: rgba(247, 244, 237, .50);
-      font: inherit;
-      font-size: 14px;
+      color: var(--parchment-dim);
+      font-family: inherit;
+      font-size: 16.5px;
       font-weight: 700;
       cursor: pointer;
-      transition: color .25s var(--ease);
+      transition: color 0.25s var(--ease), filter 0.25s var(--ease);
     }
-    .tabs button[aria-selected="true"] { color: var(--text); }
+    .tabs button + button { margin-left: -6px; }
 
-    .tab-indicator {
-      position: absolute;
-      bottom: -1px;
-      height: 2px;
-      width: 50%;
-      border-radius: 4px;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-      transition: transform .35s var(--ease);
-    }
-    .tab-indicator[data-mode="login"] { transform: translateX(0); }
-    .tab-indicator[data-mode="signup"] { transform: translateX(-100%); }
-
-    .fields { display: flex; flex-direction: column; }
-
-    label {
-      display: block;
-      margin: 16px 0 7px;
-      font-size: 12.5px;
-      font-weight: 700;
-      color: rgba(247, 244, 237, .64);
-    }
-
-    .field-wrap { position: relative; }
-
-    input {
-      width: 100%;
-      padding: 13px 2px 11px;
-      border: 0;
-      border-bottom: 1px solid rgba(255,255,255,.16);
-      background: transparent;
-      color: var(--text);
-      font: inherit;
-      font-size: 15.5px;
-      transition: border-color .25s var(--ease);
-    }
-    input::placeholder { color: rgba(247, 244, 237, .25); }
-    input:focus { outline: none; }
-
-    .field-wrap::after {
+    .tabs button::before,
+    .tabs button::after {
       content: '';
       position: absolute;
-      inset-inline: 0;
-      bottom: 0;
-      height: 2px;
-      border-radius: 3px;
-      background: var(--gold);
-      transform: scaleX(0);
-      transform-origin: center;
-      transition: transform .30s var(--ease), background-color .2s ease;
+      clip-path: var(--hex-tab);
+      transition: background 0.25s var(--ease);
     }
-    .field-wrap:focus-within::after { transform: scaleX(1); }
-    .field-wrap.invalid::after { transform: scaleX(1); background: var(--error); }
+    .tabs button::before { inset: 0;   z-index: -2; background: var(--border); }
+    .tabs button::after  { inset: 1px; z-index: -1; background: linear-gradient(180deg, rgba(15, 76, 117, 0.28), rgba(11, 26, 38, 0.8)); }
 
-    .field-wrap.has-eye input { padding-inline-start: 38px; }
-    .toggle-eye {
-      position: absolute;
-      inset-inline-start: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      padding: 6px;
+    .tabs button:hover { color: var(--parchment); }
+
+    .tabs button[aria-selected="true"] {
+      color: var(--gold-bright);
+      filter: drop-shadow(0 4px 12px rgba(216, 167, 82, 0.28));
+      z-index: 1;
+    }
+    .tabs button[aria-selected="true"]::before { background: linear-gradient(180deg, var(--gold-bright), var(--gold-deep)); }
+    .tabs button[aria-selected="true"]::after  { background: linear-gradient(180deg, rgba(216, 167, 82, 0.34), rgba(17, 29, 37, 0.96) 85%); }
+
+    .tabs button:focus-visible { outline: none; }
+    .tabs button:focus-visible::before { background: #fff; }
+
+    /* ===================== fields ===================== */
+    .fields { display: flex; flex-direction: column; }
+
+    .field {
+      direction: ltr;
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 58px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(8, 20, 30, 0.6);
+      transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease), background-color 0.25s var(--ease);
+    }
+
+    .field:hover { border-color: rgba(50, 130, 184, 0.7); }
+
+    .field:focus-within {
+      border-color: var(--gold);
+      background: rgba(8, 20, 30, 0.8);
+      box-shadow: 0 0 0 3px rgba(216, 167, 82, 0.16), inset 0 0 16px rgba(216, 167, 82, 0.05);
+    }
+
+    .field.invalid { border-color: var(--error); box-shadow: 0 0 0 3px rgba(255, 154, 154, 0.14); }
+
+    .field .icon {
+      flex-shrink: 0;
+      width: 24px; height: 24px;
+      margin-left: 16px;
+      fill: none;
+      stroke: rgba(232, 241, 245, 0.72);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: stroke 0.25s var(--ease);
+    }
+    .field:focus-within .icon { stroke: var(--gold-bright); }
+
+    .field input {
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      padding: 0 14px;
       border: 0;
       background: transparent;
-      color: var(--text);
-      opacity: .5;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: opacity .2s ease;
+      color: var(--parchment);
+      font-family: inherit;
+      font-size: 16.5px;
+      text-align: left;
     }
-    .toggle-eye:hover { opacity: .95; }
-    .toggle-eye svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.6; }
-    .toggle-eye .slash { stroke-dasharray: 26; stroke-dashoffset: 26; transition: stroke-dashoffset .25s var(--ease); }
+    .field input::placeholder { color: rgba(232, 241, 245, 0.5); }
+    .field input:focus { outline: none; }
+
+    /* keep browser autofill from painting a white box */
+    .field input:-webkit-autofill {
+      -webkit-text-fill-color: var(--parchment);
+      transition: background-color 9999s ease-out 0s;
+      box-shadow: 0 0 0 40px #0c2030 inset;
+    }
+
+    .toggle-eye {
+      flex-shrink: 0;
+      margin-right: 10px;
+      padding: 8px;
+      line-height: 0;
+      background: transparent;
+      border: 0;
+      border-radius: 8px;
+      color: var(--parchment);
+      opacity: 0.65;
+      cursor: pointer;
+      transition: opacity 0.2s ease, color 0.2s ease;
+    }
+    .toggle-eye:hover { opacity: 1; color: var(--gold-bright); }
+    .toggle-eye svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .toggle-eye .slash { stroke-dasharray: 26; stroke-dashoffset: 26; transition: stroke-dashoffset 0.25s var(--ease); }
     .toggle-eye[aria-pressed="true"] .slash { stroke-dashoffset: 0; }
 
+    /* ---- password strength (signup only) ---- */
     .strength {
       display: grid;
       grid-template-rows: 0fr;
       opacity: 0;
-      margin-top: 0;
-      transition: grid-template-rows .35s var(--ease), opacity .25s ease, margin .35s var(--ease);
+      margin-top: -6px;
+      transition: grid-template-rows 0.35s var(--ease), opacity 0.25s ease, margin 0.35s var(--ease);
     }
-    .strength.show { grid-template-rows: 1fr; opacity: 1; margin-top: 10px; }
+    .strength.show { grid-template-rows: 1fr; opacity: 1; margin-bottom: 4px; }
     .strength > div { overflow: hidden; }
-    .bars { display: flex; gap: 5px; }
+
+    .bars { display: flex; gap: 5px; padding-top: 4px; }
     .bars i {
       flex: 1;
       height: 3px;
-      border-radius: 4px;
-      background: rgba(247,244,237,.12);
-      transition: background-color .3s var(--ease);
+      border-radius: 2px;
+      background: rgba(232, 241, 245, 0.14);
+      transition: background-color 0.3s var(--ease);
     }
-    .strength-text { margin-top: 6px; font-size: 11.5px; color: var(--muted); }
+    .strength-text { font-size: 12.5px; margin: 6px 0 8px; color: var(--parchment-dim); }
+
+    /* ===================== submit ===================== */
+    .submit-wrap {
+      margin-top: 10px;
+      filter: drop-shadow(0 8px 18px rgba(216, 167, 82, 0.26));
+      transition: filter 0.25s ease, transform 0.12s ease;
+    }
+    .submit-wrap:hover { filter: drop-shadow(0 10px 24px rgba(240, 199, 122, 0.4)); }
+    .submit-wrap:active { transform: scale(0.99); }
+    .submit-wrap:focus-within { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 8px 18px rgba(216, 167, 82, 0.3)); }
 
     button.submit {
       position: relative;
       width: 100%;
-      margin-top: 23px;
-      padding: 14px 16px;
-      border: 1px solid rgba(231, 184, 77, .48);
-      border-radius: 12px;
-      background: linear-gradient(135deg, #f0c65c 0%, #c58b2f 100%);
-      color: #161008;
-      font: inherit;
-      font-size: 15px;
+      height: 58px;
+      border: 0;
+      clip-path: var(--hex-btn);
+      background: linear-gradient(180deg, #FBE1A0 0%, #E5B660 46%, #B98230 100%);
+      color: #2A1A05;
+      font-family: inherit;
       font-weight: 800;
+      font-size: 19px;
       cursor: pointer;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 9px;
-      box-shadow: 0 10px 24px rgba(197, 139, 47, .16);
-      transition: filter .2s ease, transform .12s ease, box-shadow .25s ease;
+      gap: 10px;
     }
-    button.submit:hover:not(:disabled) {
-      filter: brightness(1.07);
-      box-shadow: 0 12px 30px rgba(197, 139, 47, .23);
+    button.submit:focus-visible { outline: none; }
+
+    /* inner highlight bevel */
+    button.submit::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      clip-path: var(--hex-btn);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0) 55%);
+      pointer-events: none;
     }
-    button.submit:active:not(:disabled) { transform: scale(.985); }
-    button.submit:disabled { opacity: .7; cursor: not-allowed; }
+
+    button.submit > span { position: relative; z-index: 1; }
+
+    button.submit:disabled { opacity: 0.72; cursor: not-allowed; }
+
+    /* sheen sweep while loading */
     button.submit.loading::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.26), transparent);
+      z-index: 2;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
       animation: sheen 1.15s linear infinite;
     }
-    @keyframes sheen { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+    @keyframes sheen {
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(100%); }
+    }
 
     .spinner {
       display: none;
-      width: 15px;
-      height: 15px;
-      border: 2px solid rgba(22,16,8,.25);
-      border-top-color: #161008;
+      width: 17px; height: 17px;
+      border: 2px solid rgba(42, 26, 5, 0.3);
+      border-top-color: #2A1A05;
       border-radius: 50%;
-      animation: spin .7s linear infinite;
+      animation: spin 0.7s linear infinite;
     }
     button.submit.loading .spinner { display: inline-block; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ---- message ---- */
     .msg {
-      min-height: 20px;
       margin-top: 14px;
-      font-size: 13px;
-      line-height: 1.55;
+      font-size: 14px;
       text-align: center;
+      min-height: 20px;
+      line-height: 1.6;
     }
-    .msg:not(:empty) { animation: msgIn .35s var(--ease) both; }
-    @keyframes msgIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+    .msg:not(:empty) { animation: msgIn 0.35s var(--ease) both; }
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: none; }
+    }
     .msg.error { color: var(--error); }
-    .msg.ok { color: var(--ok); }
-    .msg.wait { color: var(--wait); }
+    .msg.ok    { color: var(--ok); }
+    .msg.wait  { color: var(--wait); }
 
-    :where(button, input, a):focus-visible {
-      outline: 2px solid var(--gold);
-      outline-offset: 3px;
+    /* ---- switch login / signup ---- */
+    .switch {
+      margin: 12px 0 0;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-soft);
+      text-align: center;
+      font-size: 14.5px;
+      color: var(--parchment-dim);
+    }
+
+    .link {
+      background: none;
+      border: 0;
+      padding: 2px 4px;
+      color: var(--gold-bright);
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+    .link:hover { color: #fff; }
+
+    :where(.link, .toggle-eye):focus-visible {
+      outline: 2px solid var(--gold-bright);
+      outline-offset: 2px;
       border-radius: 6px;
     }
 
-    @media (max-width: 900px) {
-      body { background-position: 76% center; }
-      body::before {
-        background:
-          linear-gradient(90deg,
-            rgba(3,11,17,.995) 0%,
-            rgba(3,11,17,.98) 48%,
-            rgba(3,11,17,.82) 68%,
-            rgba(3,11,17,.30) 84%,
-            rgba(3,11,17,.06) 100%),
-          linear-gradient(180deg, rgba(2,8,12,.18), rgba(2,8,12,.52));
+    /* ===================== responsive ===================== */
+    @media (max-width: 960px) {
+      .stage { align-items: center; padding: 24px 16px 32px; }
+      .logo { margin-left: 0; }
+      .art {
+        width: 100%;
+        background-position: 62% top;
+        opacity: 0.55;
+        -webkit-mask-image: linear-gradient(to bottom, #000 25%, transparent 90%);
+                mask-image: linear-gradient(to bottom, #000 25%, transparent 90%);
       }
-      .auth-stage { justify-content: center; padding: 20px; }
-      .auth-shell { margin-inline-start: 0; width: min(500px, 100%); }
     }
 
-    @media (max-width: 580px) {
-      body { overflow: auto; background-position: 73% center; }
-      .auth-stage { min-height: 100dvh; align-items: center; padding: 14px; }
-      .auth-shell { border-radius: 20px; padding: 24px 20px 22px; }
-      .brand-mark { width: 35px; height: 35px; }
-      .brand { font-size: 28px; }
-      .sub { margin-bottom: 20px; }
+    @media (max-width: 420px) {
+      .tabs button { font-size: 15px; padding: 0 10px; }
+      .field { height: 54px; }
+      button.submit { height: 54px; font-size: 18px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
     }
   </style>
 </head>
+
 <body>
-  <main class="auth-stage">
-    <section class="auth-shell" id="book" aria-label="Axiom authentication">
-      <div class="leaf-form">
-        <p class="greeting" id="greeting"></p>
+  <div class="art" aria-hidden="true"></div>
 
-        <div class="brand-lockup">
-          <img class="brand-mark" src="./dragon-icon-gold.png" alt="" aria-hidden="true">
-          <h1 class="brand">AXIOM</h1>
+  <main class="stage">
+    <div class="logo">
+      <img src="./dragon-icon-gold.png" alt="" aria-hidden="true" onerror="this.remove()">
+      <h1>AXIOM</h1>
+    </div>
+
+    <section class="panel" id="book" dir="rtl">
+      <span class="corner tl" aria-hidden="true"></span>
+      <span class="corner tr" aria-hidden="true"></span>
+      <span class="corner bl" aria-hidden="true"></span>
+      <span class="corner br" aria-hidden="true"></span>
+      <span class="gem top" aria-hidden="true"><i></i></span>
+      <span class="gem bottom" aria-hidden="true"><i></i></span>
+
+      <div class="tabs" role="tablist" aria-label="نوع العملية">
+        <button id="tabLogin" role="tab" aria-selected="true" aria-controls="authForm" type="button">تسجيل الدخول</button>
+        <button id="tabSignup" role="tab" aria-selected="false" aria-controls="authForm" type="button">إنشاء حساب</button>
+      </div>
+
+      <form class="fields" id="authForm" novalidate>
+        <label class="sr-only" for="email">الإيميل</label>
+        <div class="field" id="emailWrap">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
+            <path d="M3 7l9 6.5L21 7" />
+          </svg>
+          <input id="email" name="email" type="email" placeholder="الإيميل"
+                 autocomplete="email" inputmode="email" required />
         </div>
 
-        <p class="sub">ادخل عالم Axiom وكمّل رحلتك. سجّل دخولك أو أنشئ حساب جديد للبدء.</p>
-
-        <div class="tabs" role="tablist" aria-label="نوع العملية">
-          <button id="tabLogin" role="tab" aria-selected="true" aria-controls="authForm" type="button">تسجيل الدخول</button>
-          <button id="tabSignup" role="tab" aria-selected="false" aria-controls="authForm" type="button">إنشاء حساب</button>
-          <span class="tab-indicator" id="tabIndicator" data-mode="login" aria-hidden="true"></span>
+        <label class="sr-only" for="password">كلمة المرور</label>
+        <div class="field" id="passwordWrap">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="4.5" y="10.5" width="15" height="10" rx="2.5" />
+            <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" />
+            <circle cx="12" cy="15.5" r="1.1" />
+          </svg>
+          <input id="password" name="password" type="password" placeholder="كلمة المرور"
+                 autocomplete="current-password" required minlength="6" />
+          <button type="button" class="toggle-eye" id="togglePassword"
+                  aria-pressed="false" aria-label="إظهار كلمة المرور" aria-controls="password">
+            <svg viewBox="0 0 24 24">
+              <path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" />
+              <circle cx="12" cy="12" r="3" />
+              <path class="slash" d="M4 20L20 4" />
+            </svg>
+          </button>
         </div>
 
-        <form class="fields" id="authForm" novalidate>
-          <label for="email">البريد الإلكتروني</label>
-          <div class="field-wrap" id="emailWrap">
-            <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" inputmode="email" required />
-          </div>
-
-          <label for="password">كلمة المرور</label>
-          <div class="field-wrap has-eye" id="passwordWrap">
-            <button type="button" class="toggle-eye" id="togglePassword" aria-pressed="false" aria-label="إظهار كلمة المرور" aria-controls="password">
-              <svg viewBox="0 0 24 24">
-                <path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" />
-                <circle cx="12" cy="12" r="3" />
-                <path class="slash" d="M4 20L20 4" />
-              </svg>
-            </button>
-            <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required minlength="6" />
-          </div>
-
-          <div class="strength" id="strength" aria-hidden="true">
-            <div>
-              <div class="bars"><i></i><i></i><i></i><i></i></div>
-              <div class="strength-text" id="strengthText">اكتب 8 حروف على الأقل، وخلّي فيها أرقام ورموز.</div>
+        <div class="strength" id="strength" aria-hidden="true">
+          <div>
+            <div class="bars">
+              <i></i><i></i><i></i><i></i>
             </div>
+            <div class="strength-text" id="strengthText">اكتب 8 حروف على الأقل، وخلّي فيها أرقام ورموز.</div>
           </div>
+        </div>
 
+        <div class="submit-wrap">
           <button class="submit" id="submitBtn" type="submit">
             <span class="spinner" id="submitSpinner" aria-hidden="true"></span>
             <span id="submitLabel">دخول</span>
           </button>
-        </form>
+        </div>
+      </form>
 
-        <div class="msg" id="msg" role="status" aria-live="polite"></div>
-      </div>
+      <div class="msg" id="msg" role="status" aria-live="polite"></div>
+
+      <p class="switch">
+        <span id="switchText">ما عندكش حساب؟</span>
+        <button type="button" class="link" id="switchBtn">إنشاء حساب</button>
+      </p>
     </section>
   </main>
-<script src="./supabase-config.js"></script>
+
+  <script src="./supabase-config.js"></script>
   <script>
     "use strict";
 
@@ -474,11 +585,12 @@
 
     const els = {
       book: $("book"), form: $("authForm"),
-      tabLogin: $("tabLogin"), tabSignup: $("tabSignup"), indicator: $("tabIndicator"),
+      tabLogin: $("tabLogin"), tabSignup: $("tabSignup"),
+      switchText: $("switchText"), switchBtn: $("switchBtn"),
       submitBtn: $("submitBtn"), submitLabel: $("submitLabel"),
       msg: $("msg"), email: $("email"), password: $("password"),
       emailWrap: $("emailWrap"), passwordWrap: $("passwordWrap"),
-      togglePassword: $("togglePassword"), greeting: $("greeting"),
+      togglePassword: $("togglePassword"),
       strength: $("strength"), strengthText: $("strengthText"),
       bars: document.querySelectorAll(".bars i"),
     };
@@ -567,7 +679,8 @@
       const isLogin = m === "login";
       els.tabLogin.setAttribute("aria-selected", String(isLogin));
       els.tabSignup.setAttribute("aria-selected", String(!isLogin));
-      els.indicator.dataset.mode = m;
+      els.switchText.textContent = isLogin ? "ما عندكش حساب؟" : "عندك حساب؟";
+      els.switchBtn.textContent = isLogin ? "إنشاء حساب" : "تسجيل الدخول";
       els.submitLabel.textContent = isLogin ? "دخول" : "إنشاء الحساب";
       // correct autocomplete hint matters: it stops password managers from
       // saving the wrong credential and lets them offer a generated password
@@ -592,17 +705,6 @@
         els.submitLabel.textContent = els.submitBtn.dataset.prevLabel;
       }
     }
-
-    /* ===================== greeting ===================== */
-
-    (function setGreeting() {
-      const h = new Date().getHours();
-      els.greeting.textContent =
-        h < 5  ? "سهرانين لحد دلوقتي؟" :
-        h < 12 ? "صباح الخير" :
-        h < 17 ? "مساء الخير" :
-        h < 21 ? "مساء الفل" : "مساء الخير";
-    })();
 
     /* ===================== returning from password reset ===================== */
 
@@ -662,6 +764,7 @@
 
     els.tabLogin.addEventListener("click", () => setMode("login"));
     els.tabSignup.addEventListener("click", () => setMode("signup"));
+    els.switchBtn.addEventListener("click", () => setMode(mode === "login" ? "signup" : "login"));
 
     // arrow-key navigation between tabs, as expected from a real tablist
     [els.tabLogin, els.tabSignup].forEach((tab) => {
