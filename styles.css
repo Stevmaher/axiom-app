@@ -89,7 +89,7 @@
         inset 0 0 0 1px rgba(50, 130, 184, 0.12);
       position: relative;
       overflow: hidden;
-      animation: panelIn 0.55s var(--ease) both;
+      animation: panelIn 0.4s var(--ease) backwards;
     }
 
     @keyframes panelIn {
@@ -305,16 +305,19 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, background 0.18s ease;
+      transition: transform 0.12s ease;
       border: 1px solid rgba(50, 130, 184, 0.12);
       user-select: none;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      will-change: transform;
+      contain: layout style;
     }
 
-    .cell:hover {
-      transform: translateY(-1px) scale(1.02);
-      filter: brightness(1.08);
+    /* hover only where a real pointer exists (no sticky hover / extra repaints on touch) */
+    @media (hover: hover) {
+      .cell:hover {
+        transform: translateY(-1px) scale(1.02);
+        filter: brightness(1.08);
+      }
     }
 
     .cell:active {
@@ -389,7 +392,7 @@
       height: 114%;
       object-fit: contain;
       pointer-events: none;
-      filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.55));
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45); /* was filter: drop-shadow(14px) on every tile */
       border-radius: 50%;
     }
 
@@ -423,7 +426,7 @@
       border-radius: 14px;
       border: 1px solid rgba(50, 130, 184, 0.22);
       z-index: 10;
-      transition: transform 200ms ease;
+      transition: transform 130ms ease;
       will-change: transform;
     }
 
@@ -740,7 +743,6 @@
     .eleven-star.filled {
       color: var(--gold-bright);
       text-shadow: 0 0 16px rgba(50, 130, 184, 0.85), 0 0 34px rgba(50, 130, 184, 0.4), 0 0 4px rgba(232, 241, 245, 0.6);
-      animation: starIdleGlow 2.6s ease-in-out infinite;
     }
 
     @keyframes starIdleGlow {
@@ -806,7 +808,7 @@
       pointer-events: none;
       background: radial-gradient(circle, rgba(232, 241, 245, 0.55), rgba(50, 130, 184, 0.3) 45%, rgba(50, 130, 184, 0) 75%);
       z-index: 15;
-      animation: mergeBurst 260ms ease-out forwards;
+      animation: mergeBurst 180ms ease-out forwards;
     }
 
     @keyframes mergeBurst {
@@ -821,7 +823,7 @@
     }
 
     .cell.merge-pop {
-      animation: mergePop 220ms ease-out;
+      animation: mergePop 160ms ease-out;
       z-index: 3;
     }
 
@@ -1093,4 +1095,15 @@
 
     @media (prefers-reduced-motion: reduce) {
       .tile-sheet-panel, .tile-sheet-backdrop { transition: none; }
+    }
+
+    /* ===== Mobile: give the board more room and enlarge beast images ===== */
+    @media (max-width: 600px) {
+      .wrap { padding: 6px; }
+      .panel { padding: 12px 8px; border-radius: 16px; }
+      .board-shell { max-width: none; padding: 4px; border-radius: 16px; margin: 12px 0; }
+      .board { gap: 5px; padding: 6px; border-radius: 14px; }
+      .cell { border-radius: 12px; }
+      .tile-icon { width: 128%; height: 128%; }
+      .sheet-tile .tile-icon { width: 100%; height: 100%; }
     }

@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Tajawal:wght@400;500;700;800&display=swap"
         rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
   <style>
     :root {
       --void: #1B262C;
@@ -1299,14 +1299,14 @@
           <td data-label="الاشتراك">${subHtml}</td>
           <td class="actions-cell">
             <div class="actions">
-              <button class="mini ${row.active ? "off" : "on"}" data-act="toggle" data-id="${row.id}" data-active="${row.active}">
+              <button class="mini ${row.active ? "off" : "on"}" data-act="toggle" data-id="${escapeHtml(row.id)}" data-active="${row.active}">
                 ${row.active ? "إيقاف" : "تفعيل"}
               </button>
-              <button class="mini ext" data-act="extend" data-id="${row.id}"
-                      data-email="${escapeHtml(row.email)}" data-exp="${row.expires_at || ""}">تمديد</button>
-              <button class="mini reset" data-act="resetDevice" data-id="${row.id}"
+              <button class="mini ext" data-act="extend" data-id="${escapeHtml(row.id)}"
+                      data-email="${escapeHtml(row.email)}" data-exp="${escapeHtml(row.expires_at || "")}">تمديد</button>
+              <button class="mini reset" data-act="resetDevice" data-id="${escapeHtml(row.id)}"
                       data-email="${escapeHtml(row.email)}">Reset Device</button>
-              <button class="mini del" data-act="del" data-id="${row.id}" data-email="${escapeHtml(row.email)}">حذف</button>
+              <button class="mini del" data-act="del" data-id="${escapeHtml(row.id)}" data-email="${escapeHtml(row.email)}">حذف</button>
             </div>
           </td>`;
         frag.appendChild(tr);
@@ -1575,7 +1575,13 @@
     $("exportBtn").onclick = () => {
       if (!allRows.length) { toast("مفيش بيانات للتصدير"); return; }
       const head = ["email", "status", "plan", "created_at", "expires_at", "days_left", "device_name", "device_type", "device_model", "os", "browser", "user_agent", "device_state", "last_seen_at"];
-      const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+      // CSV/Formula injection guard: device_name & user_agent are client-controlled,
+      // so a cell starting with = + - @ would run as a formula when opened in Excel.
+      const esc = (v) => {
+        let s = String(v ?? "");
+        if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+        return `"${s.replace(/"/g, '""')}"`;
+      };
       const lines = [head.join(",")].concat(
         allRows.map((r) => [r.email, statusOf(r), r.plan, r.created_at, r.expires_at, daysLeft(r) ?? "",
           r.device?.device_name, r.device?.device_type, r.device?.device_model, r.device?.os, r.device?.browser, r.device?.user_agent,
