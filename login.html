@@ -4,36 +4,42 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#1B262C" />
+  <meta name="theme-color" content="#030C14" />
   <meta name="description" content="Axiom — تسجيل الدخول لمحرّك الحل الذكي" />
   <title>Axiom — تسجيل الدخول</title>
   <link rel="icon" href="./favicon.ico" sizes="any">
   <link rel="icon" href="./favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="./favicon-192.png" type="image/png" sizes="192x192">
   <link rel="apple-touch-icon" href="./favicon-180.png">
+  <link rel="preload" as="image" href="./login-bg.webp" media="(min-width: 901px)">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Cormorant+Garamond:wght@500;600&family=Tajawal:wght@400;500;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Tajawal:wght@400;500;700;800&display=swap"
     rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"
     integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
   <style>
     :root {
-      --void: #1B262C;
-      --leather: #0F4C75;
-      --leather-2: #1B262C;
-      --parchment: #E8F1F5;
-      --parchment-dim: rgba(232, 241, 245, 0.72);
-      --gold: #D8A752;
-      --gold-dim: rgba(216, 167, 82, 0.55);
-      --border: rgba(50, 130, 184, 0.35);
-      --border-soft: rgba(50, 130, 184, 0.18);
-      --ember: #C98A4A;
-      --ember-dim: rgba(201, 138, 74, 0.5);
-      --error: #ff9a9a;
-      --ok: #8fd9ac;
-      --wait: #e8c07d;
+      --void: #030C14;
+      --navy: #061826;
+      --navy-2: #04111C;
+      --field: rgba(1, 17, 29, 0.88);
+      --parchment: #E9EEF3;
+      --muted: #8A97A6;
+      --line: rgba(150, 170, 192, 0.42);
+      --gold-hi: #FBE08A;
+      --gold: #E8A92E;
+      --gold-lo: #B8710F;
+      --gold-text: #F6D98A;
+      --gold-dim: rgba(232, 169, 46, 0.5);
+      --gem: #2C9BE6;
+      --social-line: rgba(46, 120, 190, 0.55);
+      --ember: #E8561F;
+      --error: #FF8F8F;
+      --ok: #8FD9AC;
+      --wait: #F0C36B;
+      --hex: polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%);
       --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
     }
 
@@ -46,49 +52,105 @@
       min-height: 100%;
       font-family: 'Tajawal', system-ui, sans-serif;
       color: var(--parchment);
+      background: var(--void);
+    }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+      overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+    }
+
+    /* ===================== backdrop ===================== */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background: var(--void) url('./login-bg.webp') 78% center / cover no-repeat;
+    }
+
+    /* keeps the left half calm so the card reads; the warrior stays untouched on the right */
+    .bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(2, 10, 18, 0.86) 0%, rgba(2, 10, 18, 0.55) 40%, rgba(2, 10, 18, 0) 66%),
+        linear-gradient(180deg, rgba(2, 10, 18, 0.3), transparent 22%, transparent 78%, rgba(2, 10, 18, 0.5));
+    }
+
+    /* ===================== stage ===================== */
+    /* The artwork is composed left-to-right in the reference, so this row is
+       laid out physically (ltr) and only the card's contents are rtl. */
+    .stage {
+      direction: ltr;
+      min-height: 100vh;
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: clamp(16px, 3vw, 40px) clamp(16px, 6vw, 110px);
+    }
+
+    .auth-col {
+      width: min(100%, 520px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(8px, 1.6vw, 18px);
+    }
+
+    /* ===================== wordmark ===================== */
+    .brand-lockup {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: clamp(16px, 4vw, 40px);
-      background:
-        radial-gradient(ellipse 70% 50% at 20% 0%, rgba(50, 130, 184, 0.16), transparent 60%),
-        radial-gradient(ellipse 70% 50% at 100% 100%, rgba(201, 138, 74, 0.08), transparent 55%),
-        linear-gradient(180deg, var(--void) 0%, var(--leather-2) 55%, var(--void) 100%);
+      gap: clamp(8px, 1.4vw, 16px);
+      margin: 0;
+      direction: ltr;
     }
 
-    body::before {
-      content: '';
-      position: fixed;
-      inset: -40px;
-      background-image: radial-gradient(rgba(232, 241, 245, 0.10) 1px, transparent 1px);
-      background-size: 26px 26px;
-      opacity: 0.3;
-      pointer-events: none;
-      z-index: -1;
-      animation: drift 40s linear infinite;
+    .brand-mark {
+      width: clamp(52px, 6.4vw, 100px);
+      height: auto;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 14px rgba(255, 176, 48, 0.55));
     }
 
-    @keyframes drift {
-      from { transform: translate(0, 0); }
-      to   { transform: translate(26px, 26px); }
+    .brand {
+      margin: 0;
+      font-family: 'Cinzel', serif;
+      font-weight: 900;
+      font-size: clamp(46px, 6.4vw, 100px);
+      line-height: 1;
+      letter-spacing: 0.01em;
+      background: linear-gradient(180deg, #FFF3B8 0%, #F7CC57 34%, #D8941E 60%, #F4C44E 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 3px 0 rgba(90, 44, 0, 0.55)) drop-shadow(0 0 22px rgba(255, 160, 30, 0.38));
     }
 
     /* ===================== card ===================== */
     .book {
+      position: relative;
+      direction: rtl;
       width: 100%;
-      max-width: 860px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      background: linear-gradient(180deg, rgba(15, 76, 117, 0.92), rgba(27, 38, 44, 0.94));
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
-      overflow: hidden;
+      padding: clamp(26px, 3.2vw, 38px) clamp(22px, 3.4vw, 46px) clamp(22px, 2.6vw, 30px);
+      background:
+        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(44, 155, 230, 0.08), transparent 70%),
+        linear-gradient(180deg, rgba(5, 22, 36, 0.9), rgba(2, 11, 19, 0.94));
+      border: 1px solid rgba(232, 169, 46, 0.55);
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.6),
+        inset 0 0 0 1px rgba(232, 169, 46, 0.08),
+        inset 0 0 60px rgba(0, 0, 0, 0.35);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
       animation: cardIn 0.7s var(--ease) both;
     }
 
     @keyframes cardIn {
-      from { opacity: 0; transform: translateY(18px) scale(0.985); }
+      from { opacity: 0; transform: translateY(16px); }
       to   { opacity: 1; transform: none; }
     }
 
@@ -101,189 +163,201 @@
       40%, 60% { transform: translateX(6px); }
     }
 
-    .spine { position: relative; }
-
-    .spine::after {
+    /* gold corner brackets */
+    .corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      pointer-events: none;
+      border: 0 solid var(--gold);
+      filter: drop-shadow(0 0 6px rgba(232, 169, 46, 0.5));
+    }
+    .corner::after {
       content: '';
       position: absolute;
-      top: 8%;
-      bottom: 8%;
-      inset-inline-end: 0;
-      width: 1px;
-      background: linear-gradient(180deg, transparent, var(--border), transparent);
+      width: 7px;
+      height: 7px;
+      background: var(--gold-hi);
+      transform: rotate(45deg);
+    }
+    .corner.tl { top: -2px; left: -2px; border-top-width: 3px; border-left-width: 3px; }
+    .corner.tr { top: -2px; right: -2px; border-top-width: 3px; border-right-width: 3px; }
+    .corner.bl { bottom: -2px; left: -2px; border-bottom-width: 3px; border-left-width: 3px; }
+    .corner.br { bottom: -2px; right: -2px; border-bottom-width: 3px; border-right-width: 3px; }
+    .corner.tl::after { top: -4px; left: -4px; }
+    .corner.tr::after { top: -4px; right: -4px; }
+    .corner.bl::after { bottom: -4px; left: -4px; }
+    .corner.br::after { bottom: -4px; right: -4px; }
+
+    /* blue gem set into the top and bottom edge, with gold wings */
+    .gem-wrap {
+      position: absolute;
+      inset-inline: 0;
+      height: 0;
+      pointer-events: none;
+    }
+    .gem-wrap.top { top: 0; }
+    .gem-wrap.bottom { bottom: 0; }
+
+    .gem-wrap::before, .gem-wrap::after {
+      content: '';
+      position: absolute;
+      top: -1px;
+      width: 15%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--gold));
+    }
+    .gem-wrap::before { left: calc(50% - 15% - 18px); }
+    .gem-wrap::after { right: calc(50% - 15% - 18px); transform: scaleX(-1); }
+
+    .gem {
+      position: absolute;
+      left: 50%;
+      top: -11px;
+      width: 22px;
+      height: 22px;
+      margin-left: -11px;
+      transform: rotate(45deg);
+      background: radial-gradient(circle at 35% 30%, #9FDBFF 0%, var(--gem) 45%, #0B4F86 100%);
+      border: 2px solid var(--gold);
+      box-shadow: 0 0 14px rgba(44, 155, 230, 0.75), 0 0 0 4px rgba(3, 12, 20, 0.9);
     }
 
-    /* ===================== form ===================== */
-    .leaf-form {
-      padding: clamp(28px, 4vw, 40px);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    /* staggered entrance for everything inside the form */
-    .leaf-form > *, .fields > * {
-      animation: riseIn 0.6s var(--ease) both;
-    }
-    .leaf-form > *:nth-child(1) { animation-delay: 0.10s; }
-    .leaf-form > *:nth-child(2) { animation-delay: 0.16s; }
-    .leaf-form > *:nth-child(3) { animation-delay: 0.22s; }
-    .leaf-form > *:nth-child(4) { animation-delay: 0.28s; }
-    .leaf-form > *:nth-child(5) { animation-delay: 0.34s; }
-
-    @keyframes riseIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: none; }
-    }
-
-    .greeting {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-size: 14px;
-      color: var(--gold);
-      margin: 0 0 4px;
-      min-height: 18px;
-    }
-
-    .brand-lockup {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 0 0 2px;
-    }
-
-    .brand-mark {
-      width: 28px;
-      height: auto;
-      flex-shrink: 0;
-      filter: drop-shadow(0 0 8px rgba(216, 167, 82, 0.45));
-    }
-
-    .brand {
-      font-family: 'Cinzel', serif;
-      font-weight: 700;
-      font-size: 26px;
-      letter-spacing: 0.02em;
-      margin: 0;
-    }
-
-    .sub {
-      margin: 0 0 24px;
-      color: var(--parchment-dim);
-      font-size: 14.5px;
-      line-height: 1.6;
-      max-width: 34ch;
-    }
-
-    /* ---- tabs with a sliding indicator ---- */
+    /* ===================== tabs ===================== */
     .tabs {
-      position: relative;
       display: flex;
-      border-bottom: 1px solid var(--border-soft);
-      margin-bottom: 8px;
+      gap: 0;
+      margin-bottom: clamp(16px, 2vw, 22px);
+      filter: drop-shadow(0 0 10px rgba(232, 169, 46, 0.18));
     }
 
     .tabs button {
+      position: relative;
       flex: 1;
-      padding: 10px 4px;
-      background: transparent;
-      border: none;
-      color: var(--parchment-dim);
+      height: 54px;
+      padding: 0 10px;
+      border: 0;
+      background: rgba(60, 120, 170, 0.5);
+      clip-path: var(--hex);
+      color: var(--muted);
       font-family: inherit;
-      font-size: 14.5px;
+      font-size: 18px;
       font-weight: 500;
       cursor: pointer;
       transition: color 0.25s var(--ease);
     }
 
-    .tabs button[aria-selected="true"] { color: var(--parchment); font-weight: 700; }
+    .tabs button:first-child { margin-inline-end: -10px; }
 
-    .tab-indicator {
+    .tabs button::before {
+      content: '';
       position: absolute;
-      bottom: -1px;
-      height: 2px;
-      width: 50%;
-      background: var(--gold);
-      border-radius: 2px;
-      transition: transform 0.35s var(--ease);
-    }
-    /* RTL: login tab is on the right */
-    .tab-indicator[data-mode="login"]  { transform: translateX(0); }
-    .tab-indicator[data-mode="signup"] { transform: translateX(-100%); }
-
-    .fields { display: flex; flex-direction: column; }
-
-    label {
-      display: block;
-      font-size: 13px;
-      color: var(--parchment-dim);
-      margin: 16px 0 6px;
+      inset: 1px;
+      clip-path: var(--hex);
+      background: linear-gradient(180deg, #08233A, #051523);
+      transition: background 0.3s var(--ease);
     }
 
-    .field-wrap { position: relative; }
+    .tabs button span { position: relative; }
+
+    .tabs button:hover { color: var(--parchment); }
+
+    .tabs button[aria-selected="true"] {
+      color: var(--gold-text);
+      font-weight: 800;
+      background: linear-gradient(180deg, var(--gold-hi), var(--gold-lo));
+      z-index: 1;
+    }
+
+    .tabs button[aria-selected="true"]::before {
+      background: linear-gradient(180deg, #3B2A0B 0%, #1C1608 100%);
+    }
+
+    /* ===================== fields ===================== */
+    .fields { display: flex; flex-direction: column; gap: 16px; }
+
+    .field-wrap {
+      position: relative;
+      height: 60px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--field);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .field-wrap:focus-within {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(232, 169, 46, 0.18);
+    }
+
+    .field-wrap.invalid {
+      border-color: var(--error);
+      box-shadow: 0 0 0 3px rgba(255, 143, 143, 0.14);
+    }
+
+    .field-wrap .icon {
+      position: absolute;
+      inset-inline-start: 18px;
+      top: 50%;
+      width: 26px;
+      height: 26px;
+      transform: translateY(-50%);
+      fill: none;
+      stroke: #AEB9C6;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
 
     input {
       width: 100%;
-      padding: 11px 2px;
-      border: none;
-      border-bottom: 1px solid var(--border);
+      height: 100%;
+      padding: 0 62px 0 14px;
+      border: 0;
       background: transparent;
       color: var(--parchment);
-      font-size: 15.5px;
+      font-size: 17px;
       font-family: inherit;
-      transition: border-color 0.25s var(--ease);
+      text-align: start;
     }
 
-    input::placeholder { color: rgba(232, 241, 245, 0.35); }
-    input:focus { outline: none; }
-    input:focus-visible { outline: none; }
+    .field-wrap input { padding-inline-start: 58px; padding-inline-end: 16px; }
+    .field-wrap.has-eye input { padding-inline-end: 54px; }
 
-    /* animated underline that grows from the center on focus */
-    .field-wrap::after {
-      content: '';
-      position: absolute;
-      inset-inline: 0;
-      bottom: 0;
-      height: 2px;
-      background: var(--gold);
-      transform: scaleX(0);
-      transform-origin: center;
-      transition: transform 0.3s var(--ease), background-color 0.2s ease;
-    }
-    .field-wrap:focus-within::after { transform: scaleX(1); }
-    .field-wrap.invalid::after { transform: scaleX(1); background: var(--error); }
-
-    .field-wrap.has-eye input { padding-inline-start: 34px; }
+    input::placeholder { color: #8795A4; opacity: 1; }
+    input:focus, input:focus-visible { outline: none; }
+    input[type="email"] { direction: ltr; text-align: right; padding: 0 58px 0 16px; }
+    input[type="email"]::placeholder { direction: rtl; }
 
     .toggle-eye {
       position: absolute;
-      inset-inline-start: 0;
+      inset-inline-end: 8px;
       top: 50%;
       transform: translateY(-50%);
       background: transparent;
-      border: none;
+      border: 0;
       cursor: pointer;
-      padding: 6px;
+      padding: 8px;
       line-height: 0;
-      color: var(--parchment);
-      opacity: 0.5;
+      color: #AEB9C6;
       border-radius: 8px;
-      transition: opacity 0.2s ease;
+      transition: color 0.2s ease;
     }
-    .toggle-eye:hover { opacity: 0.95; }
-    .toggle-eye svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+    .toggle-eye:hover { color: var(--parchment); }
+    .toggle-eye svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; }
     .toggle-eye .slash { stroke-dasharray: 26; stroke-dashoffset: 26; transition: stroke-dashoffset 0.25s var(--ease); }
     .toggle-eye[aria-pressed="true"] .slash { stroke-dashoffset: 0; }
 
-    /* ---- password strength (signup only) ---- */
+    /* ---- password strength (sign-up only) ---- */
     .strength {
       display: grid;
       grid-template-rows: 0fr;
       opacity: 0;
+      margin-top: -16px;
       transition: grid-template-rows 0.35s var(--ease), opacity 0.25s ease, margin 0.35s var(--ease);
-      margin-top: 0;
     }
-    .strength.show { grid-template-rows: 1fr; opacity: 1; margin-top: 10px; }
+    .strength.show { grid-template-rows: 1fr; opacity: 1; margin-top: -4px; }
     .strength > div { overflow: hidden; }
 
     .bars { display: flex; gap: 5px; }
@@ -291,59 +365,56 @@
       flex: 1;
       height: 3px;
       border-radius: 2px;
-      background: rgba(232, 241, 245, 0.14);
+      background: rgba(233, 238, 243, 0.14);
       transition: background-color 0.3s var(--ease);
     }
-    .strength-text { font-size: 12px; margin-top: 6px; color: var(--parchment-dim); }
+    .strength-text { font-size: 12.5px; margin-top: 6px; color: var(--muted); }
 
-    .link {
-      background: none;
-      border: none;
-      padding: 0;
-      color: var(--gold);
-      font-family: inherit;
-      font-size: 13px;
-      cursor: pointer;
-      text-decoration: underline;
-      text-underline-offset: 3px;
-      transition: color 0.2s ease;
+    /* ===================== submit ===================== */
+    .submit-wrap {
+      margin-top: 6px;
+      filter: drop-shadow(0 6px 16px rgba(232, 169, 46, 0.32));
     }
-    .link:hover { color: var(--parchment); }
 
-    /* ---- submit ---- */
     button.submit {
       position: relative;
       width: 100%;
-      margin-top: 22px;
-      padding: 13px;
-      border-radius: 12px;
-      border: 1px solid var(--ember-dim);
-      background: linear-gradient(180deg, var(--ember), #A8703A);
-      color: #1B140C;
-      font-weight: 800;
-      font-size: 15px;
+      height: 60px;
+      border: 0;
+      clip-path: var(--hex);
+      background: linear-gradient(180deg, #FFF0B0, #A8650E);
+      color: #2A1805;
       font-family: inherit;
+      font-weight: 800;
+      font-size: 22px;
       cursor: pointer;
       overflow: hidden;
-      transition: filter 0.2s ease, transform 0.12s ease, box-shadow 0.25s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 9px;
+      gap: 10px;
+      transition: filter 0.2s ease, transform 0.12s ease;
     }
-    button.submit:hover:not(:disabled) {
-      filter: brightness(1.08);
-      box-shadow: 0 8px 22px rgba(201, 138, 74, 0.22);
-    }
-    button.submit:active:not(:disabled) { transform: scale(0.985); }
-    button.submit:disabled { opacity: 0.7; cursor: not-allowed; }
 
-    /* sheen sweep while loading */
-    button.submit.loading::before {
+    button.submit::before {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      clip-path: var(--hex);
+      background: linear-gradient(180deg, #F9D878 0%, #EDB23A 46%, #D18C1C 100%);
+    }
+
+    button.submit > * { position: relative; }
+
+    button.submit:hover:not(:disabled) { filter: brightness(1.08); }
+    button.submit:active:not(:disabled) { transform: scale(0.99); }
+    button.submit:disabled { opacity: 0.75; cursor: not-allowed; }
+
+    button.submit.loading::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
       animation: sheen 1.15s linear infinite;
     }
     @keyframes sheen {
@@ -353,29 +424,91 @@
 
     .spinner {
       display: none;
-      width: 15px;
-      height: 15px;
-      border: 2px solid rgba(27, 20, 12, 0.3);
-      border-top-color: #1B140C;
+      width: 17px;
+      height: 17px;
+      border: 2px solid rgba(42, 24, 5, 0.3);
+      border-top-color: #2A1805;
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
     }
     button.submit.loading .spinner { display: inline-block; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    :where(button, input, a):focus-visible {
-      outline: 2px solid var(--gold);
-      outline-offset: 3px;
-      border-radius: 6px;
+    /* ===================== divider + social ===================== */
+    .or {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 14px;
+      margin: 18px 0 14px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .or::before, .or::after {
+      content: '';
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(150, 170, 192, 0.4));
+    }
+    .or::after { background: linear-gradient(270deg, transparent, rgba(150, 170, 192, 0.4)); }
+
+    .social { display: flex; flex-direction: column; gap: 12px; }
+
+    .social button {
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      border: 1px solid var(--social-line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(4, 30, 54, 0.9), rgba(2, 17, 31, 0.92));
+      color: var(--parchment);
+      font-family: inherit;
+      font-size: 16.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.12s ease;
+    }
+    .social button:hover:not(:disabled) {
+      border-color: rgba(86, 170, 240, 0.85);
+      background: linear-gradient(180deg, rgba(8, 44, 78, 0.95), rgba(3, 24, 42, 0.95));
+    }
+    .social button:active:not(:disabled) { transform: scale(0.99); }
+    .social button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .social svg { width: 26px; height: 26px; flex-shrink: 0; }
+
+    /* ===================== footer + message ===================== */
+    .switch {
+      margin: 20px 0 0;
+      text-align: center;
+      font-size: 14.5px;
+      color: var(--muted);
     }
 
-    /* ---- message ---- */
+    .link {
+      background: none;
+      border: 0;
+      padding: 0 4px;
+      color: var(--gold);
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+    .link:hover { color: var(--gold-hi); text-decoration: underline; text-underline-offset: 4px; }
+
+    :where(button, input, a):focus-visible {
+      outline: 2px solid var(--gold-hi);
+      outline-offset: 3px;
+    }
+
     .msg {
-      margin-top: 14px;
-      font-size: 13.5px;
+      margin-top: 12px;
+      font-size: 14px;
       text-align: center;
-      min-height: 20px;
-      line-height: 1.55;
+      min-height: 22px;
+      line-height: 1.6;
     }
     .msg:not(:empty) { animation: msgIn 0.35s var(--ease) both; }
     @keyframes msgIn {
@@ -386,111 +519,20 @@
     .msg.ok    { color: var(--ok); }
     .msg.wait  { color: var(--wait); }
 
-    /* ===================== hero ===================== */
-    .leaf-hero {
-      padding: clamp(28px, 4vw, 40px);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 18px;
-      background: radial-gradient(circle at 50% 20%, rgba(50, 130, 184, 0.14), transparent 65%);
-      animation: riseIn 0.7s var(--ease) 0.2s both;
-    }
-
-    .hero-eyebrow {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-size: 15px;
-      color: var(--gold);
-      margin: 0;
-    }
-
-    .hero-title {
-      font-family: 'Cinzel', 'Tajawal', serif;
-      font-weight: 700;
-      font-size: 22px;
-      line-height: 1.5;
-      margin: 0;
-    }
-
-    .hero-desc {
-      font-size: 14px;
-      line-height: 1.75;
-      color: var(--parchment-dim);
-      margin: 0;
-      max-width: 32ch;
-    }
-
-    /* ---- merge diagram: a real 4s merge loop ---- */
-    .merge {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin: 10px 0 4px;
-      min-height: 66px;
-    }
-
-    .token {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      background: radial-gradient(circle at 35% 30%, rgba(232, 241, 245, 0.14), rgba(15, 76, 117, 0.6));
-      border: 1px solid var(--border);
-    }
-
-    .token svg { width: 24px; height: 24px; stroke: var(--parchment); fill: none; stroke-width: 1.4; }
-
-    .token.a { animation: mergeA 4s var(--ease) infinite; }
-    .token.b { animation: mergeB 4s var(--ease) infinite; }
-    .plus, .arrow { animation: fadeMid 4s var(--ease) infinite; }
-
-    .plus  { color: var(--gold-dim); font-size: 15px; }
-    .arrow { color: var(--parchment-dim); font-size: 15px; transform: scaleX(-1); }
-
-    .token.result {
-      width: 62px;
-      height: 62px;
-      border-color: var(--ember-dim);
-      animation: pop 4s var(--ease) infinite;
-    }
-    .token.result svg { width: 30px; height: 30px; stroke: var(--ember); }
-
-    /* the two tokens slide together, fade, then the result pops */
-    @keyframes mergeA {
-      0%, 20%   { transform: translateX(0) scale(1); opacity: 1; }
-      45%       { transform: translateX(-26px) scale(0.9); opacity: 1; }
-      55%, 85%  { transform: translateX(-26px) scale(0.6); opacity: 0; }
-      100%      { transform: translateX(0) scale(1); opacity: 1; }
-    }
-    @keyframes mergeB {
-      0%, 20%   { transform: translateX(0) scale(1); opacity: 1; }
-      45%       { transform: translateX(26px) scale(0.9); opacity: 1; }
-      55%, 85%  { transform: translateX(26px) scale(0.6); opacity: 0; }
-      100%      { transform: translateX(0) scale(1); opacity: 1; }
-    }
-    @keyframes fadeMid {
-      0%, 25%  { opacity: 1; }
-      45%, 85% { opacity: 0; }
-      100%     { opacity: 1; }
-    }
-    @keyframes pop {
-      0%, 45%  { transform: scale(1); box-shadow: 0 0 0 0 rgba(201, 138, 74, 0); }
-      58%      { transform: scale(1.18); box-shadow: 0 0 26px 6px rgba(201, 138, 74, 0.4); }
-      72%      { transform: scale(1); box-shadow: 0 0 14px 2px rgba(201, 138, 74, 0.2); }
-      100%     { transform: scale(1); box-shadow: 0 0 0 0 rgba(201, 138, 74, 0); }
-    }
-
     /* ===================== responsive ===================== */
-    @media (max-width: 760px) {
-      .book { grid-template-columns: 1fr; }
-      .spine::after { display: none; }
-      .leaf-hero { order: -1; padding-bottom: 8px; gap: 14px; }
-      .leaf-form { padding-top: 8px; }
-      .hero-desc { max-width: none; }
-      .hero-title { font-size: 19px; }
+    @media (max-width: 900px) {
+      .bg { background-image: url('./login-bg-sm.webp'); background-position: 72% center; }
+      .bg::after {
+        background: linear-gradient(180deg, rgba(2, 10, 18, 0.55), rgba(2, 10, 18, 0.78));
+      }
+      .stage { justify-content: center; }
+    }
+
+    @media (max-width: 480px) {
+      .tabs button { height: 48px; font-size: 16px; }
+      .field-wrap, button.submit { height: 56px; }
+      button.submit { font-size: 20px; }
+      .social button { height: 50px; font-size: 15.5px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -504,80 +546,101 @@
 </head>
 
 <body>
-  <main class="book" id="book">
-    <section class="leaf-form spine">
-      <p class="greeting" id="greeting"></p>
+  <div class="bg" aria-hidden="true"></div>
+
+  <main class="stage">
+    <div class="auth-col">
       <div class="brand-lockup">
         <img class="brand-mark" src="./dragon-icon-gold.png" alt="" aria-hidden="true">
-        <h1 class="brand">Axiom</h1>
-      </div>
-      <p class="sub">سجّل دخولك أو افتح حساب جديد عشان توصل لمحرّك الحل الذكي.</p>
-
-      <div class="tabs" role="tablist" aria-label="نوع العملية">
-        <button id="tabLogin" role="tab" aria-selected="true" aria-controls="authForm" type="button">تسجيل الدخول</button>
-        <button id="tabSignup" role="tab" aria-selected="false" aria-controls="authForm" type="button">إنشاء حساب</button>
-        <span class="tab-indicator" id="tabIndicator" data-mode="login" aria-hidden="true"></span>
+        <h1 class="brand">AXIOM</h1>
       </div>
 
-      <form class="fields" id="authForm" novalidate>
-        <label for="email">الإيميل</label>
-        <div class="field-wrap" id="emailWrap">
-          <input id="email" name="email" type="email" placeholder="you@example.com"
-                 autocomplete="email" inputmode="email" required />
+      <section class="book" id="book">
+        <span class="corner tl" aria-hidden="true"></span>
+        <span class="corner tr" aria-hidden="true"></span>
+        <span class="corner bl" aria-hidden="true"></span>
+        <span class="corner br" aria-hidden="true"></span>
+        <span class="gem-wrap top" aria-hidden="true"><span class="gem"></span></span>
+        <span class="gem-wrap bottom" aria-hidden="true"><span class="gem"></span></span>
+
+        <div class="tabs" role="tablist" aria-label="نوع العملية">
+          <button id="tabLogin" role="tab" aria-selected="true" aria-controls="authForm" type="button"><span>تسجيل الدخول</span></button>
+          <button id="tabSignup" role="tab" aria-selected="false" aria-controls="authForm" type="button"><span>إنشاء حساب</span></button>
         </div>
 
-        <label for="password">كلمة المرور</label>
-        <div class="field-wrap has-eye" id="passwordWrap">
-          <button type="button" class="toggle-eye" id="togglePassword"
-                  aria-pressed="false" aria-label="إظهار كلمة المرور" aria-controls="password">
-            <svg viewBox="0 0 24 24">
-              <path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" />
-              <circle cx="12" cy="12" r="3" />
-              <path class="slash" d="M4 20L20 4" />
+        <form class="fields" id="authForm" novalidate>
+          <div class="field-wrap" id="emailWrap">
+            <label class="sr-only" for="email">الإيميل</label>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="2.5" y="5" width="19" height="14" rx="2" />
+              <path d="M3 6.5l9 7 9-7" />
+              <path d="M3 18l6.2-6M21 18l-6.2-6" />
             </svg>
-          </button>
-          <input id="password" name="password" type="password" placeholder="••••••••"
-                 autocomplete="current-password" required minlength="6" />
-        </div>
-
-        <div class="strength" id="strength" aria-hidden="true">
-          <div>
-            <div class="bars">
-              <i></i><i></i><i></i><i></i>
-            </div>
-            <div class="strength-text" id="strengthText">اكتب 8 حروف على الأقل، وخلّي فيها أرقام ورموز.</div>
+            <input id="email" name="email" type="email" placeholder="الإيميل"
+                   autocomplete="email" inputmode="email" required />
           </div>
+
+          <div class="field-wrap has-eye" id="passwordWrap">
+            <label class="sr-only" for="password">كلمة المرور</label>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="4.5" y="10.5" width="15" height="10" rx="2" />
+              <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
+              <circle cx="12" cy="15.5" r="1.2" />
+            </svg>
+            <input id="password" name="password" type="password" placeholder="كلمة المرور"
+                   autocomplete="current-password" required minlength="6" />
+            <button type="button" class="toggle-eye" id="togglePassword"
+                    aria-pressed="false" aria-label="إظهار كلمة المرور" aria-controls="password">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" />
+                <circle cx="12" cy="12" r="3" />
+                <path class="slash" d="M4 20L20 4" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="strength" id="strength" aria-hidden="true">
+            <div>
+              <div class="bars">
+                <i></i><i></i><i></i><i></i>
+              </div>
+              <div class="strength-text" id="strengthText">اكتب 8 حروف على الأقل، وخلّي فيها أرقام ورموز.</div>
+            </div>
+          </div>
+
+          <div class="submit-wrap">
+            <button class="submit" id="submitBtn" type="submit">
+              <span class="spinner" id="submitSpinner" aria-hidden="true"></span>
+              <span id="submitLabel">دخول</span>
+            </button>
+          </div>
+        </form>
+
+        <div class="or" aria-hidden="true">أو</div>
+
+        <div class="social">
+          <button type="button" id="btnGoogle">
+            <svg viewBox="0 0 48 48" aria-hidden="true">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+            </svg>
+            <span>المتابعة بحساب Google</span>
+          </button>
+          <button type="button" id="btnGithub">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path fill="#F2F5F8" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+            </svg>
+            <span>المتابعة بحساب GitHub</span>
+          </button>
         </div>
 
-        <button class="submit" id="submitBtn" type="submit">
-          <span class="spinner" id="submitSpinner" aria-hidden="true"></span>
-          <span id="submitLabel">دخول</span>
-        </button>
-      </form>
+        <p class="switch"><span id="switchText">معندكش حساب؟</span><button type="button" class="link" id="switchLink">إنشاء حساب</button></p>
 
-      <div class="msg" id="msg" role="status" aria-live="polite"></div>
-    </section>
-
-    <section class="leaf-hero">
-      <p class="hero-eyebrow">The Bestiary Trial</p>
-      <h2 class="hero-title">اتنين من نفس النوع بيتحدوا ويطلعوا وحش أقوى</h2>
-
-      <div class="merge" aria-hidden="true">
-        <div class="token a">
-          <svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.7-4 4 1 5.5L12 15.8 7 18.2l1-5.5-4-4 5.5-.7z"/></svg>
-        </div>
-        <span class="plus">+</span>
-        <div class="token b">
-          <svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.7-4 4 1 5.5L12 15.8 7 18.2l1-5.5-4-4 5.5-.7z"/></svg>
-        </div>
-        <span class="arrow">←</span>
-        <div class="token result">
-          <svg viewBox="0 0 24 24"><path d="M12 2l3 6 6.5.9-4.7 4.6 1.1 6.5L12 16.8 6.1 20l1.1-6.5L2.5 8.9 9 8z"/></svg>
-        </div>
-      </div>
-
-      <p class="hero-desc">كل مستوى وحش جديد، لحد ما توصل للمستوى 11 وتتحرر اللوحة منه. الحل الذكي اللي جوّه بيحسبلك أفضل حركة في كل خطوة.</p>
-    </section>
+        <div class="msg" id="msg" role="status" aria-live="polite"></div>
+      </section>
+    </div>
   </main>
 
   <script src="./supabase-config.js"></script>
@@ -588,11 +651,13 @@
 
     const els = {
       book: $("book"), form: $("authForm"),
-      tabLogin: $("tabLogin"), tabSignup: $("tabSignup"), indicator: $("tabIndicator"),
+      tabLogin: $("tabLogin"), tabSignup: $("tabSignup"),
       submitBtn: $("submitBtn"), submitLabel: $("submitLabel"),
       msg: $("msg"), email: $("email"), password: $("password"),
       emailWrap: $("emailWrap"), passwordWrap: $("passwordWrap"),
-      togglePassword: $("togglePassword"), greeting: $("greeting"),
+      togglePassword: $("togglePassword"),
+      btnGoogle: $("btnGoogle"), btnGithub: $("btnGithub"),
+      switchText: $("switchText"), switchLink: $("switchLink"),
       strength: $("strength"), strengthText: $("strengthText"),
       bars: document.querySelectorAll(".bars i"),
     };
@@ -681,7 +746,8 @@
       const isLogin = m === "login";
       els.tabLogin.setAttribute("aria-selected", String(isLogin));
       els.tabSignup.setAttribute("aria-selected", String(!isLogin));
-      els.indicator.dataset.mode = m;
+      els.switchText.textContent = isLogin ? "معندكش حساب؟" : "عندك حساب؟";
+      els.switchLink.textContent = isLogin ? "إنشاء حساب" : "سجّل دخول";
       els.submitLabel.textContent = isLogin ? "دخول" : "إنشاء الحساب";
       // correct autocomplete hint matters: it stops password managers from
       // saving the wrong credential and lets them offer a generated password
@@ -697,6 +763,8 @@
     function setLoading(isLoading, loadingText) {
       busy = isLoading;
       els.submitBtn.disabled = isLoading;
+      els.btnGoogle.disabled = isLoading;
+      els.btnGithub.disabled = isLoading;
       els.submitBtn.classList.toggle("loading", isLoading);
       els.submitBtn.setAttribute("aria-busy", String(isLoading));
       if (isLoading) {
@@ -706,17 +774,6 @@
         els.submitLabel.textContent = els.submitBtn.dataset.prevLabel;
       }
     }
-
-    /* ===================== greeting ===================== */
-
-    (function setGreeting() {
-      const h = new Date().getHours();
-      els.greeting.textContent =
-        h < 5  ? "سهرانين لحد دلوقتي؟" :
-        h < 12 ? "صباح الخير" :
-        h < 17 ? "مساء الخير" :
-        h < 21 ? "مساء الفل" : "مساء الخير";
-    })();
 
     /* ===================== returning from password reset ===================== */
 
@@ -788,6 +845,33 @@
       });
     });
 
+    els.switchLink.addEventListener("click", () => setMode(mode === "login" ? "signup" : "login"));
+
+    /* ===================== social sign-in ===================== */
+
+    // After the provider redirects back to this page, checkExistingSession()
+    // below picks up the new session and runs the same device + subscription
+    // checks as a password login.
+    async function signInWithProvider(provider) {
+      if (busy) return;
+      showMsg("");
+      setLoading(true, mode === "login" ? "بيتم الدخول..." : "بيتم الإنشاء...");
+      try {
+        const { error } = await supabaseClient.auth.signInWithOAuth({
+          provider,
+          options: { redirectTo: new URL("./login.html", window.location.href).href },
+        });
+        if (error) { setLoading(false); fail(friendlyAuthError(error, mode)); }
+      } catch (err) {
+        console.error(err);
+        setLoading(false);
+        fail("حصل خطأ غير متوقع. اتأكد من الاتصال بالنت وجرّب تاني.");
+      }
+    }
+
+    els.btnGoogle.addEventListener("click", () => signInWithProvider("google"));
+    els.btnGithub.addEventListener("click", () => signInWithProvider("github"));
+
     /* ===================== validation ===================== */
 
     const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -834,6 +918,17 @@
         return;
       }
 
+      // OAuth users never pass through the sign-up form, so make sure they
+      // have a (inactive) subscription row the admin can see and activate.
+      if (!sub) {
+        const { error: insErr } = await supabaseClient
+          .from("subscriptions")
+          .insert({ id: session.user.id, email, active: false });
+        if (insErr && !String(insErr.message).toLowerCase().includes("duplicate")) {
+          console.warn("subscriptions insert:", insErr.message);
+        }
+      }
+
       if (isSubscriptionValid(sub)) {
         showMsg("تمام، بنفتحلك المحرّك...", "ok");
         window.location.href = "./index.html";
@@ -857,6 +952,9 @@
       if (m.includes("email not confirmed")) return "لازم تأكّد الإيميل بتاعك الأول من الرسالة اللي وصلتك";
       if (m.includes("already registered") || m.includes("already been registered")) {
         return "الإيميل ده متسجّل قبل كده. جرّب تسجّل دخول.";
+      }
+      if (m.includes("provider is not enabled") || m.includes("unsupported provider")) {
+        return "الدخول بالطريقة دي لسه مش متفعّل. استخدم الإيميل وكلمة المرور.";
       }
       if (m.includes("rate limit") || m.includes("too many")) return "محاولات كتير. استنى دقيقة وجرّب تاني.";
       if (m.includes("password")) return "كلمة المرور مش مطابقة للشروط";
@@ -951,7 +1049,7 @@
         setLoading(false);
       }
     })();
-  </script>
+    </script>
 </body>
 
 </html>
