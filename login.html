@@ -129,6 +129,15 @@
       filter: drop-shadow(0 3px 0 rgba(90, 44, 0, 0.55)) drop-shadow(0 0 22px rgba(255, 160, 30, 0.38));
     }
 
+    .brand-logo-wrap { line-height: 0; background: none; filter: none; }
+
+    .brand-logo {
+      display: block;
+      width: clamp(190px, 30vw, 380px);
+      height: auto;
+      filter: drop-shadow(0 0 22px rgba(255, 160, 30, 0.4));
+    }
+
     /* ===================== card ===================== */
     .book {
       position: relative;
@@ -521,7 +530,7 @@
     <div class="auth-col">
       <div class="brand-lockup">
         <img class="brand-mark" src="./dragon-icon-gold.png" alt="" aria-hidden="true">
-        <h1 class="brand">AXIOM</h1>
+        <h1 class="brand brand-logo-wrap"><img class="brand-logo" src="./axiom-logo.png" alt="AXIOM" width="1000" height="252"></h1>
       </div>
 
       <section class="book" id="book">

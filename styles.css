@@ -179,6 +179,16 @@
       filter: drop-shadow(0 0 10px rgba(232, 169, 46, 0.45));
     }
 
+    .brand-logo-wrap { line-height: 0; background: none; filter: none; }
+
+    .brand-logo {
+      display: block;
+      height: clamp(34px, 7vw, 52px);
+      width: auto;
+      max-width: 100%;
+      filter: drop-shadow(0 0 14px rgba(255, 160, 30, 0.35));
+    }
+
     h1 {
       margin: 0;
       font-family: 'Cinzel', 'Tajawal', serif;
