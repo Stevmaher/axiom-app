@@ -1372,46 +1372,25 @@
         btn.textContent = "...";
 
         try {
-          const {
-            data: { session },
-            error: sessionError
-          } = await adminClient.auth.getSession();
+          if (!(await ensureAdminSession())) return;
 
-          if (sessionError || !session?.access_token) {
-            toast("جلسة الأدمن انتهت، سجّل دخول تاني", "err");
-            return;
-          }
-
-          const response = await fetch(
-            `${SUPABASE_URL}/functions/v1/admin-actions`,
-            {
-              method: "POST",
-              headers: {
-                "Authorization": `Bearer ${session.access_token}`,
-                "apikey": SUPABASE_ANON_KEY,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({
-                action: "reset_device",
-                user_id: id
-              })
-            }
+          const { data: result, error } = await adminClient.rpc(
+            "reset_user_devices",
+            { p_target_user_id: id }
           );
 
-          const result = await response.json().catch(() => ({}));
-
-          if (!response.ok || !result?.ok) {
-            console.error("RESET DEVICE ERROR:", result);
+          if (error || !result || result.success !== true) {
+            console.error("RESET DEVICE ERROR:", error || result);
             toast(
               "Reset Device فشل: " +
-              (result?.error || result?.message || `HTTP ${response.status}`),
+              (error?.message || result?.reason || "خطأ غير معروف"),
               "err"
             );
             return;
           }
 
           toast(
-            "تم Reset Device بنجاح — الجهاز القديم اتفك والجلسات اتلغت",
+            "تم Reset Device بنجاح — الجهاز القديم اتفك، وأول جهاز يدخل هيتسجّل",
             "ok"
           );
 
