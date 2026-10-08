@@ -34,7 +34,6 @@
       --gold-text: #F6D98A;
       --gold-dim: rgba(232, 169, 46, 0.5);
       --gem: #2C9BE6;
-      --social-line: rgba(46, 120, 190, 0.55);
       --ember: #E8561F;
       --error: #FF8F8F;
       --ok: #8FD9AC;
@@ -434,49 +433,6 @@
     button.submit.loading .spinner { display: inline-block; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ===================== divider + social ===================== */
-    .or {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      gap: 14px;
-      margin: 18px 0 14px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-    .or::before, .or::after {
-      content: '';
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(150, 170, 192, 0.4));
-    }
-    .or::after { background: linear-gradient(270deg, transparent, rgba(150, 170, 192, 0.4)); }
-
-    .social { display: flex; flex-direction: column; gap: 12px; }
-
-    .social button {
-      height: 54px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      border: 1px solid var(--social-line);
-      border-radius: 8px;
-      background: linear-gradient(180deg, rgba(4, 30, 54, 0.9), rgba(2, 17, 31, 0.92));
-      color: var(--parchment);
-      font-family: inherit;
-      font-size: 16.5px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: border-color 0.2s ease, background 0.2s ease, transform 0.12s ease;
-    }
-    .social button:hover:not(:disabled) {
-      border-color: rgba(86, 170, 240, 0.85);
-      background: linear-gradient(180deg, rgba(8, 44, 78, 0.95), rgba(3, 24, 42, 0.95));
-    }
-    .social button:active:not(:disabled) { transform: scale(0.99); }
-    .social button:disabled { opacity: 0.6; cursor: not-allowed; }
-    .social svg { width: 26px; height: 26px; flex-shrink: 0; }
-
     /* ===================== footer + message ===================== */
     .switch {
       margin: 20px 0 0;
@@ -521,18 +477,31 @@
 
     /* ===================== responsive ===================== */
     @media (max-width: 900px) {
-      .bg { background-image: url('./login-bg-sm.webp'); background-position: 72% center; }
-      .bg::after {
-        background: linear-gradient(180deg, rgba(2, 10, 18, 0.55), rgba(2, 10, 18, 0.78));
+      /* artwork becomes a hero at the top; the card slides up over its lower edge */
+      .bg {
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: clamp(380px, 62svh, 640px);
+        background-image: url('./login-bg-sm.webp');
+        background-position: 74% 8%;
       }
-      .stage { justify-content: center; }
+      .bg::after {
+        background:
+          linear-gradient(180deg, rgba(2, 10, 18, 0.35) 0%, rgba(2, 10, 18, 0) 18%, rgba(2, 10, 18, 0) 48%, rgba(3, 12, 20, 0.88) 82%, var(--void) 100%);
+      }
+      .stage {
+        justify-content: center;
+        align-items: flex-start;
+        padding-top: clamp(150px, 28svh, 300px);
+      }
+      .brand-lockup { filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.75)); }
+      .book { background-color: rgba(3, 12, 20, 0.92); }
     }
 
     @media (max-width: 480px) {
       .tabs button { height: 48px; font-size: 16px; }
       .field-wrap, button.submit { height: 56px; }
       button.submit { font-size: 20px; }
-      .social button { height: 50px; font-size: 15.5px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -616,26 +585,6 @@
           </div>
         </form>
 
-        <div class="or" aria-hidden="true">أو</div>
-
-        <div class="social">
-          <button type="button" id="btnGoogle">
-            <svg viewBox="0 0 48 48" aria-hidden="true">
-              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
-              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-            </svg>
-            <span>المتابعة بحساب Google</span>
-          </button>
-          <button type="button" id="btnGithub">
-            <svg viewBox="0 0 16 16" aria-hidden="true">
-              <path fill="#F2F5F8" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
-            </svg>
-            <span>المتابعة بحساب GitHub</span>
-          </button>
-        </div>
-
         <p class="switch"><span id="switchText">معندكش حساب؟</span><button type="button" class="link" id="switchLink">إنشاء حساب</button></p>
 
         <div class="msg" id="msg" role="status" aria-live="polite"></div>
@@ -656,7 +605,6 @@
       msg: $("msg"), email: $("email"), password: $("password"),
       emailWrap: $("emailWrap"), passwordWrap: $("passwordWrap"),
       togglePassword: $("togglePassword"),
-      btnGoogle: $("btnGoogle"), btnGithub: $("btnGithub"),
       switchText: $("switchText"), switchLink: $("switchLink"),
       strength: $("strength"), strengthText: $("strengthText"),
       bars: document.querySelectorAll(".bars i"),
@@ -763,8 +711,6 @@
     function setLoading(isLoading, loadingText) {
       busy = isLoading;
       els.submitBtn.disabled = isLoading;
-      els.btnGoogle.disabled = isLoading;
-      els.btnGithub.disabled = isLoading;
       els.submitBtn.classList.toggle("loading", isLoading);
       els.submitBtn.setAttribute("aria-busy", String(isLoading));
       if (isLoading) {
@@ -847,31 +793,6 @@
 
     els.switchLink.addEventListener("click", () => setMode(mode === "login" ? "signup" : "login"));
 
-    /* ===================== social sign-in ===================== */
-
-    // After the provider redirects back to this page, checkExistingSession()
-    // below picks up the new session and runs the same device + subscription
-    // checks as a password login.
-    async function signInWithProvider(provider) {
-      if (busy) return;
-      showMsg("");
-      setLoading(true, mode === "login" ? "بيتم الدخول..." : "بيتم الإنشاء...");
-      try {
-        const { error } = await supabaseClient.auth.signInWithOAuth({
-          provider,
-          options: { redirectTo: new URL("./login.html", window.location.href).href },
-        });
-        if (error) { setLoading(false); fail(friendlyAuthError(error, mode)); }
-      } catch (err) {
-        console.error(err);
-        setLoading(false);
-        fail("حصل خطأ غير متوقع. اتأكد من الاتصال بالنت وجرّب تاني.");
-      }
-    }
-
-    els.btnGoogle.addEventListener("click", () => signInWithProvider("google"));
-    els.btnGithub.addEventListener("click", () => signInWithProvider("github"));
-
     /* ===================== validation ===================== */
 
     const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -952,9 +873,6 @@
       if (m.includes("email not confirmed")) return "لازم تأكّد الإيميل بتاعك الأول من الرسالة اللي وصلتك";
       if (m.includes("already registered") || m.includes("already been registered")) {
         return "الإيميل ده متسجّل قبل كده. جرّب تسجّل دخول.";
-      }
-      if (m.includes("provider is not enabled") || m.includes("unsupported provider")) {
-        return "الدخول بالطريقة دي لسه مش متفعّل. استخدم الإيميل وكلمة المرور.";
       }
       if (m.includes("rate limit") || m.includes("too many")) return "محاولات كتير. استنى دقيقة وجرّب تاني.";
       if (m.includes("password")) return "كلمة المرور مش مطابقة للشروط";
