@@ -991,7 +991,9 @@ function refreshScores(data, elapsedMs) {
     row.className = 'score-row';
     const moveName = strings[`move${move.move}`] || MOVE_NAMES[move.move] || strings.noneMove;
     const scoreText = move.legal
-      ? `${move.score.toFixed(1)} · E ${move.expectimaxScore.toFixed(1)} · MC ${move.monteCarloSurvival.toFixed(1)}`
+      ? (move.monteCarloSurvival > 0
+          ? `${move.score.toFixed(1)} · E ${move.expectimaxScore.toFixed(1)} · MC ${move.monteCarloSurvival.toFixed(1)}`
+          : `${Math.round(move.score).toLocaleString('en-US')}`)
       : strings.naScore;
     row.innerHTML = `<span>${moveName}</span><span>${scoreText}</span>`;
     if (move.move === data.bestMove) row.classList.add('best');
