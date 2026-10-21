@@ -118,7 +118,8 @@ function showGate(m) { $("app").hidden = true; $("gate").hidden = false; $("gMsg
 async function enter() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return showGate();
-  const { data: ok } = await sb.rpc("is_agent");
+  const { data: ok, error } = await sb.rpc("is_agent");
+  if (error) return showGate("تعذّر التحقق من صلاحية الوكيل: " + error.message);
   if (!ok) { await sb.auth.signOut(); return showGate("الحساب ده مش وكيل مفعّل"); }
   $("gate").hidden = true; $("app").hidden = false;
   await load();
@@ -130,6 +131,11 @@ async function load() {
     sb.from("plans").select("id,name,days,price").eq("active", true).order("days"),
     sb.from("agent_sales").select("customer_email,plan_name,price,created_at").order("created_at", { ascending: false }).limit(200)
   ]);
+  const queryError = me.error || pl.error || sl.error;
+  if (queryError) {
+    console.error("Agent dashboard load failed:", queryError);
+    toast("تعذّر تحميل البيانات: " + queryError.message, "err");
+  }
   $("meName").textContent = me.data?.name || ""; $("meMail").textContent = me.data?.email || "";
   const opts = (pl.data || []).map((p) => `<option value="${esc(p.id)}">${esc(p.name)} — ${nf.format(p.price)} ج.م</option>`).join("")
     || '<option value="">مفيش باقات متاحة</option>';

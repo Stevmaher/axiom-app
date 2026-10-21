@@ -1278,13 +1278,43 @@
         const ids = rows.map((r) => r.id);
         const chunks = [];
         for (let i = 0; i < ids.length; i += 40) chunks.push(ids.slice(i, i + 40));
-        const results = await Promise.all(chunks.map((c) => adminClient
-          .from("security_logs")
-          .select("user_id,event_type,user_agent,metadata,created_at")
-          .in("user_id", c)
-          .in("event_type", ["login_success", "device_registered"])
-          .order("created_at", { ascending: false })
-          .limit(400)));
+        async function fetchSecurityLogs(c) {
+          // المسار الأساسي يشمل metadata للحصول على تفاصيل الجهاز كاملة.
+          let result = await adminClient.from("security_logs")
+            .select("user_id,event_type,user_agent,metadata,created_at")
+            .in("user_id", c)
+            .in("event_type", ["login_success", "device_registered"])
+            .order("created_at", { ascending: false })
+            .limit(400);
+
+          // بعض قواعد البيانات القديمة قد لا تحتوي عمود metadata؛ جرّب الأعمدة الأساسية بدل إسقاط بيانات الجهاز كلها.
+          const msg = String(result.error?.message || "");
+          const missingColumn = result.error && (
+            result.error.code === "42703" || /column .* does not exist|could not find .*column|schema cache/i.test(msg)
+          );
+          if (missingColumn) {
+            result = await adminClient.from("security_logs")
+              .select("user_id,event_type,user_agent,created_at")
+              .in("user_id", c)
+              .in("event_type", ["login_success", "device_registered"])
+              .order("created_at", { ascending: false })
+              .limit(400);
+          }
+          const msg2 = String(result.error?.message || "");
+          const missingAnotherColumn = result.error && (
+            result.error.code === "42703" || /column .* does not exist|could not find .*column|schema cache/i.test(msg2)
+          );
+          if (missingAnotherColumn) {
+            result = await adminClient.from("security_logs")
+              .select("user_id,event_type,created_at")
+              .in("user_id", c)
+              .in("event_type", ["login_success", "device_registered"])
+              .order("created_at", { ascending: false })
+              .limit(400);
+          }
+          return result;
+        }
+        const results = await Promise.all(chunks.map(fetchSecurityLogs));
         const logError = results.find((r) => r.error)?.error || null;
         const logs = results.flatMap((r) => r.data || [])
           .sort((x, y) => (y.created_at > x.created_at ? 1 : -1));
@@ -2002,8 +2032,8 @@
 
     /* ================= الدفعة التانية: أمان + راحة استخدام ================= */
 
-    // التحقق من الأدمن من السيرفر (دالة is_admin في Supabase). لو الدالة لسه
-    // مش موجودة بنرجع للفحص القديم عشان اللوحة ماتقفش، لكن الحماية الحقيقية RLS.
+    // التحقق من الأدمن من السيرفر عبر دالة is_admin. عند تعطل الدالة نرفض الدخول افتراضياً.
+    // حماية RLS في Supabase تظل ضرورية حتى لو كانت الواجهة تعمل بشكل صحيح.
     let adminRpcMissingWarned = false;
     async function isAdminUser(user) {
       if (!user) return false;
@@ -2011,8 +2041,11 @@
         const { data, error } = await adminClient.rpc("is_admin");
         if (!error && typeof data === "boolean") return data;
         if (error && !adminRpcMissingWarned) { adminRpcMissingWarned = true; console.warn("is_admin RPC غير متاحة، بنستخدم الفحص المحلي:", error.message); }
-      } catch (_) {}
-      return axiomIsAdmin(user);
+      } catch (err) {
+        console.error("تعذّر التحقق من صلاحية الأدمن:", err);
+      }
+      // لا تعتمد على فحص محلي داخل المتصفح عند تعطل RPC؛ أوقف الدخول بدل تجاوز الحماية.
+      return false;
     }
 
     let curList = [];
@@ -2189,16 +2222,66 @@
       const email = $("agEmail").value.trim().toLowerCase(), name = $("agName").value.trim();
       if (!name || !MAIL_RE.test(email)) return toast("اكتب اسم وإيميل صحيح", "err");
       btn.disabled = true;
-      try {
-        const pw = rndPass(), { data, error } = await tmpClient().auth.signUp({ email, password: pw });
-        if (error) return toast("تعذّر إنشاء الحساب: " + error.message, "err");
-        const existed = data.user?.identities?.length === 0;
-        const { data: r, error: e2 } = await adminClient.rpc("admin_register_agent", { p_email: email, p_name: name });
-        if (e2 || !r?.success) return toast("فشل تسجيل الوكيل: " + (e2?.message || r?.reason), "err");
-        showCreds("اتعمل الوكيل ✓", existed ? "الإيميل كان له حساب قبل كده — بيدخل بباسورده الحالي." : "الباسورد بيظهر مرة واحدة بس، انسخه وابعته له.",
-          `رابط الدخول: ${agentUrl()}\nالإيميل: ${email}\n` + (existed ? "" : `الباسورد: ${pw}`));
+      const registerAgent = () => adminClient.rpc("admin_register_agent", { p_email: email, p_name: name });
+      const showExistingAgent = () => {
+        showCreds("تم تسجيل الوكيل ✓", "الإيميل مسجّل بالفعل؛ لن نغيّر كلمة مروره. استخدم كلمة المرور الحالية.",
+          `رابط الدخول: ${agentUrl()}\nالإيميل: ${email}`);
         loadExtras();
-      } finally { btn.disabled = false; }
+      };
+      try {
+        // تحقق أولاً من وجود Auth user. يمنع 422 عند إدخال إيميل موجود بالفعل، ولا يعيد تعيين كلمة مروره.
+        const { data: existing, error: checkError } = await registerAgent();
+        if (checkError) {
+          toast("تعذّر التحقق من حساب الوكيل: " + checkError.message, "err");
+          return;
+        }
+        if (existing?.success) {
+          showExistingAgent();
+          return;
+        }
+        if (existing?.reason !== "الحساب مش موجود") {
+          toast("فشل تسجيل الوكيل: " + (existing?.reason || "استجابة غير متوقعة من الخادم"), "err");
+          return;
+        }
+
+        // الحساب غير موجود؛ أنشئه ثم أضفه كوكيل.
+        const pw = rndPass();
+        const { data, error } = await tmpClient().auth.signUp({ email, password: pw });
+        if (error) {
+          // قد يكون حساب أُنشئ بالتزامن من جلسة أخرى؛ تحقّق من السيرفر قبل عرض الخطأ.
+          const retry = await registerAgent();
+          if (!retry.error && retry.data?.success) {
+            showExistingAgent();
+            return;
+          }
+          const extra = retry.error?.message || retry.data?.reason;
+          toast("تعذّر إنشاء حساب Supabase: " + error.message + (extra ? " — " + extra : ""), "err");
+          return;
+        }
+        if (!data?.user?.id) {
+          toast("Supabase لم يُرجع حسابًا بعد التسجيل. راجع إعدادات التسجيل في Authentication.", "err");
+          return;
+        }
+
+        const { data: r, error: e2 } = await registerAgent();
+        if (e2 || !r?.success) {
+          toast("الحساب اتعمل لكن تسجيله كوكيل فشل: " + (e2?.message || r?.reason || "خطأ غير معروف"), "err");
+          return;
+        }
+
+        const emailConfirmed = !!(data.user.email_confirmed_at || data.user.confirmed_at);
+        const note = emailConfirmed
+          ? "الباسورد يظهر مرة واحدة فقط؛ انسخه وابعته للوكيل."
+          : "الباسورد يظهر مرة واحدة فقط. تأكّد من إعدادات Supabase Auth؛ لو تأكيد البريد مفعّل، يجب تأكيد الإيميل قبل تسجيل الدخول.";
+        showCreds("اتعمل الوكيل ✓", note,
+          `رابط الدخول: ${agentUrl()}\nالإيميل: ${email}\nالباسورد: ${pw}`);
+        loadExtras();
+      } catch (err) {
+        console.error("addAgent failed:", err);
+        toast("حصل خطأ أثناء إنشاء الوكيل: " + (err?.message || "خطأ غير معروف"), "err");
+      } finally {
+        btn.disabled = false;
+      }
     }
 
     async function xUpdate(table, id, patch, col) {
