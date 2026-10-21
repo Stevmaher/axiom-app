@@ -100,7 +100,7 @@ const TRANSLATIONS = {
     naScore: 'غير متاح',
     notesTitle: 'ملاحظات',
     notes1: 'يسمح لك وضع الإعداد ببناء أي موضع للوحة عن طريق النقر على الخلايا. في وضع اللعب، تقوم "خطوة" بتطبيق حركة المحلل، ثم تنتظر منك وضع البلاطة التالية يدوياً.',
-    notes2: 'يعمل المحلل داخل Web Worker ويجمع بين البحث التقييمي ومحاكاة Monte Carlo للبقاء.',
+    notes2: 'يعمل المحلل داخل Web Worker ويعتمد على بحث Expectimax مع تقييم ثابت للوحة وتحديد وقت التفكير حسب عدد الخانات الفارغة.',
     move0: 'يسار',
     move1: 'يمين',
     move2: 'فوق',
@@ -321,7 +321,7 @@ function clearRescueUI() {
 // The assistant is on-demand: pressing the button ranks every legal swap and
 // delete that unlocks the board using the solver's real positional heuristic
 // (one batched call), then re-checks the top candidate of each kind with the
-// actual expectimax/Monte Carlo search the rest of the app uses — so the
+// actual expectimax search the rest of the app uses — so the
 // suggestion reflects what the AI itself thinks is strongest, not a
 // stand-alone shortcut. The winning cells are also highlighted on the board
 // itself so there's no ambiguity when several tiles share the same value.
@@ -607,7 +607,7 @@ function enumerateDeleteCandidates(board) {
 
 // Picks the best rescue suggestion by (1) scoring every legal swap/delete
 // candidate against the solver's real positional heuristic in a single
-// batched worker call, then (2) running the actual expectimax + Monte Carlo
+// batched worker call, then (2) running the actual expectimax
 // search (the same one "Analyze" uses) on the resulting board for the top
 // candidate of each kind, so the final pick — and which of swap/delete is
 // marked as recommended — reflects the AI's genuine best judgment rather
@@ -855,7 +855,7 @@ async function ensureSolver() {
       });
     });
 
-    // Fast batch scoring (no expectimax/Monte Carlo) used to rank many
+    // Fast batch scoring (no expectimax) used to rank many
     // candidate boards at once — e.g. every possible rescue swap/delete —
     // against the solver's real positional heuristic instead of a cheap
     // ad-hoc score.
