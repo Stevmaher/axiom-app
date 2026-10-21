@@ -947,7 +947,6 @@ function pushHistory() {
 function undoMove() {
   if (state.animating || state.history.length === 0) return;
   const prev = state.history.pop();
-  const undidMove = state.waitingForSpawn && !prev.waitingForSpawn;
   state.board = prev.board;
   state.pendingBoard = prev.pendingBoard;
   state.waitingForSpawn = prev.waitingForSpawn;
@@ -956,7 +955,6 @@ function undoMove() {
   clearRescueUI();
   rescueCardEl?.classList.remove('visible');
   render();
-  window.AxiomStats?.onUndo(undidMove);
   if (state.waitingForSpawn) {
     setStatus('statusWaitingSpawn');
   } else {
@@ -1063,7 +1061,6 @@ async function stepBestMove() {
   render();
   triggerMergePops(mergeDestinations);
   registerElevenMerges(move.elevens);
-  window.AxiomStats?.onMove(move.score, move.elevens);
   setStatus('statusApplied', { move: MOVE_NAMES[moveIndex] });
 }
 
@@ -1285,7 +1282,6 @@ function resetBoard() {
   rescueCardEl?.classList.remove('visible');
   setStatus('statusCleared');
   render();
-  window.AxiomStats?.onReset();
 }
 
 function toggleMode() {
