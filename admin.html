@@ -1029,7 +1029,7 @@
       const os = meta.os || logUaInfo?.os || d.os || uaInfo.os || "";
       const browser = meta.browser || logUaInfo?.browser || d.browser || uaInfo.browser || "";
       const device_model = meta.device_model || meta.model || logUaInfo?.model || d.model || uaInfo.model || "";
-      const device_name = meta.device_name || d.device_name || device_model ||
+      const device_name = meta.device_name || log?.device_name || d.device_name || device_model ||
         fallbackDeviceName(device_type, os) || uaInfo.name || "جهاز غير معروف";
       const user_agent = log?.user_agent || d.user_agent || "";
 
@@ -1278,43 +1278,13 @@
         const ids = rows.map((r) => r.id);
         const chunks = [];
         for (let i = 0; i < ids.length; i += 40) chunks.push(ids.slice(i, i + 40));
-        async function fetchSecurityLogs(c) {
-          // المسار الأساسي يشمل metadata للحصول على تفاصيل الجهاز كاملة.
-          let result = await adminClient.from("security_logs")
-            .select("user_id,event_type,user_agent,metadata,created_at")
-            .in("user_id", c)
-            .in("event_type", ["login_success", "device_registered"])
-            .order("created_at", { ascending: false })
-            .limit(400);
-
-          // بعض قواعد البيانات القديمة قد لا تحتوي عمود metadata؛ جرّب الأعمدة الأساسية بدل إسقاط بيانات الجهاز كلها.
-          const msg = String(result.error?.message || "");
-          const missingColumn = result.error && (
-            result.error.code === "42703" || /column .* does not exist|could not find .*column|schema cache/i.test(msg)
-          );
-          if (missingColumn) {
-            result = await adminClient.from("security_logs")
-              .select("user_id,event_type,user_agent,created_at")
-              .in("user_id", c)
-              .in("event_type", ["login_success", "device_registered"])
-              .order("created_at", { ascending: false })
-              .limit(400);
-          }
-          const msg2 = String(result.error?.message || "");
-          const missingAnotherColumn = result.error && (
-            result.error.code === "42703" || /column .* does not exist|could not find .*column|schema cache/i.test(msg2)
-          );
-          if (missingAnotherColumn) {
-            result = await adminClient.from("security_logs")
-              .select("user_id,event_type,created_at")
-              .in("user_id", c)
-              .in("event_type", ["login_success", "device_registered"])
-              .order("created_at", { ascending: false })
-              .limit(400);
-          }
-          return result;
-        }
-        const results = await Promise.all(chunks.map(fetchSecurityLogs));
+        const results = await Promise.all(chunks.map((c) => adminClient
+          .from("security_logs")
+          .select("user_id,event_type,user_agent,metadata,device_name,detail,created_at")
+          .in("user_id", c)
+          .in("event_type", ["first_device_registered", "known_device_allowed", "device_rejected", "device_reset_by_admin", "user_deleted_by_admin", "login_success", "device_registered"])
+          .order("created_at", { ascending: false })
+          .limit(400)));
         const logError = results.find((r) => r.error)?.error || null;
         const logs = results.flatMap((r) => r.data || [])
           .sort((x, y) => (y.created_at > x.created_at ? 1 : -1));
@@ -1686,16 +1656,13 @@
         $("extMsg").textContent = "اكتب عدد أيام بين 1 و 3650";
         return;
       }
-      // لو الاشتراك لسه ساري بنمدّد من تاريخ الانتهاء، لو منتهي بنمدّد من النهارده
-      const newExpiry = new Date(extBase() + days * DAY).toISOString();
-
+      const current = allRows.find((r) => r.id === extTargetId);
       btn.disabled = true; btn.textContent = "بيتم التمديد...";
-      const { data: upd, error } = await adminClient.from("subscriptions")
-        .update({ expires_at: newExpiry, active: true }).eq("id", extTargetId).select("id");
+      const { data: result, error } = await adminClient.rpc("admin_extend_subscriber", {
+        p_id: extTargetId, p_days: days, p_plan: current?.plan || ""
+      });
       btn.disabled = false; btn.textContent = "تمديد";
-
-      if (error) { $("extMsg").textContent = "حصل خطأ: " + error.message; return; }
-      if (!upd || !upd.length) { $("extMsg").textContent = "التمديد ماتنفّذش (غالباً صلاحيات RLS)"; return; }
+      if (error || !result?.ok) { $("extMsg").textContent = "فشل التمديد: " + (error?.message || result?.reason || "خطأ غير معروف"); return; }
       closeModal("extOverlay");
       toast(`تم التمديد ${days} يوم`, "ok");
       await loadRows();
@@ -1735,21 +1702,17 @@
         return;
       }
 
-      const expires_at = new Date(Date.now() + days * DAY).toISOString();
       btn.disabled = true; btn.textContent = "بيتم الإضافة...";
-      const { error } = await adminClient.from("subscriptions")
-        .insert({ email, active: true, plan, expires_at });
-      btn.disabled = false; btn.textContent = "إضافة";
-
-      if (error) {
-        // السبب الشائع هنا إن عمود id مربوط بـ auth.users، فالصف مينفعش
-        // يتضاف قبل ما المستخدم يعمل حساب بنفسه من صفحة التسجيل
-        msg.textContent = "حصل خطأ: " + error.message;
-        return;
-      }
-      closeModal("addOverlay");
-      toast("تمت إضافة المشترك", "ok");
-      await loadRows();
+      try {
+        const { data, error } = await adminClient.functions.invoke("axiom-agents", {
+          body: { action: "create_subscriber", email, days, plan: plan || null }
+        });
+        if (error || !data?.ok) { msg.textContent = "فشل إنشاء المشترك: " + (data?.reason || error?.message || "خطأ غير معروف"); return; }
+        closeModal("addOverlay");
+        toast(data.email_sent === false ? "اتعمل الحساب لكن تعذّر إرسال رابط تعيين كلمة المرور" : "تم إنشاء الحساب وإرسال رابط تعيين كلمة المرور", data.email_sent === false ? "err" : "ok");
+        await loadRows();
+      } catch (e) { msg.textContent = "تعذّر الاتصال بخدمة إنشاء الحسابات: " + (e?.message || "جرّب تاني"); }
+      finally { btn.disabled = false; btn.textContent = "إضافة"; }
     };
 
     /* ===================== export ===================== */
@@ -2032,19 +1995,16 @@
 
     /* ================= الدفعة التانية: أمان + راحة استخدام ================= */
 
-    // التحقق من الأدمن من السيرفر عبر دالة is_admin. عند تعطل الدالة نرفض الدخول افتراضياً.
-    // حماية RLS في Supabase تظل ضرورية حتى لو كانت الواجهة تعمل بشكل صحيح.
+    // التحقق من الأدمن عبر دالة is_admin في Supabase. لو فشل التحقق نرفض الدخول.
     let adminRpcMissingWarned = false;
     async function isAdminUser(user) {
       if (!user) return false;
       try {
         const { data, error } = await adminClient.rpc("is_admin");
         if (!error && typeof data === "boolean") return data;
-        if (error && !adminRpcMissingWarned) { adminRpcMissingWarned = true; console.warn("is_admin RPC غير متاحة، بنستخدم الفحص المحلي:", error.message); }
-      } catch (err) {
-        console.error("تعذّر التحقق من صلاحية الأدمن:", err);
-      }
-      // لا تعتمد على فحص محلي داخل المتصفح عند تعطل RPC؛ أوقف الدخول بدل تجاوز الحماية.
+        if (error && !adminRpcMissingWarned) { adminRpcMissingWarned = true; console.warn("is_admin RPC غير متاحة:", error.message); }
+      } catch (err) { console.error("تعذّر التحقق من صلاحية الأدمن:", err); }
+      // Fail closed: no local/browser-only admin fallback.
       return false;
     }
 
@@ -2132,14 +2092,18 @@
 
     async function loadExtras() {
       if (!(await ensureAdminSession())) return;
-      const q = (t, o) => adminClient.from(t).select("*").order(o, { ascending: false });
-      const [p, a, s, r] = await Promise.all([
-        adminClient.from("plans").select("*").order("days"), q("agents", "created_at"),
-        adminClient.from("agent_sales").select("agent_id,price,created_at"), q("ready_accounts", "created_at").limit(500)]);
-      const err = [p, a, s, r].find((x) => x.error)?.error;
-      if (err && !xWarned) { xWarned = true; toast("شغّل agents-setup.sql في Supabase الأول: " + err.message, "err"); }
-      X = { plans: p.data || [], agents: a.data || [], sales: s.data || [], ready: r.data || [] };
-      syncAddPlan(); renderPlans(); renderAgents(); renderReady();
+      try {
+        const [snap, plans] = await Promise.all([adminClient.rpc("admin_snapshot"), adminClient.rpc("admin_list_plans")]);
+        if (snap.error || plans.error) throw (snap.error || plans.error);
+        const data = snap.data || {};
+        X = { plans: Array.isArray(plans.data) ? plans.data : (data.plans || []), agents: data.agents || [],
+          sales: data.transactions || [], transactions: data.transactions || [], ledger: data.ledger || [],
+          customers: data.customers || [], audit: data.audit || [], ready: X.ready || [] };
+        xWarned = false; syncAddPlan(); renderPlans(); renderAgents(); renderReady();
+      } catch (err) {
+        console.error("Axiom admin snapshot:", err);
+        if (!xWarned) { xWarned = true; toast("تعذّر تحميل إدارة الوكلاء: " + (err?.message || "راجع صلاحية الأدمن"), "err"); }
+      }
     }
     const _lr2 = loadRows;
     loadRows = async function () { await _lr2(); loadExtras(); };
@@ -2147,180 +2111,192 @@
 
     // الباقات اللي حددتها بتظهر في مودال "إضافة مشترك" بمدّتها
     function syncAddPlan() {
-      const act = X.plans.filter((p) => p.active); if (!act.length) return;
-      $("addPlan").innerHTML = act.map((p) => `<option value="${escapeHtml(p.name)}" data-d="${p.days}">${escapeHtml(p.name)} — ${p.days} يوم</option>`).join("");
-      $("addDays").value = act[0].days; updateAddPreview();
+      const active = X.plans.filter((p) => p.active);
+      $("addPlan").innerHTML = active.map((p) => `<option value="${escapeHtml(p.plan)}" data-d="${p.duration_days}">${escapeHtml(p.label)} — ${p.duration_days} يوم</option>`).join("")
+        || '<option value="">بدون باقة محددة</option>';
+      if (active.length) {
+        const selected = active.find((p) => p.plan === $("addPlan").value) || active[0];
+        $("addPlan").value = selected.plan; $("addDays").value = selected.duration_days; updateAddPreview();
+      }
     }
-    $("addPlan").onchange = () => { const d = $("addPlan").selectedOptions[0]?.dataset.d; if (d) { $("addDays").value = d; updateAddPreview(); } };
+    $("addPlan").onchange = () => {
+      const p = X.plans.find((x) => x.plan === $("addPlan").value);
+      if (p) { $("addDays").value = p.duration_days; updateAddPreview(); }
+    };
 
-    /* ---------- الباقات ---------- */
+    /* ---------- إدارة الباقات وفق مخطط agent_plans الحالي ---------- */
     function renderPlans() {
-      $("viewPlans").innerHTML = `<div class="panel"><h2>باقات الاشتراك</h2>
-        <div class="xnote">السعر هنا هو اللي الوكيل بيفعّل بيه ويتحاسب عليه.</div>
-        <div class="xform"><input id="plName" placeholder="اسم الباقة (مثلاً شهري)"><input id="plDays" type="number" min="1" placeholder="عدد الأيام"><input id="plPrice" type="number" min="0" placeholder="السعر بالجنيه"><button class="btn primary" data-x="addPlan">+ إضافة باقة</button></div>
-        <div class="table-scroll"><table><thead><tr><th>الباقة</th><th>الأيام</th><th>سعر الوكيل</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>${
-        X.plans.map((p) => `<tr><td>${escapeHtml(p.name)}</td><td>${p.days}</td>
-          <td><input class="xin" type="number" min="0" value="${p.price}" data-id="${p.id}" data-x="price" aria-label="السعر"></td>
-          <td>${p.active ? '<span class="badge active">شغّالة</span>' : '<span class="badge inactive">مخفية</span>'}</td>
-          <td><div class="actions"><button class="mini ${p.active ? "off" : "on"}" data-x="togglePlan" data-id="${p.id}">${p.active ? "إخفاء" : "إظهار"}</button>
-          <button class="mini del" data-x="delPlan" data-id="${p.id}">حذف</button></div></td></tr>`).join("") || empty(5, "مفيش باقات لسه — ضيف أول باقة.")}</tbody></table></div></div>`;
+      $("viewPlans").innerHTML = `<div class="panel"><h2>باقات الوكلاء</h2>
+        <div class="xnote">مفتاح الباقة تقني وفريد (حروف إنجليزية صغيرة وأرقام وشرطة سفلية). لا نحذف الباقات المرتبطة بمعاملات قديمة؛ يمكن إيقافها بدلًا من ذلك.</div>
+        <div class="xform">
+          <input id="plKey" placeholder="مفتاح الباقة: monthly" maxlength="32" dir="ltr">
+          <input id="plName" placeholder="اسم الباقة: شهري">
+          <input id="plDays" type="number" min="1" max="3650" placeholder="عدد الأيام">
+          <input id="plWholesale" type="number" min="0" step="0.01" placeholder="سعر الجملة الافتراضي">
+          <input id="plSale" type="number" min="0" step="0.01" placeholder="سعر البيع الافتراضي">
+          <button class="btn primary" data-x="addPlan" type="button">+ إضافة باقة</button>
+        </div>
+        <div class="table-scroll"><table><thead><tr><th>الباقة</th><th>المفتاح</th><th>الأيام</th><th>الجملة (ج.م)</th><th>البيع (ج.م)</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>${
+        X.plans.map((p) => `<tr>
+          <td>${escapeHtml(p.label)}</td><td dir="ltr">${escapeHtml(p.plan)}</td><td>${ovFmt(p.duration_days)}</td>
+          <td><input class="xin" type="number" min="0" step="0.01" value="${Number(p.default_wholesale || 0)}" data-id="${escapeHtml(p.plan)}" data-field="wholesale" data-x="planPrice" aria-label="سعر الجملة"></td>
+          <td><input class="xin" type="number" min="0" step="0.01" value="${Number(p.default_sale || 0)}" data-id="${escapeHtml(p.plan)}" data-field="sale" data-x="planPrice" aria-label="سعر البيع"></td>
+          <td>${p.active ? '<span class="badge active">شغّالة</span>' : '<span class="badge inactive">موقوفة</span>'}</td>
+          <td><button class="mini ${p.active ? "off" : "on"}" data-x="togglePlan" data-id="${escapeHtml(p.plan)}">${p.active ? "إيقاف" : "تفعيل"}</button></td>
+          </tr>`).join("") || empty(7, "مفيش باقات؛ أضف أول باقة من النموذج أعلاه.")}</tbody></table></div></div>`;
     }
 
-    /* ---------- الوكلاء ---------- */
+    /* ---------- الوكلاء وفق الجدول الحالي + RPC آمن ---------- */
     function renderAgents() {
-      const stat = (id) => { const l = X.sales.filter((s) => s.agent_id === id); return [l.length, l.reduce((t, s) => t + Number(s.price), 0)]; };
+      const txs = X.transactions || [];
+      const stat = (id) => {
+        const list = txs.filter((t) => t.agent_id === id && t.status !== "reversed");
+        return [list.length, list.reduce((total, t) => total + Number(t.sale_price || 0), 0)];
+      };
+      const activeAgents = X.agents.filter((a) => a.status === "active");
       $("viewAgents").innerHTML = `<div class="panel"><h2>الوكلاء</h2>
         <div class="xlink">رابط صفحة الوكيل: <code>${escapeHtml(agentUrl())}</code><button class="btn sm" data-x="copyLink" type="button">نسخ</button></div>
-        <div class="xform"><input id="agName" placeholder="اسم الوكيل"><input id="agEmail" type="email" placeholder="إيميل الوكيل" autocomplete="off"><button class="btn primary" data-x="addAgent">+ إنشاء وكيل</button></div>
-        <div class="xnote">بيتعمل له حساب بباسورد عشوائي بيظهرلك مرة واحدة تبعته له.</div>
-        <div class="table-scroll"><table><thead><tr><th>الوكيل</th><th>الحالة</th><th>عدد التفعيلات</th><th>المستحق</th><th>إجراءات</th></tr></thead><tbody>${
-        X.agents.map((a) => { const [n, sum] = stat(a.user_id); return `<tr>
-          <td class="acct"><div class="acct-email">${escapeHtml(a.name)}</div><div class="acct-meta"><span>${escapeHtml(a.email)}</span></div></td>
-          <td>${a.active ? '<span class="badge active">مفعّل</span>' : '<span class="badge inactive">موقوف</span>'}</td>
+        <div class="xform"><input id="agName" placeholder="اسم الوكيل" maxlength="80"><input id="agEmail" type="email" placeholder="إيميل الوكيل" autocomplete="off"><button class="btn primary" data-x="addAgent" type="button">+ إنشاء وكيل</button></div>
+        <div class="xnote">إنشاء الوكيل يتم من خدمة الخادم الآمنة؛ يصل إليه رابط تعيين كلمة المرور عبر البريد. الإيميل الموجود مسبقًا لا يُنشأ له حساب مكرر.</div>
+        <div class="table-scroll"><table><thead><tr><th>الوكيل</th><th>الكود</th><th>نمط الحساب</th><th>الحالة</th><th>العمليات</th><th>إجمالي البيع</th><th>إجراءات</th></tr></thead><tbody>${
+        X.agents.map((a) => { const [n, sum] = stat(a.id); const active = a.status === "active"; return `<tr>
+          <td class="acct"><div class="acct-email">${escapeHtml(a.display_name)}</div><div class="acct-meta"><span>${escapeHtml(a.email)}</span></div></td>
+          <td dir="ltr">${escapeHtml(a.agent_code || "—")}</td><td>${escapeHtml(a.billing_mode || "both")}</td>
+          <td>${active ? '<span class="badge active">مفعّل</span>' : '<span class="badge inactive">موقوف</span>'}</td>
           <td>${ovFmt(n)}</td><td>${money(sum)}</td>
-          <td><div class="actions"><button class="mini ${a.active ? "off" : "on"}" data-x="toggleAgent" data-id="${a.user_id}" data-active="${a.active}">${a.active ? "إيقاف" : "تفعيل"}</button></div></td></tr>`; }).join("")
-        || empty(5, "مفيش وكلاء لسه.")}</tbody></table></div></div>`;
+          <td><button class="mini ${active ? "off" : "on"}" data-x="toggleAgent" data-id="${escapeHtml(a.id)}" data-status="${active ? "active" : "suspended"}">${active ? "إيقاف" : "تفعيل"}</button></td></tr>`; }).join("")
+        || empty(7, "مفيش وكلاء حاليًا.")}</tbody></table></div></div>`;
     }
 
-    /* ---------- الإيميلات الجاهزة ---------- */
+    /* ---------- إنشاء حسابات جاهزة من خلال Edge Function الموجودة ---------- */
     function renderReady() {
-      const av = X.ready.filter((r) => r.status === "available").length, nm = new Map(X.agents.map((a) => [a.user_id, a.name]));
-      $("viewReady").innerHTML = `<div class="panel"><h2>إيميلات جاهزة</h2>
-        <div class="xnote">بتتعمل حسابات فعلية بباسورد عشوائي. الوكيل بيسحب واحد جاهز ويفعّله للعميل بضغطة، من غير ما العميل يسجّل.</div>
-        <div class="xform"><input id="rdN" type="number" min="1" max="50" value="10" aria-label="العدد"><input id="rdPre" placeholder="بادئة (axiom)" value="axiom"><input id="rdDom" placeholder="الدومين: example.com" dir="ltr"><button class="btn primary" id="rdGo" data-x="genReady">إنشاء</button></div>
-        <div class="toolbar"><span class="count">${av} متاح من ${X.ready.length}</span>
-          <button class="btn sm" data-x="copyReady" type="button">نسخ المتاح (إيميل:باسورد)</button>
-          <button class="btn sm" data-x="clearUsed" type="button">مسح المسلَّم</button></div>
-        <div class="table-scroll"><table><thead><tr><th>الإيميل</th><th>الباسورد</th><th>الحالة</th><th>اتسلّم لـ</th></tr></thead><tbody>${
-        X.ready.map((r) => `<tr><td>${escapeHtml(r.email)}</td><td dir="ltr">${escapeHtml(r.password)}</td>
-          <td>${r.status === "available" ? '<span class="badge active">متاح</span>' : '<span class="badge expired">اتسلّم</span>'}</td>
-          <td>${escapeHtml(nm.get(r.agent_id) || "—")}</td></tr>`).join("") || empty(4, "مفيش إيميلات جاهزة لسه.")}</tbody></table></div></div>`;
+      const owners = X.agents.filter((a) => a.status === "active");
+      $("viewReady").innerHTML = `<div class="panel"><h2>إنشاء حسابات جاهزة</h2>
+        <div class="xnote">الحسابات الجديدة تكون غير مفعّلة، وتُسند للوكيل المختار. كلمة المرور تُعرض مرة واحدة بعد الإنشاء. عند تفعيل الحساب لاحقًا، يستخدم الوكيل رصيدَه وتسعيرَه الحالي.</div>
+        <div class="xform">
+          <input id="rdN" type="number" min="1" max="50" value="5" aria-label="عدد الحسابات">
+          <input id="rdPre" placeholder="بادئة الإيميل" value="axiom" maxlength="16" dir="ltr">
+          <input id="rdDom" placeholder="الدومين: example.com" dir="ltr">
+          <select id="rdOwner" aria-label="إسناد الحسابات للوكيل">${owners.map((a) => `<option value="${escapeHtml(a.id)}">${escapeHtml(a.display_name)} — ${escapeHtml(a.email)}</option>`).join("")}</select>
+          <button class="btn primary" id="rdGo" data-x="genReady" type="button" ${owners.length ? "" : "disabled"}>إنشاء الحسابات</button>
+        </div>
+        <p class="muted">${owners.length ? "اختار الوكيل الذي ستظهر الحسابات ضمن عملائه." : "أنشئ وكيلًا وفعّله أولًا قبل إسناد حسابات جاهزة."}</p>
+      </div>`;
     }
 
     async function genReady(btn) {
-      const n = Math.min(50, Math.max(1, parseInt($("rdN").value, 10) || 0));
-      const pre = ($("rdPre").value.trim() || "axiom").toLowerCase().replace(/[^a-z0-9._-]/g, "");
-      const dom = $("rdDom").value.trim().toLowerCase();
-      if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(dom)) return toast("اكتب دومين صحيح", "err");
-      btn.disabled = true; const made = []; let lastErr = "";
-      for (let i = 0; i < n; i++) {
-        const email = pre + rnd(6, "abcdefghjkmnpqrstuvwxyz23456789") + "@" + dom, password = rndPass();
-        const { data, error } = await tmpClient().auth.signUp({ email, password });
-        if (error) { lastErr = error.message; if (/rate|limit/i.test(lastErr)) break; continue; }
-        if (data.user?.identities?.length === 0) continue;
-        made.push({ email, password }); btn.textContent = made.length + " / " + n; await sleep(350);
-      }
-      if (made.length) {
-        const { error } = await adminClient.from("ready_accounts").insert(made);
-        if (error) { toast("الحسابات اتعملت بس الحفظ فشل: " + error.message, "err"); showCreds("احفظهم دلوقتي", "الحفظ في الجدول فشل", made.map((m) => m.email + ":" + m.password).join("\n")); }
-      }
-      toast(made.length ? `اتعمل ${made.length} إيميل جاهز` : "ماتعملش ولا حساب: " + (lastErr || "—"), made.length ? "ok" : "err");
-      btn.disabled = false; btn.textContent = "إنشاء"; loadExtras();
+      const count = Math.min(50, Math.max(1, parseInt($("rdN").value, 10) || 0));
+      const prefix = ($("rdPre").value.trim() || "axiom").toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0,16);
+      const domain = $("rdDom").value.trim().toLowerCase().replace(/^@/, "");
+      const owner = $("rdOwner").value;
+      if (!/^(?!-)[a-z0-9-]{1,63}(\.[a-z0-9-]{1,63})+$/.test(domain)) return toast("اكتب دومين صحيح مثل example.com", "err");
+      if (!owner) return toast("اختار وكيلًا لإسناد الحسابات إليه", "err");
+      btn.disabled = true; const old = btn.textContent; btn.textContent = "بيتم الإنشاء...";
+      try {
+        const { data, error } = await adminClient.functions.invoke("axiom-agents", {
+          body: { action: "create_ready_accounts", count, prefix, domain, owner, days: 0 }
+        });
+        if (error || !data?.ok || !Array.isArray(data.accounts) || !data.accounts.length) {
+          return toast("فشل إنشاء الحسابات: " + (data?.reason || error?.message || "لم يتم إنشاء حسابات"), "err");
+        }
+        const creds = data.accounts.map((a) => `${a.email}:${a.password}`).join("\n");
+        showCreds("تم إنشاء الحسابات", `تم إنشاء ${data.accounts.length} حساب/حسابات غير مفعّلة وإسنادها للوكيل. احفظ البيانات الآن.`, creds);
+        toast(`تم إنشاء ${data.accounts.length} حساب`, "ok");
+        await loadRows();
+      } catch (e) {
+        console.error(e); toast("تعذّر الاتصال بخدمة إنشاء الحسابات: " + (e?.message || "جرّب تاني"), "err");
+      } finally { btn.disabled = false; btn.textContent = old; }
     }
 
     async function addAgent(btn) {
-      const email = $("agEmail").value.trim().toLowerCase(), name = $("agName").value.trim();
-      if (!name || !MAIL_RE.test(email)) return toast("اكتب اسم وإيميل صحيح", "err");
-      btn.disabled = true;
-      const registerAgent = () => adminClient.rpc("admin_register_agent", { p_email: email, p_name: name });
-      const showExistingAgent = () => {
-        showCreds("تم تسجيل الوكيل ✓", "الإيميل مسجّل بالفعل؛ لن نغيّر كلمة مروره. استخدم كلمة المرور الحالية.",
-          `رابط الدخول: ${agentUrl()}\nالإيميل: ${email}`);
-        loadExtras();
-      };
+      const email = $("agEmail").value.trim().toLowerCase();
+      const display_name = $("agName").value.trim();
+      if (!display_name || !MAIL_RE.test(email)) return toast("اكتب اسمًا وإيميلًا صحيحًا", "err");
+      btn.disabled = true; const old = btn.textContent; btn.textContent = "بيتم الإنشاء...";
       try {
-        // تحقق أولاً من وجود Auth user. يمنع 422 عند إدخال إيميل موجود بالفعل، ولا يعيد تعيين كلمة مروره.
-        const { data: existing, error: checkError } = await registerAgent();
-        if (checkError) {
-          toast("تعذّر التحقق من حساب الوكيل: " + checkError.message, "err");
-          return;
+        const { data, error } = await adminClient.functions.invoke("axiom-agents", {
+          body: { action: "create_agent", email, display_name, billing_mode: "both", notes: "" }
+        });
+        if (error || !data?.ok) {
+          const reason = data?.reason || error?.message || "unknown_error";
+          const msg = reason === "email_exists" ? "الإيميل مسجّل بالفعل. استخدم إيميلًا جديدًا غير مسجّل." :
+            reason === "forbidden" ? "الجلسة الحالية لا تملك صلاحية الأدمن." : "فشل إنشاء الوكيل: " + reason;
+          return toast(msg, "err");
         }
-        if (existing?.success) {
-          showExistingAgent();
-          return;
-        }
-        if (existing?.reason !== "الحساب مش موجود") {
-          toast("فشل تسجيل الوكيل: " + (existing?.reason || "استجابة غير متوقعة من الخادم"), "err");
-          return;
-        }
-
-        // الحساب غير موجود؛ أنشئه ثم أضفه كوكيل.
-        const pw = rndPass();
-        const { data, error } = await tmpClient().auth.signUp({ email, password: pw });
-        if (error) {
-          // قد يكون حساب أُنشئ بالتزامن من جلسة أخرى؛ تحقّق من السيرفر قبل عرض الخطأ.
-          const retry = await registerAgent();
-          if (!retry.error && retry.data?.success) {
-            showExistingAgent();
-            return;
-          }
-          const extra = retry.error?.message || retry.data?.reason;
-          toast("تعذّر إنشاء حساب Supabase: " + error.message + (extra ? " — " + extra : ""), "err");
-          return;
-        }
-        if (!data?.user?.id) {
-          toast("Supabase لم يُرجع حسابًا بعد التسجيل. راجع إعدادات التسجيل في Authentication.", "err");
-          return;
-        }
-
-        const { data: r, error: e2 } = await registerAgent();
-        if (e2 || !r?.success) {
-          toast("الحساب اتعمل لكن تسجيله كوكيل فشل: " + (e2?.message || r?.reason || "خطأ غير معروف"), "err");
-          return;
-        }
-
-        const emailConfirmed = !!(data.user.email_confirmed_at || data.user.confirmed_at);
-        const note = emailConfirmed
-          ? "الباسورد يظهر مرة واحدة فقط؛ انسخه وابعته للوكيل."
-          : "الباسورد يظهر مرة واحدة فقط. تأكّد من إعدادات Supabase Auth؛ لو تأكيد البريد مفعّل، يجب تأكيد الإيميل قبل تسجيل الدخول.";
-        showCreds("اتعمل الوكيل ✓", note,
-          `رابط الدخول: ${agentUrl()}\nالإيميل: ${email}\nالباسورد: ${pw}`);
-        loadExtras();
-      } catch (err) {
-        console.error("addAgent failed:", err);
-        toast("حصل خطأ أثناء إنشاء الوكيل: " + (err?.message || "خطأ غير معروف"), "err");
-      } finally {
-        btn.disabled = false;
-      }
+        const message = `رابط صفحة الوكيل: ${agentUrl()}\nالإيميل: ${email}\n${data.email_sent ? "تم إرسال رابط تعيين كلمة المرور إلى البريد." : "تعذّر إرسال رسالة التعيين تلقائيًا؛ راجع إعدادات البريد في Supabase."}`;
+        showCreds("تم إنشاء الوكيل", "تم تسجيل الوكيل في النظام. كلمة المرور لا تُعرض من لوحة الأدمن؛ استخدم رابط تعيين كلمة المرور المرسل بالبريد.", message);
+        $("agName").value = ""; $("agEmail").value = "";
+        await loadExtras();
+        toast(data.email_sent ? "تم إنشاء الوكيل وإرسال رسالة التعيين" : "تم إنشاء الوكيل لكن إرسال البريد فشل", data.email_sent ? "ok" : "err");
+      } catch (e) {
+        console.error(e); toast("تعذّر الاتصال بخدمة إدارة الوكلاء: " + (e?.message || "جرّب تاني"), "err");
+      } finally { btn.disabled = false; btn.textContent = old; }
     }
 
-    async function xUpdate(table, id, patch, col) {
-      const { data, error } = await adminClient.from(table).update(patch).eq(col || "id", id).select();
-      if (error || !data?.length) { toast("التعديل فشل: " + (error?.message || "صلاحيات RLS"), "err"); return false; }
-      return true;
+    async function updatePlanDefaults(input) {
+      const planKey = input.dataset.id;
+      const plan = X.plans.find((p) => p.plan === planKey);
+      if (!plan) return;
+      const wholesaleInput = document.querySelector(`[data-x="planPrice"][data-id="${CSS.escape(planKey)}"][data-field="wholesale"]`);
+      const saleInput = document.querySelector(`[data-x="planPrice"][data-id="${CSS.escape(planKey)}"][data-field="sale"]`);
+      const wholesale = Number(wholesaleInput?.value);
+      const sale = Number(saleInput?.value);
+      if (!Number.isFinite(wholesale) || !Number.isFinite(sale) || wholesale < 0 || sale < wholesale) {
+        toast("لازم يكون السعران صحيحين وسعر البيع مساويًا لسعر الجملة أو أعلى منه", "err"); renderPlans(); return;
+      }
+      input.disabled = true;
+      try {
+        const { data, error } = await adminClient.rpc("admin_set_plan_defaults", { p_plan: planKey, p_wholesale: wholesale, p_sale: sale });
+        if (error || !data?.ok) { toast("فشل تحديث الأسعار: " + (error?.message || data?.reason || "خطأ غير معروف"), "err"); await loadExtras(); return; }
+        toast("تم تحديث أسعار الباقة", "ok"); await loadExtras();
+      } finally { input.disabled = false; }
     }
 
     $("dashboard").addEventListener("click", async (e) => {
-      const b = e.target.closest("[data-x]"); if (!b || b.tagName === "INPUT") return;
-      const a = b.dataset.x, id = b.dataset.id;
-      if (a === "addPlan") {
-        const name = $("plName").value.trim(), days = parseInt($("plDays").value, 10), price = Number($("plPrice").value);
-        if (!name || !(days > 0) || !(price >= 0) || $("plPrice").value === "") return toast("كمّل الاسم والأيام والسعر", "err");
-        const { error } = await adminClient.from("plans").insert({ name, days, price });
-        if (error) return toast(error.message, "err");
-        toast("اتضافت الباقة", "ok"); loadExtras();
-      } else if (a === "togglePlan") {
-        const pl = X.plans.find((p) => p.id === id); if (pl && await xUpdate("plans", id, { active: !pl.active })) loadExtras();
-      } else if (a === "delPlan") {
-        if (!(await askConfirm("حذف الباقة دي؟ مبيعات الوكلاء القديمة مش هتتأثر."))) return;
-        const { error } = await adminClient.from("plans").delete().eq("id", id);
-        error ? toast(error.message, "err") : (toast("اتحذفت", "ok"), loadExtras());
-      } else if (a === "addAgent") addAgent(b);
-      else if (a === "toggleAgent") { if (await xUpdate("agents", id, { active: b.dataset.active !== "true" }, "user_id")) loadExtras(); }
-      else if (a === "copyLink") toast((await copyText(agentUrl())) ? "اتنسخ الرابط" : "تعذّر النسخ", "ok");
-      else if (a === "genReady") genReady(b);
-      else if (a === "copyReady") {
-        const l = X.ready.filter((r) => r.status === "available").map((r) => r.email + ":" + r.password);
-        l.length ? toast((await copyText(l.join("\n"))) ? "اتنسخ " + l.length : "تعذّر النسخ", "ok") : toast("مفيش متاح");
-      } else if (a === "clearUsed") {
-        if (!(await askConfirm("مسح الحسابات المسلَّمة من القايمة؟ الحسابات نفسها هتفضل شغّالة."))) return;
-        const { error } = await adminClient.from("ready_accounts").delete().eq("status", "assigned");
-        error ? toast(error.message, "err") : (toast("اتمسحت", "ok"), loadExtras());
+      const b = e.target.closest("[data-x]"); if (!b || b.tagName === "INPUT" || b.disabled) return;
+      const action = b.dataset.x, id = b.dataset.id;
+      if (action === "addPlan") {
+        const key = $("plKey").value.trim().toLowerCase();
+        const label = $("plName").value.trim();
+        const days = parseInt($("plDays").value, 10);
+        const wholesale = Number($("plWholesale").value), sale = Number($("plSale").value);
+        if (!/^[a-z0-9_]{2,32}$/.test(key)) return toast("مفتاح الباقة لازم يكون 2–32 حرفًا إنجليزيًا صغيرًا أو رقمًا أو _", "err");
+        if (!label || !Number.isInteger(days) || days < 1 || days > 3650) return toast("اكتب اسم باقة وعدد أيام بين 1 و3650", "err");
+        if (!Number.isFinite(wholesale) || !Number.isFinite(sale) || wholesale < 0 || sale < wholesale) return toast("راجع سعر الجملة وسعر البيع", "err");
+        b.disabled = true; const old = b.textContent; b.textContent = "بيتم الحفظ...";
+        try {
+          const { data: up, error: upErr } = await adminClient.rpc("admin_upsert_plan", { p_plan: key, p_label: label, p_days: days, p_active: true });
+          if (upErr || !up?.ok) return toast("فشل حفظ الباقة: " + (upErr?.message || up?.reason || "خطأ"), "err");
+          const { data: price, error: priceErr } = await adminClient.rpc("admin_set_plan_defaults", { p_plan: key, p_wholesale: wholesale, p_sale: sale });
+          if (priceErr || !price?.ok) return toast("تم حفظ الباقة لكن فشل حفظ السعر: " + (priceErr?.message || price?.reason || "خطأ"), "err");
+          toast("تمت إضافة الباقة", "ok"); $("plKey").value = ""; $("plName").value = ""; $("plDays").value = ""; $("plWholesale").value = ""; $("plSale").value = "";
+          await loadExtras();
+        } finally { b.disabled = false; b.textContent = old; }
+      } else if (action === "togglePlan") {
+        const p = X.plans.find((x) => x.plan === id); if (!p) return;
+        const { data, error } = await adminClient.rpc("admin_upsert_plan", { p_plan: p.plan, p_label: p.label, p_days: p.duration_days, p_active: !p.active });
+        if (error || !data?.ok) toast("فشل تغيير حالة الباقة: " + (error?.message || data?.reason || "خطأ"), "err");
+        else { toast(p.active ? "تم إيقاف الباقة" : "تم تفعيل الباقة", "ok"); await loadExtras(); }
+      } else if (action === "addAgent") {
+        await addAgent(b);
+      } else if (action === "toggleAgent") {
+        const next = b.dataset.status === "active" ? "suspended" : "active";
+        b.disabled = true;
+        try {
+          const { data, error } = await adminClient.rpc("admin_set_agent_status", { p_id: id, p_status: next, p_reason: "تعديل من لوحة الأدمن" });
+          if (error || !data?.ok) toast("فشل تغيير حالة الوكيل: " + (error?.message || data?.reason || "خطأ"), "err");
+          else { toast(next === "active" ? "تم تفعيل الوكيل" : "تم إيقاف الوكيل", "ok"); await loadExtras(); }
+        } finally { b.disabled = false; }
+      } else if (action === "copyLink") {
+        toast((await copyText(agentUrl())) ? "اتنسخ الرابط" : "تعذّر النسخ", "ok");
+      } else if (action === "genReady") {
+        await genReady(b);
       }
     });
+
     $("dashboard").addEventListener("change", async (e) => {
-      const i = e.target; if (i.dataset?.x !== "price") return;
-      if (Number(i.value) >= 0 && i.value !== "" && await xUpdate("plans", i.dataset.id, { price: Number(i.value) })) toast("اتحدّث السعر", "ok");
+      const input = e.target;
+      if (input.dataset?.x === "planPrice") await updatePlanDefaults(input);
     });
 
     boot();

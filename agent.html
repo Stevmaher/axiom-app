@@ -62,7 +62,7 @@ th,td{text-align:start;padding:10px 12px;border-bottom:1px solid rgba(232,169,46
 
   <div class="stats">
     <div class="stat"><b id="stCount">0</b><span>اشتراكات فعّلتها</span></div>
-    <div class="stat"><b id="stSum">0</b><span>إجمالي المستحق للأدمن (ج.م)</span></div>
+    <div class="stat"><b id="stSum">0</b><span>إجمالي المبيعات (ج.م)</span></div>
     <div class="stat"><b id="stToday">0</b><span>تفعيلات النهارده</span></div>
   </div>
 
@@ -75,10 +75,12 @@ th,td{text-align:start;padding:10px 12px;border-bottom:1px solid rgba(232,169,46
       <button class="btn primary" id="actBtn">تفعيل</button>
     </section>
     <section class="card ready">
-      <h2>حساب جاهز للعميل</h2>
-      <div class="sub">بياخد حساب جاهز، يفعّله بالباقة، ويديك البيانات ورسالة جاهزة للإرسال.</div>
-      <select id="rPlan" aria-label="الباقة"></select>
-      <button class="btn primary" id="takeBtn">اسحب حساب جاهز وفعّله</button>
+      <h2>إنشاء حسابات جاهزة</h2>
+      <div class="sub">أنشئ حسابًا أو أكثر باسم نطاقك. الحسابات بتتسند ليك وتفضل غير مفعّلة لحد ما تختار باقة وتفعّل الإيميل من القسم الأول.</div>
+      <input id="readyCount" type="number" min="1" max="20" value="1" aria-label="عدد الحسابات" />
+      <input id="readyPrefix" type="text" maxlength="16" value="axiom" placeholder="بادئة الإيميل" dir="ltr" />
+      <input id="readyDomain" type="text" placeholder="الدومين: example.com" dir="ltr" />
+      <button class="btn primary" id="takeBtn">إنشاء الحسابات الجاهزة</button>
     </section>
   </div>
 
@@ -107,85 +109,110 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const nf = new Intl.NumberFormat("ar-u-nu-latn");
-const fd = (d) => new Date(d).toLocaleDateString("ar-EG", { year: "numeric", month: "short", day: "numeric" });
+const fd = (d) => d ? new Date(d).toLocaleDateString("ar-EG", { year: "numeric", month: "short", day: "numeric" }) : "—";
+let snapshot = null;
 
 function toast(t, k = "") {
   const e = document.createElement("div"); e.className = "toast " + k; e.textContent = t;
-  $("toasts").appendChild(e); setTimeout(() => e.remove(), 3200);
+  $("toasts").appendChild(e); setTimeout(() => e.remove(), 3800);
 }
 function showGate(m) { $("app").hidden = true; $("gate").hidden = false; $("gMsg").textContent = m || ""; }
-
+function done(text) { $("resText").value = text; $("resBox").hidden = false; $("resBox").scrollIntoView({ behavior: "smooth", block: "center" }); }
+function planLabel(key) { return snapshot?.prices?.find((p) => p.plan === key)?.label || key || "—"; }
+function reasonText(reason) {
+  const map = {
+    forbidden: "الحساب مش وكيلًا مفعّلًا أو الجلسة انتهت.",
+    agent_suspended: "حساب الوكيل موقوف حاليًا.",
+    customer_unavailable: "الإيميل مش ضمن العملاء المتاحين لحسابك.",
+    customer_not_found: "مش لاقيين حساب العميل بالإيميل ده.",
+    plan_unavailable: "الباقة مش متاحة للوكيل.",
+    insufficient_credits: "رصيد النقاط غير كافٍ لتفعيل الباقة.",
+    insufficient_balance: "الرصيد المالي غير كافٍ لتفعيل الباقة.",
+    price_below_cost: "تسعير الباقة محتاج مراجعة من الأدمن.",
+    bad_request: "راجع الإيميل والباقة والبيانات المدخلة.",
+    email_exists: "الإيميل موجود بالفعل.",
+    server_error: "حصل خطأ في الخادم؛ جرّب مرة أخرى."
+  };
+  return map[reason] || (reason ? String(reason) : "حصل خطأ غير معروف.");
+}
 async function enter() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) return showGate();
-  const { data: ok, error } = await sb.rpc("is_agent");
-  if (error) return showGate("تعذّر التحقق من صلاحية الوكيل: " + error.message);
-  if (!ok) { await sb.auth.signOut(); return showGate("الحساب ده مش وكيل مفعّل"); }
-  $("gate").hidden = true; $("app").hidden = false;
+  const { data: { session }, error } = await sb.auth.getSession();
+  if (error || !session) return showGate();
   await load();
 }
-
 async function load() {
-  const [me, pl, sl] = await Promise.all([
-    sb.from("agents").select("name,email").maybeSingle(),
-    sb.from("plans").select("id,name,days,price").eq("active", true).order("days"),
-    sb.from("agent_sales").select("customer_email,plan_name,price,created_at").order("created_at", { ascending: false }).limit(200)
-  ]);
-  const queryError = me.error || pl.error || sl.error;
-  if (queryError) {
-    console.error("Agent dashboard load failed:", queryError);
-    toast("تعذّر تحميل البيانات: " + queryError.message, "err");
+  const { data, error } = await sb.rpc("agent_snapshot");
+  if (error || !data?.agent) {
+    await sb.auth.signOut();
+    showGate(error?.message?.includes("forbidden") ? "الحساب ده مش مسجّل كوكيل." : "تعذّر تحميل حساب الوكيل. تأكد من تفعيل الحساب ثم سجّل الدخول مرة أخرى.");
+    return;
   }
-  $("meName").textContent = me.data?.name || ""; $("meMail").textContent = me.data?.email || "";
-  const opts = (pl.data || []).map((p) => `<option value="${esc(p.id)}">${esc(p.name)} — ${nf.format(p.price)} ج.م</option>`).join("")
-    || '<option value="">مفيش باقات متاحة</option>';
-  $("cPlan").innerHTML = opts; $("rPlan").innerHTML = opts;
-  const rows = sl.data || [], today = new Date().toDateString();
-  $("stCount").textContent = nf.format(rows.length);
-  $("stSum").textContent = nf.format(rows.reduce((t, r) => t + Number(r.price), 0));
-  $("stToday").textContent = nf.format(rows.filter((r) => new Date(r.created_at).toDateString() === today).length);
-  $("rows").innerHTML = rows.map((r) => `<tr><td>${esc(r.customer_email)}</td><td>${esc(r.plan_name)}</td><td>${nf.format(r.price)} ج.م</td><td>${fd(r.created_at)}</td></tr>`).join("")
+  if (data.agent.status !== "active") {
+    await sb.auth.signOut(); showGate("حساب الوكيل موقوف حاليًا. تواصل مع الأدمن."); return;
+  }
+  snapshot = data;
+  $("meName").textContent = data.agent.display_name || "وكيل";
+  $("meMail").textContent = data.agent.email || "";
+  const prices = (data.prices || []).filter((p) => p.active && p.enabled);
+  const opts = prices.map((p) => `<option value="${esc(p.plan)}">${esc(p.label)} — ${nf.format(p.sale_price)} ج.م (${nf.format(p.duration_days)} يوم)</option>`).join("")
+    || '<option value="">مفيش باقات مفعّلة لحسابك</option>';
+  $("cPlan").innerHTML = opts;
+  const txs = [...(data.transactions || [])].sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  const today = new Date().toDateString();
+  $("stCount").textContent = nf.format(txs.filter((t) => t.status !== "reversed").length);
+  $("stSum").textContent = nf.format(txs.filter((t) => t.status !== "reversed").reduce((sum,t) => sum + Number(t.sale_price || 0), 0));
+  $("stToday").textContent = nf.format(txs.filter((t) => new Date(t.created_at).toDateString() === today && t.status !== "reversed").length);
+  $("rows").innerHTML = txs.slice(0, 100).map((t) => `<tr><td>${esc(t.customer_email)}</td><td>${esc(planLabel(t.plan))}</td><td>${nf.format(Number(t.sale_price || 0))} ج.م</td><td>${fd(t.created_at)}</td></tr>`).join("")
     || '<tr><td colspan="4" style="color:var(--dim)">لسه مفيش عمليات.</td></tr>';
 }
-
-function done(text) { $("resText").value = text; $("resBox").hidden = false; $("resBox").scrollIntoView({ behavior: "smooth", block: "center" }); }
-const planLabel = (id) => $("cPlan").querySelector(`option[value="${id}"]`)?.textContent.split(" — ")[0] || "";
-
 async function run(btn, label, fn) {
   btn.disabled = true; const old = btn.textContent; btn.textContent = label;
-  try { await fn(); } catch (e) { console.error(e); toast("حصل خطأ، جرّب تاني", "err"); }
-  btn.disabled = false; btn.textContent = old;
+  try { await fn(); } catch (e) { console.error(e); toast("حصل خطأ: " + (e?.message || "جرّب تاني"), "err"); }
+  finally { btn.disabled = false; btn.textContent = old; }
 }
 
 $("actBtn").onclick = () => run($("actBtn"), "بيتم التفعيل...", async () => {
   const email = $("cEmail").value.trim().toLowerCase(), plan = $("cPlan").value;
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return toast("اكتب إيميل صحيح", "err");
-  if (!plan) return toast("اختار باقة", "err");
-  const { data, error } = await sb.rpc("agent_activate", { p_email: email, p_plan_id: plan });
-  if (error || !data?.success) return toast(error?.message || data?.reason || "فشل التفعيل", "err");
-  done(`أهلاً بيك في Axiom 👋\nاشتراكك (${planLabel(plan)}) اتفعّل على: ${email}\nينتهي في: ${fd(data.expires_at)}`);
-  $("cEmail").value = ""; toast("تم التفعيل", "ok"); load();
+  if (!plan) return toast("مفيش باقة متاحة؛ راجع الأدمن", "err");
+  const { data: quote, error: qErr } = await sb.rpc("agent_quote", { p_mode: "existing", p_email: email, p_plan: plan });
+  if (qErr || !quote?.ok) return toast(reasonText(quote?.reason || qErr?.message), "err");
+  const rnd = new Uint8Array(16); crypto.getRandomValues(rnd);
+  const idem = Array.from(rnd, (b) => b.toString(16).padStart(2, "0")).join("");
+  const { data, error } = await sb.rpc("agent_activate", { p_email: email, p_plan: plan, p_notes: "", p_idem: idem });
+  if (error || !data?.ok) return toast(reasonText(data?.reason || error?.message), "err");
+  const exp = data.new_expires_at || data.transaction?.new_expires_at;
+  done(`تم تفعيل اشتراك Axiom ✓\nالإيميل: ${email}\nالباقة: ${planLabel(plan)}\nينتهي في: ${fd(exp)}\n\nلو محتاج تبعت بيانات الحساب للعميل، استخدم بيانات دخوله الحالية.`);
+  toast("تم التفعيل وتسجيل العملية", "ok");
+  await load();
 });
 
-$("takeBtn").onclick = () => run($("takeBtn"), "لحظة...", async () => {
-  const plan = $("rPlan").value;
-  if (!plan) return toast("اختار باقة", "err");
-  const { data, error } = await sb.rpc("agent_take_ready", { p_plan_id: plan });
-  if (error || !data?.success) return toast(error?.message || data?.reason || "فشل السحب", "err");
-  done(`أهلاً بيك في Axiom 👋\nبيانات حسابك:\nالإيميل: ${data.email}\nالباسورد: ${data.password}\nالباقة: ${planLabel(plan)} — لحد ${fd(data.expires_at)}`);
-  toast("اتسحب حساب جاهز واتفعّل", "ok"); load();
+$("takeBtn").onclick = () => run($("takeBtn"), "بيتم إنشاء الحسابات...", async () => {
+  const count = Math.min(20, Math.max(1, parseInt($("readyCount").value, 10) || 0));
+  const prefix = ($("readyPrefix").value.trim() || "axiom").toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0,16);
+  const domain = $("readyDomain").value.trim().toLowerCase().replace(/^@/, "");
+  if (!/^(?!-)[a-z0-9-]{1,63}(\.[a-z0-9-]{1,63})+$/.test(domain)) return toast("اكتب دومين صحيح مثل example.com", "err");
+  const { data, error } = await sb.functions.invoke("axiom-agents", { body: { action: "create_ready_accounts", count, prefix, domain } });
+  if (error || !data?.ok || !Array.isArray(data.accounts) || !data.accounts.length) return toast("فشل إنشاء الحسابات: " + reasonText(data?.reason || error?.message), "err");
+  done(`تم إنشاء ${data.accounts.length} حساب جاهز، وهي غير مفعّلة حتى تختار باقة وتفعّلها من القسم الأول.\n\n` + data.accounts.map((a) => `الإيميل: ${a.email}\nكلمة المرور: ${a.password}`).join("\n\n"));
+  $("cEmail").value = data.accounts[0].email;
+  toast(`تم إنشاء ${data.accounts.length} حساب وإسنادها لحسابك`, "ok");
+  await load();
 });
 
 $("resCopy").onclick = async () => {
   try { await navigator.clipboard.writeText($("resText").value); toast("اتنسخت", "ok"); }
   catch (_) { $("resText").select(); document.execCommand("copy"); toast("اتنسخت", "ok"); }
 };
-
 $("gForm").addEventListener("submit", async (e) => {
   e.preventDefault(); $("gMsg").textContent = "";
-  const { error } = await sb.auth.signInWithPassword({ email: $("gEmail").value.trim(), password: $("gPass").value });
-  if (error) { $("gMsg").textContent = "بيانات الدخول غلط"; return; }
-  enter();
+  const btn = $("gBtn"); btn.disabled = true; btn.textContent = "بيتم الدخول...";
+  try {
+    const { error } = await sb.auth.signInWithPassword({ email: $("gEmail").value.trim().toLowerCase(), password: $("gPass").value });
+    if (error) { $("gMsg").textContent = "بيانات الدخول غير صحيحة أو الحساب غير مفعّل."; return; }
+    await enter();
+  } catch (e) { $("gMsg").textContent = "تعذّر الاتصال. جرّب مرة أخرى."; }
+  finally { btn.disabled = false; btn.textContent = "دخول"; }
 });
 $("out").onclick = async () => { await sb.auth.signOut(); showGate(); };
 enter();
