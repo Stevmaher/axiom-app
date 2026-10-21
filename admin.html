@@ -675,6 +675,12 @@
         transition-duration: 0.001ms !important;
       }
     }
+    .xform{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+    .xform input,.xform select{flex:1;min-width:130px}
+    .xin{width:96px}
+    .xnote{font-size:13px;color:var(--dim);margin:6px 0 12px}
+    .xlink{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;margin-bottom:12px}
+    .xlink code{direction:ltr;padding:4px 8px;border-radius:8px;background:rgba(232,169,46,.1)}
   </style>
 </head>
 
@@ -714,6 +720,9 @@
     <nav class="tabs" id="tabs" role="tablist" aria-label="أقسام اللوحة">
       <button class="tab" role="tab" type="button" data-tab="subs" aria-selected="true">المشتركون<span class="n" id="tabCount"></span></button>
       <button class="tab" role="tab" type="button" data-tab="overview" aria-selected="false">نظرة عامة</button>
+      <button class="tab" role="tab" type="button" data-tab="plans" aria-selected="false">الباقات</button>
+      <button class="tab" role="tab" type="button" data-tab="agents" aria-selected="false">الوكلاء</button>
+      <button class="tab" role="tab" type="button" data-tab="ready" aria-selected="false">إيميلات جاهزة</button>
     </nav>
     <div class="stamp" id="stamp"></div>
 
@@ -770,6 +779,9 @@
     </div>
 
     <div id="viewOverview" hidden></div>
+    <div id="viewPlans" hidden></div>
+    <div id="viewAgents" hidden></div>
+    <div id="viewReady" hidden></div>
   </div>
 
   <!-- ===================== مودال التمديد ===================== -->
@@ -827,6 +839,18 @@
       <div class="modal-actions">
         <button class="btn danger" id="confirmYes">تأكيد</button>
         <button class="btn" id="confirmNo">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="credOverlay" role="dialog" aria-modal="true" aria-labelledby="credTitle">
+    <div class="modal">
+      <h2 id="credTitle"></h2>
+      <div class="sub" id="credSub"></div>
+      <textarea id="credText" readonly rows="5" style="width:100%"></textarea>
+      <div class="modal-actions">
+        <button class="btn primary" id="credCopy">نسخ</button>
+        <button class="btn" id="credClose">إغلاق</button>
       </div>
     </div>
   </div>
@@ -1792,15 +1816,17 @@
     try { setAuto(localStorage.getItem("axiomAdminAuto") === "1"); } catch (_) { setAuto(false); }
 
     /* ---------- تبويبات ---------- */
+    const TABS = ["subs", "overview", "plans", "agents", "ready"];
     let curTab = "subs";
     function setTab(t, fromHash) {
-      if (t !== "subs" && t !== "overview") t = "subs";
+      if (!TABS.includes(t)) t = "subs";
       curTab = t;
-      $("viewSubs").hidden = t !== "subs";
-      $("viewOverview").hidden = t !== "overview";
+      TABS.forEach((x) => { $("view" + x[0].toUpperCase() + x.slice(1)).hidden = t !== x; });
+      document.querySelector(".stats").hidden = !(t === "subs" || t === "overview");
       document.querySelectorAll("#tabs .tab").forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === t ? "true" : "false"));
       if (!fromHash) history.replaceState(null, "", "#" + t);
       if (t === "overview") renderOverview();
+      if (!dashboard.hidden && ["plans", "agents", "ready"].includes(t)) loadExtras();
       hideOvTip();
     }
     document.querySelectorAll("#tabs .tab").forEach((b) => { b.onclick = () => { setTab(b.dataset.tab); window.scrollTo(0, 0); }; });
@@ -2050,6 +2076,168 @@
     try { const saved = localStorage.getItem("axiomAdminEmail"); if (saved) $("gEmail").value = saved; } catch (_) {}
     $("gateForm").addEventListener("submit", () => {
       const v = $("gEmail").value.trim(); if (v) { try { localStorage.setItem("axiomAdminEmail", v); } catch (_) {} }
+    });
+
+    /* ================= الباقات + الوكلاء + الإيميلات الجاهزة ================= */
+    let X = { plans: [], agents: [], sales: [], ready: [] }, xWarned = false;
+    const money = (n) => ovFmt(Number(n || 0)) + " ج.م";
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const MAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    function rnd(n, alpha) { const a = new Uint32Array(n); crypto.getRandomValues(a); return [...a].map((x) => alpha[x % alpha.length]).join(""); }
+    const rndPass = () => rnd(10, "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789");
+    const tmpClient = () => window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: "axiom-tmp-" + rnd(8, "abcdef0123456789") }
+    });
+    const agentUrl = () => location.origin + location.pathname.replace(/[^/]*$/, "agent.html");
+    const empty = (cols, t) => `<tr><td colspan="${cols}" class="muted">${t}</td></tr>`;
+
+    function showCreds(title, sub, text) {
+      $("credTitle").textContent = title; $("credSub").textContent = sub; $("credText").value = text; openModal("credOverlay");
+    }
+    $("credClose").onclick = () => closeModal("credOverlay");
+    $("credCopy").onclick = async () => toast((await copyText($("credText").value)) ? "اتنسخ" : "تعذّر النسخ", "ok");
+
+    async function loadExtras() {
+      if (!(await ensureAdminSession())) return;
+      const q = (t, o) => adminClient.from(t).select("*").order(o, { ascending: false });
+      const [p, a, s, r] = await Promise.all([
+        adminClient.from("plans").select("*").order("days"), q("agents", "created_at"),
+        adminClient.from("agent_sales").select("agent_id,price,created_at"), q("ready_accounts", "created_at").limit(500)]);
+      const err = [p, a, s, r].find((x) => x.error)?.error;
+      if (err && !xWarned) { xWarned = true; toast("شغّل agents-setup.sql في Supabase الأول: " + err.message, "err"); }
+      X = { plans: p.data || [], agents: a.data || [], sales: s.data || [], ready: r.data || [] };
+      syncAddPlan(); renderPlans(); renderAgents(); renderReady();
+    }
+    const _lr2 = loadRows;
+    loadRows = async function () { await _lr2(); loadExtras(); };
+    $("refreshBtn").onclick = loadRows;
+
+    // الباقات اللي حددتها بتظهر في مودال "إضافة مشترك" بمدّتها
+    function syncAddPlan() {
+      const act = X.plans.filter((p) => p.active); if (!act.length) return;
+      $("addPlan").innerHTML = act.map((p) => `<option value="${escapeHtml(p.name)}" data-d="${p.days}">${escapeHtml(p.name)} — ${p.days} يوم</option>`).join("");
+      $("addDays").value = act[0].days; updateAddPreview();
+    }
+    $("addPlan").onchange = () => { const d = $("addPlan").selectedOptions[0]?.dataset.d; if (d) { $("addDays").value = d; updateAddPreview(); } };
+
+    /* ---------- الباقات ---------- */
+    function renderPlans() {
+      $("viewPlans").innerHTML = `<div class="panel"><h2>باقات الاشتراك</h2>
+        <div class="xnote">السعر هنا هو اللي الوكيل بيفعّل بيه ويتحاسب عليه.</div>
+        <div class="xform"><input id="plName" placeholder="اسم الباقة (مثلاً شهري)"><input id="plDays" type="number" min="1" placeholder="عدد الأيام"><input id="plPrice" type="number" min="0" placeholder="السعر بالجنيه"><button class="btn primary" data-x="addPlan">+ إضافة باقة</button></div>
+        <div class="table-scroll"><table><thead><tr><th>الباقة</th><th>الأيام</th><th>سعر الوكيل</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>${
+        X.plans.map((p) => `<tr><td>${escapeHtml(p.name)}</td><td>${p.days}</td>
+          <td><input class="xin" type="number" min="0" value="${p.price}" data-id="${p.id}" data-x="price" aria-label="السعر"></td>
+          <td>${p.active ? '<span class="badge active">شغّالة</span>' : '<span class="badge inactive">مخفية</span>'}</td>
+          <td><div class="actions"><button class="mini ${p.active ? "off" : "on"}" data-x="togglePlan" data-id="${p.id}">${p.active ? "إخفاء" : "إظهار"}</button>
+          <button class="mini del" data-x="delPlan" data-id="${p.id}">حذف</button></div></td></tr>`).join("") || empty(5, "مفيش باقات لسه — ضيف أول باقة.")}</tbody></table></div></div>`;
+    }
+
+    /* ---------- الوكلاء ---------- */
+    function renderAgents() {
+      const stat = (id) => { const l = X.sales.filter((s) => s.agent_id === id); return [l.length, l.reduce((t, s) => t + Number(s.price), 0)]; };
+      $("viewAgents").innerHTML = `<div class="panel"><h2>الوكلاء</h2>
+        <div class="xlink">رابط صفحة الوكيل: <code>${escapeHtml(agentUrl())}</code><button class="btn sm" data-x="copyLink" type="button">نسخ</button></div>
+        <div class="xform"><input id="agName" placeholder="اسم الوكيل"><input id="agEmail" type="email" placeholder="إيميل الوكيل" autocomplete="off"><button class="btn primary" data-x="addAgent">+ إنشاء وكيل</button></div>
+        <div class="xnote">بيتعمل له حساب بباسورد عشوائي بيظهرلك مرة واحدة تبعته له.</div>
+        <div class="table-scroll"><table><thead><tr><th>الوكيل</th><th>الحالة</th><th>عدد التفعيلات</th><th>المستحق</th><th>إجراءات</th></tr></thead><tbody>${
+        X.agents.map((a) => { const [n, sum] = stat(a.user_id); return `<tr>
+          <td class="acct"><div class="acct-email">${escapeHtml(a.name)}</div><div class="acct-meta"><span>${escapeHtml(a.email)}</span></div></td>
+          <td>${a.active ? '<span class="badge active">مفعّل</span>' : '<span class="badge inactive">موقوف</span>'}</td>
+          <td>${ovFmt(n)}</td><td>${money(sum)}</td>
+          <td><div class="actions"><button class="mini ${a.active ? "off" : "on"}" data-x="toggleAgent" data-id="${a.user_id}" data-active="${a.active}">${a.active ? "إيقاف" : "تفعيل"}</button></div></td></tr>`; }).join("")
+        || empty(5, "مفيش وكلاء لسه.")}</tbody></table></div></div>`;
+    }
+
+    /* ---------- الإيميلات الجاهزة ---------- */
+    function renderReady() {
+      const av = X.ready.filter((r) => r.status === "available").length, nm = new Map(X.agents.map((a) => [a.user_id, a.name]));
+      $("viewReady").innerHTML = `<div class="panel"><h2>إيميلات جاهزة</h2>
+        <div class="xnote">بتتعمل حسابات فعلية بباسورد عشوائي. الوكيل بيسحب واحد جاهز ويفعّله للعميل بضغطة، من غير ما العميل يسجّل.</div>
+        <div class="xform"><input id="rdN" type="number" min="1" max="50" value="10" aria-label="العدد"><input id="rdPre" placeholder="بادئة (axiom)" value="axiom"><input id="rdDom" placeholder="الدومين: example.com" dir="ltr"><button class="btn primary" id="rdGo" data-x="genReady">إنشاء</button></div>
+        <div class="toolbar"><span class="count">${av} متاح من ${X.ready.length}</span>
+          <button class="btn sm" data-x="copyReady" type="button">نسخ المتاح (إيميل:باسورد)</button>
+          <button class="btn sm" data-x="clearUsed" type="button">مسح المسلَّم</button></div>
+        <div class="table-scroll"><table><thead><tr><th>الإيميل</th><th>الباسورد</th><th>الحالة</th><th>اتسلّم لـ</th></tr></thead><tbody>${
+        X.ready.map((r) => `<tr><td>${escapeHtml(r.email)}</td><td dir="ltr">${escapeHtml(r.password)}</td>
+          <td>${r.status === "available" ? '<span class="badge active">متاح</span>' : '<span class="badge expired">اتسلّم</span>'}</td>
+          <td>${escapeHtml(nm.get(r.agent_id) || "—")}</td></tr>`).join("") || empty(4, "مفيش إيميلات جاهزة لسه.")}</tbody></table></div></div>`;
+    }
+
+    async function genReady(btn) {
+      const n = Math.min(50, Math.max(1, parseInt($("rdN").value, 10) || 0));
+      const pre = ($("rdPre").value.trim() || "axiom").toLowerCase().replace(/[^a-z0-9._-]/g, "");
+      const dom = $("rdDom").value.trim().toLowerCase();
+      if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(dom)) return toast("اكتب دومين صحيح", "err");
+      btn.disabled = true; const made = []; let lastErr = "";
+      for (let i = 0; i < n; i++) {
+        const email = pre + rnd(6, "abcdefghjkmnpqrstuvwxyz23456789") + "@" + dom, password = rndPass();
+        const { data, error } = await tmpClient().auth.signUp({ email, password });
+        if (error) { lastErr = error.message; if (/rate|limit/i.test(lastErr)) break; continue; }
+        if (data.user?.identities?.length === 0) continue;
+        made.push({ email, password }); btn.textContent = made.length + " / " + n; await sleep(350);
+      }
+      if (made.length) {
+        const { error } = await adminClient.from("ready_accounts").insert(made);
+        if (error) { toast("الحسابات اتعملت بس الحفظ فشل: " + error.message, "err"); showCreds("احفظهم دلوقتي", "الحفظ في الجدول فشل", made.map((m) => m.email + ":" + m.password).join("\n")); }
+      }
+      toast(made.length ? `اتعمل ${made.length} إيميل جاهز` : "ماتعملش ولا حساب: " + (lastErr || "—"), made.length ? "ok" : "err");
+      btn.disabled = false; btn.textContent = "إنشاء"; loadExtras();
+    }
+
+    async function addAgent(btn) {
+      const email = $("agEmail").value.trim().toLowerCase(), name = $("agName").value.trim();
+      if (!name || !MAIL_RE.test(email)) return toast("اكتب اسم وإيميل صحيح", "err");
+      btn.disabled = true;
+      try {
+        const pw = rndPass(), { data, error } = await tmpClient().auth.signUp({ email, password: pw });
+        if (error) return toast("تعذّر إنشاء الحساب: " + error.message, "err");
+        const existed = data.user?.identities?.length === 0;
+        const { data: r, error: e2 } = await adminClient.rpc("admin_register_agent", { p_email: email, p_name: name });
+        if (e2 || !r?.success) return toast("فشل تسجيل الوكيل: " + (e2?.message || r?.reason), "err");
+        showCreds("اتعمل الوكيل ✓", existed ? "الإيميل كان له حساب قبل كده — بيدخل بباسورده الحالي." : "الباسورد بيظهر مرة واحدة بس، انسخه وابعته له.",
+          `رابط الدخول: ${agentUrl()}\nالإيميل: ${email}\n` + (existed ? "" : `الباسورد: ${pw}`));
+        loadExtras();
+      } finally { btn.disabled = false; }
+    }
+
+    async function xUpdate(table, id, patch, col) {
+      const { data, error } = await adminClient.from(table).update(patch).eq(col || "id", id).select();
+      if (error || !data?.length) { toast("التعديل فشل: " + (error?.message || "صلاحيات RLS"), "err"); return false; }
+      return true;
+    }
+
+    $("dashboard").addEventListener("click", async (e) => {
+      const b = e.target.closest("[data-x]"); if (!b || b.tagName === "INPUT") return;
+      const a = b.dataset.x, id = b.dataset.id;
+      if (a === "addPlan") {
+        const name = $("plName").value.trim(), days = parseInt($("plDays").value, 10), price = Number($("plPrice").value);
+        if (!name || !(days > 0) || !(price >= 0) || $("plPrice").value === "") return toast("كمّل الاسم والأيام والسعر", "err");
+        const { error } = await adminClient.from("plans").insert({ name, days, price });
+        if (error) return toast(error.message, "err");
+        toast("اتضافت الباقة", "ok"); loadExtras();
+      } else if (a === "togglePlan") {
+        const pl = X.plans.find((p) => p.id === id); if (pl && await xUpdate("plans", id, { active: !pl.active })) loadExtras();
+      } else if (a === "delPlan") {
+        if (!(await askConfirm("حذف الباقة دي؟ مبيعات الوكلاء القديمة مش هتتأثر."))) return;
+        const { error } = await adminClient.from("plans").delete().eq("id", id);
+        error ? toast(error.message, "err") : (toast("اتحذفت", "ok"), loadExtras());
+      } else if (a === "addAgent") addAgent(b);
+      else if (a === "toggleAgent") { if (await xUpdate("agents", id, { active: b.dataset.active !== "true" }, "user_id")) loadExtras(); }
+      else if (a === "copyLink") toast((await copyText(agentUrl())) ? "اتنسخ الرابط" : "تعذّر النسخ", "ok");
+      else if (a === "genReady") genReady(b);
+      else if (a === "copyReady") {
+        const l = X.ready.filter((r) => r.status === "available").map((r) => r.email + ":" + r.password);
+        l.length ? toast((await copyText(l.join("\n"))) ? "اتنسخ " + l.length : "تعذّر النسخ", "ok") : toast("مفيش متاح");
+      } else if (a === "clearUsed") {
+        if (!(await askConfirm("مسح الحسابات المسلَّمة من القايمة؟ الحسابات نفسها هتفضل شغّالة."))) return;
+        const { error } = await adminClient.from("ready_accounts").delete().eq("status", "assigned");
+        error ? toast(error.message, "err") : (toast("اتمسحت", "ok"), loadExtras());
+      }
+    });
+    $("dashboard").addEventListener("change", async (e) => {
+      const i = e.target; if (i.dataset?.x !== "price") return;
+      if (Number(i.value) >= 0 && i.value !== "" && await xUpdate("plans", i.dataset.id, { price: Number(i.value) })) toast("اتحدّث السعر", "ok");
     });
 
     boot();

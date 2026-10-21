@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="theme-color" content="#030C14" />
+<title>Axiom — بوابة الوكلاء</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"
+  integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
+<style>
+:root{--void:#030C14;--parchment:#E9EEF3;--dim:rgba(233,238,243,.6);--gold:#E8A92E;--border:rgba(232,169,46,.35);--good:#3ddc84;--bad:#ff6b6b;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:'Tajawal',system-ui,sans-serif;color:var(--parchment);background:radial-gradient(900px 420px at 85% -10%,rgba(232,169,46,.12),transparent),linear-gradient(180deg,var(--void),#061826 60%,var(--void));background-attachment:fixed;padding:clamp(14px,3vw,26px);padding-top:max(14px,env(safe-area-inset-top))}
+.wrap{max-width:1040px;margin:0 auto}
+h1{margin:0;font-size:24px}h1 span{color:var(--gold)}
+h2{margin:0 0 4px;font-size:18px}
+.sub{color:var(--dim);font-size:13px;margin-bottom:14px}
+input,select,textarea{width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--border);background:rgba(3,12,20,.8);color:var(--parchment);font:inherit;margin-bottom:10px}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.btn{padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:rgba(232,169,46,.2);color:var(--parchment);cursor:pointer;font:inherit;font-weight:700;transition:transform .12s,background .18s}
+.btn:hover:not(:disabled){background:rgba(232,169,46,.35)}.btn:active:not(:disabled){transform:scale(.97)}.btn:disabled{opacity:.55;cursor:wait}
+.btn.primary{background:linear-gradient(180deg,#F9D878,#D18C1C);border-color:#FFE9A0;color:#2A1805;font-weight:800;width:100%}
+.btn.danger{background:rgba(255,107,107,.15);border-color:rgba(255,107,107,.4);color:var(--bad)}
+#gate{max-width:380px;margin:12vh auto 0;padding:28px;border:1px solid var(--border);border-radius:16px;background:rgba(6,28,46,.9)}
+.msg{color:var(--bad);font-size:13px;min-height:18px;margin-top:8px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:18px}
+.stat{padding:18px 20px;border:1px solid var(--border);border-radius:14px;background:rgba(6,28,46,.6);border-inline-start:3px solid var(--gold)}
+.stat b{display:block;font-size:28px;font-variant-numeric:tabular-nums}.stat span{color:var(--dim);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:18px}
+.card{padding:22px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,rgba(6,28,46,.94),rgba(3,12,20,.94));animation:rise .5s both}
+.card.ready{border-style:dashed}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.result{margin-top:14px;padding:14px;border-radius:12px;border:1px solid rgba(61,220,132,.4);background:rgba(61,220,132,.08)}
+.result textarea{min-height:130px;font-size:13px;direction:rtl}
+.table-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:start;padding:10px 12px;border-bottom:1px solid rgba(232,169,46,.15);white-space:nowrap}th{color:var(--dim);font-weight:500}
+#toasts{position:fixed;inset-inline:0;bottom:max(16px,env(safe-area-inset-bottom));display:grid;justify-items:center;gap:8px;pointer-events:none}
+.toast{padding:10px 18px;border-radius:10px;background:#0b2a40;border:1px solid var(--border)}.toast.ok{border-color:var(--good)}.toast.err{border-color:var(--bad)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="gate">
+  <h1>بوابة <span>الوكلاء</span></h1>
+  <p class="sub">سجّل دخول بالحساب اللي اتعملك من الأدمن.</p>
+  <form id="gForm" novalidate>
+    <input id="gEmail" type="email" placeholder="الإيميل" autocomplete="email" required />
+    <input id="gPass" type="password" placeholder="كلمة المرور" autocomplete="current-password" required />
+    <button class="btn primary" id="gBtn" type="submit">دخول</button>
+  </form>
+  <div class="msg" id="gMsg" role="alert"></div>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <header>
+    <div><h1>أهلاً <span id="meName"></span></h1><div class="sub" id="meMail" style="margin:4px 0 0"></div></div>
+    <button class="btn danger" id="out">خروج</button>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><b id="stCount">0</b><span>اشتراكات فعّلتها</span></div>
+    <div class="stat"><b id="stSum">0</b><span>إجمالي المستحق للأدمن (ج.م)</span></div>
+    <div class="stat"><b id="stToday">0</b><span>تفعيلات النهارده</span></div>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2>تفعيل اشتراك لإيميل</h2>
+      <div class="sub">العميل لازم يكون عامل حساب بالإيميل ده.</div>
+      <input id="cEmail" type="email" placeholder="إيميل العميل" autocomplete="off" />
+      <select id="cPlan" aria-label="الباقة"></select>
+      <button class="btn primary" id="actBtn">تفعيل</button>
+    </section>
+    <section class="card ready">
+      <h2>حساب جاهز للعميل</h2>
+      <div class="sub">بياخد حساب جاهز، يفعّله بالباقة، ويديك البيانات ورسالة جاهزة للإرسال.</div>
+      <select id="rPlan" aria-label="الباقة"></select>
+      <button class="btn primary" id="takeBtn">اسحب حساب جاهز وفعّله</button>
+    </section>
+  </div>
+
+  <div class="card" id="resBox" hidden>
+    <h2>تمّ ✓</h2>
+    <div class="result"><textarea id="resText" readonly></textarea>
+      <button class="btn primary" id="resCopy">نسخ الرسالة</button></div>
+  </div>
+
+  <section class="card" style="margin-top:16px">
+    <h2>آخر العمليات</h2>
+    <div class="table-scroll"><table>
+      <thead><tr><th>العميل</th><th>الباقة</th><th>السعر</th><th>التاريخ</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+  </section>
+</div>
+<div id="toasts" aria-live="polite"></div>
+
+<script src="./supabase-config.js"></script>
+<script>
+"use strict";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storageKey: "axiom-agent-auth", persistSession: true, autoRefreshToken: true }
+});
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const nf = new Intl.NumberFormat("ar-u-nu-latn");
+const fd = (d) => new Date(d).toLocaleDateString("ar-EG", { year: "numeric", month: "short", day: "numeric" });
+
+function toast(t, k = "") {
+  const e = document.createElement("div"); e.className = "toast " + k; e.textContent = t;
+  $("toasts").appendChild(e); setTimeout(() => e.remove(), 3200);
+}
+function showGate(m) { $("app").hidden = true; $("gate").hidden = false; $("gMsg").textContent = m || ""; }
+
+async function enter() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return showGate();
+  const { data: ok } = await sb.rpc("is_agent");
+  if (!ok) { await sb.auth.signOut(); return showGate("الحساب ده مش وكيل مفعّل"); }
+  $("gate").hidden = true; $("app").hidden = false;
+  await load();
+}
+
+async function load() {
+  const [me, pl, sl] = await Promise.all([
+    sb.from("agents").select("name,email").maybeSingle(),
+    sb.from("plans").select("id,name,days,price").eq("active", true).order("days"),
+    sb.from("agent_sales").select("customer_email,plan_name,price,created_at").order("created_at", { ascending: false }).limit(200)
+  ]);
+  $("meName").textContent = me.data?.name || ""; $("meMail").textContent = me.data?.email || "";
+  const opts = (pl.data || []).map((p) => `<option value="${esc(p.id)}">${esc(p.name)} — ${nf.format(p.price)} ج.م</option>`).join("")
+    || '<option value="">مفيش باقات متاحة</option>';
+  $("cPlan").innerHTML = opts; $("rPlan").innerHTML = opts;
+  const rows = sl.data || [], today = new Date().toDateString();
+  $("stCount").textContent = nf.format(rows.length);
+  $("stSum").textContent = nf.format(rows.reduce((t, r) => t + Number(r.price), 0));
+  $("stToday").textContent = nf.format(rows.filter((r) => new Date(r.created_at).toDateString() === today).length);
+  $("rows").innerHTML = rows.map((r) => `<tr><td>${esc(r.customer_email)}</td><td>${esc(r.plan_name)}</td><td>${nf.format(r.price)} ج.م</td><td>${fd(r.created_at)}</td></tr>`).join("")
+    || '<tr><td colspan="4" style="color:var(--dim)">لسه مفيش عمليات.</td></tr>';
+}
+
+function done(text) { $("resText").value = text; $("resBox").hidden = false; $("resBox").scrollIntoView({ behavior: "smooth", block: "center" }); }
+const planLabel = (id) => $("cPlan").querySelector(`option[value="${id}"]`)?.textContent.split(" — ")[0] || "";
+
+async function run(btn, label, fn) {
+  btn.disabled = true; const old = btn.textContent; btn.textContent = label;
+  try { await fn(); } catch (e) { console.error(e); toast("حصل خطأ، جرّب تاني", "err"); }
+  btn.disabled = false; btn.textContent = old;
+}
+
+$("actBtn").onclick = () => run($("actBtn"), "بيتم التفعيل...", async () => {
+  const email = $("cEmail").value.trim().toLowerCase(), plan = $("cPlan").value;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return toast("اكتب إيميل صحيح", "err");
+  if (!plan) return toast("اختار باقة", "err");
+  const { data, error } = await sb.rpc("agent_activate", { p_email: email, p_plan_id: plan });
+  if (error || !data?.success) return toast(error?.message || data?.reason || "فشل التفعيل", "err");
+  done(`أهلاً بيك في Axiom 👋\nاشتراكك (${planLabel(plan)}) اتفعّل على: ${email}\nينتهي في: ${fd(data.expires_at)}`);
+  $("cEmail").value = ""; toast("تم التفعيل", "ok"); load();
+});
+
+$("takeBtn").onclick = () => run($("takeBtn"), "لحظة...", async () => {
+  const plan = $("rPlan").value;
+  if (!plan) return toast("اختار باقة", "err");
+  const { data, error } = await sb.rpc("agent_take_ready", { p_plan_id: plan });
+  if (error || !data?.success) return toast(error?.message || data?.reason || "فشل السحب", "err");
+  done(`أهلاً بيك في Axiom 👋\nبيانات حسابك:\nالإيميل: ${data.email}\nالباسورد: ${data.password}\nالباقة: ${planLabel(plan)} — لحد ${fd(data.expires_at)}`);
+  toast("اتسحب حساب جاهز واتفعّل", "ok"); load();
+});
+
+$("resCopy").onclick = async () => {
+  try { await navigator.clipboard.writeText($("resText").value); toast("اتنسخت", "ok"); }
+  catch (_) { $("resText").select(); document.execCommand("copy"); toast("اتنسخت", "ok"); }
+};
+
+$("gForm").addEventListener("submit", async (e) => {
+  e.preventDefault(); $("gMsg").textContent = "";
+  const { error } = await sb.auth.signInWithPassword({ email: $("gEmail").value.trim(), password: $("gPass").value });
+  if (error) { $("gMsg").textContent = "بيانات الدخول غلط"; return; }
+  enter();
+});
+$("out").onclick = async () => { await sb.auth.signOut(); showGate(); };
+enter();
+</script>
+</body>
+</html>
